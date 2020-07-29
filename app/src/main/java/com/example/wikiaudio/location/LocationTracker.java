@@ -25,11 +25,16 @@ public class LocationTracker {
     private FusedLocationProviderClient fusedLocationClient;
 
 
-    public LocationTracker(ComponentActivity ownerActivity, LocationCallback locationCallback) {
+    public LocationTracker(ComponentActivity ownerActivity) {
         this.activity = ownerActivity;
         createLocationRequest();
-        this.locationCallback = locationCallback;
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
+    }
+
+    public LocationTracker setLocationCallback(LocationCallback locationCallback)
+    {
+        this.locationCallback = locationCallback;
+        return this;
     }
 
     //TODO Make a wrapper that calls the param function only if distance changed enough (100m?)
@@ -81,9 +86,16 @@ public class LocationTracker {
     }
 
     private Task<Void> startLocationUpdates() {
-        return fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback,
-                Looper.getMainLooper());
+        if(this.locationCallback != null)
+        {
+            return fusedLocationClient.requestLocationUpdates(locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper());
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public Location getCurLocation() {
