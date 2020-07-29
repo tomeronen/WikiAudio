@@ -13,11 +13,14 @@ import androidx.work.WorkRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * the facade to all interaction with wikipedia
+ */
 public class Wikipedia {
     private ComponentActivity ownerActivity;
 
-    public Wikipedia(ComponentActivity context) {
-        this.ownerActivity = context;
+    public Wikipedia(ComponentActivity ownerActivity) {
+        this.ownerActivity = ownerActivity;
     }
 
     public List<WikiPage> getPagesNearby(long latitude , long longitude)
