@@ -17,7 +17,7 @@ import retrofit2.Response;
 /**
  * a class of workers that get wiki pages nearby.
  */
-public class GetPagesWorker extends Worker {
+public class GetPagesNearbyWorker extends Worker {
 
     public static final String latitudeTag = "Latitude";
     public static final String longitudeTag = "Longitude";
@@ -32,7 +32,7 @@ public class GetPagesWorker extends Worker {
      * @param context The application of the worker.
      * @param workerParams Parameters to setup the internal state of this worker
      */
-    public GetPagesWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public GetPagesNearbyWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         latitude = getInputData().getString(latitudeTag);
         longitude = getInputData().getString(longitudeTag);

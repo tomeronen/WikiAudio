@@ -28,10 +28,10 @@ public class Wikipedia {
         ArrayList<WikiPage> pagesNearby = new ArrayList<>();
         WorkRequest getNearbyPagesReq =
                 new OneTimeWorkRequest
-                        .Builder(GetPagesWorker.class)
+                        .Builder(GetPagesNearbyWorker.class)
                         .setInputData(new Data.Builder()
-                                .putString(GetPagesWorker.latitudeTag, Long.toString(latitude))
-                                .putString(GetPagesWorker.longitudeTag, Long.toString(longitude))
+                                .putString(GetPagesNearbyWorker.latitudeTag, Long.toString(latitude))
+                                .putString(GetPagesNearbyWorker.longitudeTag, Long.toString(longitude))
                                 .build())
                         .build();
         WorkManager.getInstance(ownerActivity).enqueue(getNearbyPagesReq);

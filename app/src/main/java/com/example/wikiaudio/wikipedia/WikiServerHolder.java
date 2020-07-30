@@ -33,9 +33,14 @@ public class WikiServerHolder {
                 .create(WikiServer.class);
     }
 
-    public Call<Object> getPagesNearby(String latitude , String longitude)
+    Call<Object> getPagesNearby(String latitude, String longitude)
     {
         return this.server.callGetPagesNearby(latitude + "|" + longitude);
+    }
+
+    Call<Object> getPagesByCategory(String categoryName)
+    {
+        return this.server.callGetPagesByCategory("Category:" + categoryName);
     }
 
 }
