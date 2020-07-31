@@ -12,12 +12,11 @@ import retrofit2.http.Query;
 public interface WikiServer {
 
 // Example full get request:
-//https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
+//https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url|watchers&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
     @GET("/w/api.php?" +
             "action=query&" + // get data from wikipedia
-            "prop=coordinates|pageimages|description|info&" + // properties to get for queried pages
+            "prop=coordinates|description|extracts&" + // properties to get for queried pages
             "inprop=url&" +
-            "pithumbsize=144&" +
             "generator=geosearch&" +
             "ggsradius=10000&" + // the radius from Coordinates to query pages in.
             "ggslimit=10&" + // max number of pages to query (50 max)
@@ -25,11 +24,28 @@ public interface WikiServer {
     public Call<Object> callGetPagesNearby(@Query("ggscoord") String geoCoordinates);
 
 
-// Example full get request:
-//https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
     @GET("/w/api.php?" +
             "action=query&" +
+            "inprop=url&" +
             "generator=categorymembers&" +
+            "gcmnamespace=0&" + // only articles (code name space '0')
             "&prop=info")
     public Call<Object> callGetPagesByCategory(@Query("gcmtitle") String category);
+
+
+    //    api.php?action=parse&page=Project:Sandbox
+    @GET("/w/api.php?" +
+            "format=json" + // the format of response.
+            "&action=parse" + // we want to parse the spoken articles page
+            "&page=Wikipedia:Spoken_articles" + // the wanted page.
+            "&prop=sections") // we want all the section.
+    public Call<Object> callGetSpokenPagesCategories();
+
+
+//    api.php?action=parse&page=Project:Sandbox
+    @GET("/w/api.php?" +
+            "action=parse" +
+            "&page=Wikipedia:Spoken_articles" +
+            "&format=json")
+    public Call<Object> callGetSpokenPagesByCategory(@Query("gcmtitle") String category);
 }

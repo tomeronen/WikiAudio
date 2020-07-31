@@ -20,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wikipedia = new Wikipedia(this);
+//        wikipedia.getPagesNearby(32.443814,34.892546);
+        wikipedia.getSpokenPagesCategories();
         locationTracker = new LocationTracker(this);
+
     }
 }

@@ -9,7 +9,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WikiServerHolder {
-    private static final String BASE_URL = "https://en.wikipedia.org/w/api.php";
+    private static final String BASE_URL = "https://en.wikipedia.org";
     private static WikiServerHolder instance = null;
     private final WikiServer server;
 
@@ -41,6 +41,11 @@ public class WikiServerHolder {
     Call<Object> getPagesByCategory(String categoryName)
     {
         return this.server.callGetPagesByCategory("Category:" + categoryName);
+    }
+
+    Call<Object> callGetSpokenPagesCategories()
+    {
+        return this.server.callGetSpokenPagesCategories();
     }
 
 }

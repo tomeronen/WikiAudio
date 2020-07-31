@@ -13,6 +13,10 @@ import androidx.work.WorkRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 /**
  * the facade to all interaction with wikipedia
  */
@@ -23,15 +27,15 @@ public class Wikipedia {
         this.ownerActivity = ownerActivity;
     }
 
-    public List<WikiPage> getPagesNearby(long latitude , long longitude)
+    public List<WikiPage> getPagesNearby(double latitude , double longitude)
     {
         ArrayList<WikiPage> pagesNearby = new ArrayList<>();
         WorkRequest getNearbyPagesReq =
                 new OneTimeWorkRequest
                         .Builder(GetPagesNearbyWorker.class)
                         .setInputData(new Data.Builder()
-                                .putString(GetPagesNearbyWorker.latitudeTag, Long.toString(latitude))
-                                .putString(GetPagesNearbyWorker.longitudeTag, Long.toString(longitude))
+                                .putString(GetPagesNearbyWorker.latitudeTag, Double.toString(latitude))
+                                .putString(GetPagesNearbyWorker.longitudeTag, Double.toString(longitude))
                                 .build())
                         .build();
         WorkManager.getInstance(ownerActivity).enqueue(getNearbyPagesReq);
@@ -57,8 +61,23 @@ public class Wikipedia {
                         }
                     }
                 });
-
         return pagesNearby;
     }
 
+    public void getSpokenPagesCategories()
+    {
+        // TODO - not finished just for basic debugging
+        Call<Object> call = WikiServerHolder.getInstance().callGetSpokenPagesCategories();
+        call.enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(Call<Object> call, Response<Object> response) {
+                String res = response.body().toString();
+            }
+
+            @Override
+            public void onFailure(Call<Object> call, Throwable t) {
+
+            }
+        });
+    }
 }
