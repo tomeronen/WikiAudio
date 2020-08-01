@@ -12,22 +12,28 @@ import androidx.work.WorkRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.UUID;
 
 /**
  * the facade to all interaction with wikipedia
  */
 public class Wikipedia {
-    private ComponentActivity ownerActivity;
 
-    public Wikipedia(ComponentActivity ownerActivity) {
-        this.ownerActivity = ownerActivity;
+    public ArrayList<String> spokenPagesCategories;
+    private static Wikipedia instance = null;
+
+    synchronized static public Wikipedia getInstance(){
+        if (instance == null) {
+            instance = new Wikipedia();
+        }
+        return instance;
     }
 
-    public List<WikiPage> getPagesNearby(double latitude , double longitude)
+    private Wikipedia(){
+    }
+
+
+    public List<WikiPage> getPagesNearby(ComponentActivity ownerActivity, double latitude , double longitude)
     {
         ArrayList<WikiPage> pagesNearby = new ArrayList<>();
         WorkRequest getNearbyPagesReq =
@@ -64,20 +70,13 @@ public class Wikipedia {
         return pagesNearby;
     }
 
-    public void getSpokenPagesCategories()
+    public UUID loadSpokenPagesCategories(ComponentActivity ownerActivity)
     {
-        // TODO - not finished just for basic debugging
-        Call<Object> call = WikiServerHolder.getInstance().callGetSpokenPagesCategories();
-        call.enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(Call<Object> call, Response<Object> response) {
-                String res = response.body().toString();
-            }
-
-            @Override
-            public void onFailure(Call<Object> call, Throwable t) {
-
-            }
-        });
+        WorkRequest loadSpokenCategoriseWorkerReq =
+                new OneTimeWorkRequest
+                        .Builder(loadSpokenCategoriseWorker.class)
+                        .build();
+        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
+        return loadSpokenCategoriseWorkerReq.getId();
     }
 }

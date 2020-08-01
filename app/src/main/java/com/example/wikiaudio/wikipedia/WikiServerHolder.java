@@ -46,6 +46,7 @@ public class WikiServerHolder {
     Call<Object> callGetSpokenPagesCategories()
     {
         return this.server.callGetSpokenPagesCategories();
+
     }
 
 }
