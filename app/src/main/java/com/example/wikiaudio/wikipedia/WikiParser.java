@@ -1,4 +1,6 @@
 package com.example.wikiaudio.wikipedia;
 
-public class WikiTextParser {
+public class WikiParser{
+
+
 }

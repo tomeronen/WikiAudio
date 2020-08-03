@@ -6,6 +6,7 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -83,6 +84,17 @@ public class WikiServerHolder {
                                         LinkedTreeMap<String, String>>> // logintoken->token
                           res = (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>) response.body();
                         String token = res.get("query").get("tokens").get("logintoken");
+                        server.login("logintoken="+token).enqueue(new Callback<Object>() {
+                            @Override
+                            public void onResponse(Call<Object> call, Response<Object> response) {
+                                String c = response.body().toString();
+                            }
+
+                            @Override
+                            public void onFailure(Call<Object> call, Throwable t) {
+                                String c = t.getMessage();
+                            }
+                        });
                 }
 
                 @Override

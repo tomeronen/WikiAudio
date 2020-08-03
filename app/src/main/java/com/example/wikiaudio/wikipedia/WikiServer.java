@@ -1,8 +1,11 @@
 package com.example.wikiaudio.wikipedia;
 
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -58,10 +61,10 @@ public interface WikiServer {
 @POST("/w/api.php?action=clientlogin" +
         "&username=tomer+ronen" +
         "&password=xTGHTibZAL3cBws" +
-        "&loginreturnurl=www.google.com")
-    public Call<Object> login(@Body String token);
+        "&loginreturnurl=http://example.org/")
+    public Call<Object> login(@Body String s);
 
-@POST("/w/api.php?action=query" +
+@GET("/w/api.php?action=query" +
         "&meta=tokens" +
         "&format=json" +
         "&type=login")

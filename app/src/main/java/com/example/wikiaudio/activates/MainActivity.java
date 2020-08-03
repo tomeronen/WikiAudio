@@ -8,19 +8,13 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.location.LocationTracker;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.google.android.gms.location.LocationCallback;
 
-import java.io.IOException;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,11 +28,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wikipedia = Wikipedia.getInstance();
-
-        wikipedia.login("a","b");
+//        WikiPage a = WikiTextParser.parseWikiHtml("https://en.wikipedia.org/wiki/Quark");
+//        wikipedia.login("a","b");
         // for debug:
-//        Intent rec = new Intent(this, WikiRecordActivity.class);
-//        startActivity(rec);
+        Intent rec = new Intent(this, WikiRecordActivity.class);
+        startActivity(rec);
 //        activity = this;
 //        wikipedia = Wikipedia.getInstance();
 //        wikipedia.getPagesNearby(this,32.443814,34.892546);
