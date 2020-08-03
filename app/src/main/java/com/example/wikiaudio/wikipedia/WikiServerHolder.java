@@ -2,9 +2,19 @@ package com.example.wikiaudio.wikipedia;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -46,7 +56,43 @@ public class WikiServerHolder {
     Call<Object> callGetSpokenPagesCategories()
     {
         return this.server.callGetSpokenPagesCategories();
-
     }
+
+    Call<Object> callGetSpokenPagesByCategories(String category)
+    {
+        if(Wikipedia.getInstance().spokenPagesCategories == null)
+        {
+            // TODO - implement what if categorise were not loaded yet. (load categorise and continue)
+            return null;
+        }
+        else
+        {
+            String CategoryIndex = Integer.toString(Wikipedia.getInstance().spokenPagesCategories.indexOf(category) + 1 );
+            return this.server.callGetSpokenPagesByCategory(CategoryIndex);
+        }
+    }
+
+    Call<Object> callLogin(String userName, String password)
+    {
+            this.server.getToken()
+                    .enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                        LinkedTreeMap<String, // query->LinkedTreeMap;
+                                LinkedTreeMap<String, // tokens->LinkedTreeMap
+                                        LinkedTreeMap<String, String>>> // logintoken->token
+                          res = (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>) response.body();
+                        String token = res.get("query").get("tokens").get("logintoken");
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                    String s = t.getLocalizedMessage();
+                }
+            });
+//            this.server.login().execute();
+        return null;
+    }
+
 
 }

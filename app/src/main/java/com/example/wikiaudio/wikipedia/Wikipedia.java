@@ -10,6 +10,8 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.google.gson.internal.LinkedTreeMap;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +23,7 @@ public class Wikipedia {
 
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
+    LinkedTreeMap<String, ArrayList<String>> spokenCategories;
 
     synchronized static public Wikipedia getInstance(){
         if (instance == null) {
@@ -78,5 +81,21 @@ public class Wikipedia {
                         .build();
         WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
         return loadSpokenCategoriseWorkerReq.getId();
+    }
+
+    public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity, final String category)
+    {
+        WorkRequest loadSpokenCategoriseWorkerReq =
+                new OneTimeWorkRequest
+                        .Builder(loadSpokenPagesByCategoriseWorker.class)
+                        .setInputData(new Data.Builder()
+                        .putString(loadSpokenPagesByCategoriseWorker.categoryTag, category).build())
+                        .build();
+        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
+        return loadSpokenCategoriseWorkerReq.getId();
+    }
+
+    public void login(String a, String b) {
+        WikiServerHolder.getInstance().callLogin(a,b);
     }
 }

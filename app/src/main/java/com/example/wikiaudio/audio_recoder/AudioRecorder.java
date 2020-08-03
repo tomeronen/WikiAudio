@@ -1,65 +1,47 @@
 package com.example.wikiaudio.audio_recoder;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.provider.MediaStore;
 
 import java.io.IOException;
 
 public class AudioRecorder
 {
-    static AudioRecorder singleton = null;
-    MediaRecorder recorder;
+    public MediaRecorder recorder;
+    String filePath;
 
-    private AudioRecorder()
+    public AudioRecorder(Context activity, MediaRecorder mr, String fileName)
     {
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        prepare();
+            this.recorder = mr;
+            this.recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            this.recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            this.recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            String a =  activity.getFilesDir() + "/" + fileName;
+            this.recorder.setOutputFile( a);
     }
 
-    public void prepare() {
-        if(singleton != null)
-        {
-            try {
-                this.recorder.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void setOutPutFile(String pathName) {
-        if(singleton != null)
-        {
-            this.recorder.setOutputFile(pathName);
-        }
-    }
-
-    public AudioRecorder getAudioRecorder() {
-        if(singleton != null)
-        {
-            return singleton;
-        }
-        else
-        {
-            singleton = new AudioRecorder();
-            return singleton;
-        }
-    }
-
-    static void startRecording()
+    public void startRecording()
     {
-        singleton.recorder.start();   // Recording is now started
+        this.recorder.start();   // Recording is now started
     }
 
-    static void pauseRecording()
+    public void pauseRecording()
     {
 
     }
 
-    static void stopRecording()
+    public void stopRecording()
     {
-
+        this.recorder.stop();
+        MediaPlayer mp = new MediaPlayer();
+        try {
+            mp.setDataSource(filePath);
+            mp.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

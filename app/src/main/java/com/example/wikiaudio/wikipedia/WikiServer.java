@@ -1,7 +1,9 @@
 package com.example.wikiaudio.wikipedia;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 //  important wiki documentation:
@@ -32,8 +34,6 @@ public interface WikiServer {
             "&prop=info")
     public Call<Object> callGetPagesByCategory(@Query("gcmtitle") String category);
 
-
-    //    api.php?action=parse&page=Project:Sandbox
     @GET("/w/api.php?" +
             "format=json" + // the format of response.
             "&action=parse" + // we want to parse the spoken articles page
@@ -42,10 +42,29 @@ public interface WikiServer {
     public Call<Object> callGetSpokenPagesCategories();
 
 
-//    api.php?action=parse&page=Project:Sandbox
+//   /w/api.php?action=parse&page=Wikipedia:Spoken_articles&format=json&prop=links
+
     @GET("/w/api.php?" +
             "action=parse" +
             "&page=Wikipedia:Spoken_articles" +
-            "&format=json")
-    public Call<Object> callGetSpokenPagesByCategory(@Query("gcmtitle") String category);
+            "&format=json" +
+            "&prop=links")
+    public Call<Object> callGetSpokenPagesByCategory(@Query("section") String category);
+
+//    @POST()
+//    gets loginToken:
+//    https://en.wikipedia.org/w/api.php?action=query&meta=tokens&format=json&type=login
+
+@POST("/w/api.php?action=clientlogin" +
+        "&username=tomer+ronen" +
+        "&password=xTGHTibZAL3cBws" +
+        "&loginreturnurl=www.google.com")
+    public Call<Object> login(@Body String token);
+
+@POST("/w/api.php?action=query" +
+        "&meta=tokens" +
+        "&format=json" +
+        "&type=login")
+    public Call<Object> getToken();
+
 }
