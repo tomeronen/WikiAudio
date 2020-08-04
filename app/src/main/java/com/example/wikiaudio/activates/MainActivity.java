@@ -13,7 +13,9 @@ import android.widget.Toast;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.location.LocationTracker;
+import com.example.wikiaudio.wikipedia.WikiPage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.google.gson.Gson;
 
 import java.util.UUID;
 
@@ -28,11 +30,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wikipedia = Wikipedia.getInstance();
+        WikiPage wp = WikiPage.getPageForTesting();
+        Gson gson = new Gson();
+        String pageJsonString = gson.toJson(wp);
+        Intent rec = new Intent(this, WikiRecordActivity.class);
+        rec.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, pageJsonString);
+        startActivity(rec);
+
+
 //        WikiPage a = WikiTextParser.parseWikiHtml("https://en.wikipedia.org/wiki/Quark");
 //        wikipedia.login("a","b");
         // for debug:
-        Intent rec = new Intent(this, WikiRecordActivity.class);
-        startActivity(rec);
+
 //        activity = this;
 //        wikipedia = Wikipedia.getInstance();
 //        wikipedia.getPagesNearby(this,32.443814,34.892546);

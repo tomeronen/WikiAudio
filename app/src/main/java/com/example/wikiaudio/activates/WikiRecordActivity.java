@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GestureDetectorCompat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -15,6 +16,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -29,6 +31,7 @@ import com.example.wikiaudio.audio_player.AudioPlayer;
 import com.example.wikiaudio.audio_recoder.AudioRecorder;
 import com.example.wikiaudio.wikipedia.WikiPage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -37,12 +40,13 @@ import java.io.IOException;
 public class WikiRecordActivity extends AppCompatActivity {
 
     private static final int REQ_RECORD_PERMISSION = 12;
-    private static final String WIKI_PAGE_TAG = "wikiPageTag" ;
+    public static final String WIKI_PAGE_TAG = "wikiPageTag" ;
     WebView wikiPageView;
     ProgressBar progressBar;
     FloatingActionButton recordButton;
     AppCompatActivity activity;
     WikiPage wikiPage;
+    private GestureDetectorCompat gestureDetectorCompat = null;
     private MediaRecorder recorder;
     boolean startRecording = true; // when button pressed record our stop recording?
     String DEBUG_URL = "https://en.wikipedia.org/wiki/Android_(operating_system)";
@@ -63,6 +67,32 @@ public class WikiRecordActivity extends AppCompatActivity {
                                             ,"text/html", "UTF-8");
         activity = this;
         setOnRecordButton();
+        setSwipeDetector();
+    }
+
+    private void setSwipeDetector() {
+        SwipeFunctions sf = new SwipeFunctions() {
+            @Override
+            public void onRightSwipe() {
+                wikiPageView.loadData("a"   ,"text/html", "UTF-8");
+                Toast.makeText(activity,"swiped right", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLeftSwipe() {
+                Toast.makeText(activity,"swiped left", Toast.LENGTH_SHORT).show();
+            }
+        };
+        DetectSwipeGestureListener gestureListener
+                = new DetectSwipeGestureListener(sf);
+        this.gestureDetectorCompat = new GestureDetectorCompat(this, gestureListener);
+        this.wikiPageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                gestureDetectorCompat.onTouchEvent(event);
+                return wikiPageView.onTouchEvent(event);
+            }
+        });
     }
 
     private void setOnRecordButton() {
@@ -177,5 +207,13 @@ public class WikiRecordActivity extends AppCompatActivity {
 //        }
 //        return (file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".mp3");
 //    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // Pass activity on touch event to the gesture detector.
+//        gestureDetectorCompat.onTouchEvent(event);
+        // Return true to tell android OS that event has been consumed, do not pass it to other event listeners.
+        return super.onTouchEvent(event);
+    }
 
 }
