@@ -11,8 +11,8 @@ import android.view.MotionEvent;
 public class DetectSwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
 
     // Minimal x and y axis swipe distance.
-    private static int MIN_SWIPE_DISTANCE_X = 100;
-    private static int MIN_SWIPE_DISTANCE_Y = 100;
+    private static int MIN_SWIPE_DISTANCE_X = 220;
+    private static int MIN_SWIPE_DISTANCE_Y = 220;
 
     // Maximal x and y axis swipe distance.
     private static int MAX_SWIPE_DISTANCE_X = 1000;

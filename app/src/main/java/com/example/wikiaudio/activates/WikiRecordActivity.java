@@ -7,34 +7,24 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GestureDetectorCompat;
 
 import android.Manifest;
-import android.app.ProgressDialog;
-import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.audio_player.AudioPlayer;
-import com.example.wikiaudio.audio_recoder.AudioRecorder;
+import com.example.wikiaudio.fileManager.FileManager;
 import com.example.wikiaudio.wikipedia.WikiPage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
-import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class WikiRecordActivity extends AppCompatActivity {
@@ -46,6 +36,7 @@ public class WikiRecordActivity extends AppCompatActivity {
     FloatingActionButton recordButton;
     AppCompatActivity activity;
     WikiPage wikiPage;
+    FileManager fileManager;
     private GestureDetectorCompat gestureDetectorCompat = null;
     private MediaRecorder recorder;
     boolean startRecording = true; // when button pressed record our stop recording?
@@ -59,28 +50,54 @@ public class WikiRecordActivity extends AppCompatActivity {
         wikiPageView = findViewById(R.id.wikiPage);
         progressBar = findViewById(R.id.progressBar);
         recordButton = findViewById(R.id.recoredButton);
+        fileManager = new FileManager(this);
         Gson gson = new Gson();
         wikiPage = gson.fromJson(getIntent()
                                                 .getStringExtra(WIKI_PAGE_TAG), WikiPage.class);
-        progressBar.setMax(wikiPage.numberOfSections());
+        progressBar.setMax(wikiPage.numberOfSections() - 1); // '-1' - we start at zero.
         wikiPageView.loadData(wikiPage.getSection(curSection)
                                             ,"text/html", "UTF-8");
         activity = this;
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         setOnRecordButton();
         setSwipeDetector();
+        // TODO - play recording just for debugging.
+//        try {
+//            MediaPlayer mp = new MediaPlayer();
+//            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
+//            mp.setDataSource(fp);
+//            mp.prepare();
+//            mp.start();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void setSwipeDetector() {
         SwipeFunctions sf = new SwipeFunctions() {
             @Override
             public void onRightSwipe() {
-                wikiPageView.loadData("a"   ,"text/html", "UTF-8");
-                Toast.makeText(activity,"swiped right", Toast.LENGTH_SHORT).show();
+                if(curSection + 1 < wikiPage.numberOfSections())
+                {
+                    ++curSection;
+                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
+                            "text/html", "UTF-8");
+                    progressBar.setProgress(curSection);
+                }
             }
 
             @Override
             public void onLeftSwipe() {
-                Toast.makeText(activity,"swiped left", Toast.LENGTH_SHORT).show();
+                if(curSection > 0)
+                {
+                    --curSection;
+                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
+                            "text/html", "UTF-8");
+                    progressBar.setProgress(curSection);
+                }
             }
         };
         DetectSwipeGestureListener gestureListener
@@ -104,16 +121,12 @@ public class WikiRecordActivity extends AppCompatActivity {
 
                     try {
                         // TODO TAKE OUT TO SPECIAL CLASS
-                        startRecording = false;
-                        startBlinkingAnimation(recordButton);
-                        recorder = new MediaRecorder();
-                        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-                        String a =  activity.getFilesDir() + "/" + wikiPage.getTitle() + ".mp3";
-                        recorder.setOutputFile(a);
-                        recorder.prepare();
-                        recorder.start();
+                            startRecording = false;
+                            startBlinkingAnimation(recordButton);
+                            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
+                            recorder.setOutputFile(fp);
+                            recorder.prepare();
+                            recorder.start();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -122,21 +135,23 @@ public class WikiRecordActivity extends AppCompatActivity {
                             new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                             REQ_RECORD_PERMISSION);
                 } else {
-                    progressBar.incrementProgressBy(1); //todo for debug only
                     startRecording = true;
                     stopBlinkingAnimation(recordButton);
                     if(recorder != null)
                     {
+                        recorder.pause();
                         recorder.stop();
-                        try {
-                            MediaPlayer mp = new MediaPlayer();
-                            String a =  activity.getFilesDir() + "/" + wikiPage.getTitle() + ".mp3";
-                            mp.setDataSource(a);
-                            mp.prepare();
-                            mp.start();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        recorder.release();
+//                         TODO - play recording just for debugging.
+//                        try {
+//                            MediaPlayer mp = new MediaPlayer();
+//                            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
+//                            mp.setDataSource(fp);
+//                            mp.prepare();
+//                            mp.start();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
                     }
                 }
             }
@@ -176,14 +191,6 @@ public class WikiRecordActivity extends AppCompatActivity {
     }
 
 
-    //
-    private class MyBrowser extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-        }
-    }
 
     private void startBlinkingAnimation(View v){
         Animation mAnimation = new AlphaAnimation(1, 0);
@@ -208,12 +215,14 @@ public class WikiRecordActivity extends AppCompatActivity {
 //        return (file.getAbsolutePath() + "/" + System.currentTimeMillis() + ".mp3");
 //    }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Pass activity on touch event to the gesture detector.
-//        gestureDetectorCompat.onTouchEvent(event);
-        // Return true to tell android OS that event has been consumed, do not pass it to other event listeners.
-        return super.onTouchEvent(event);
-    }
+//    in case we want to make a full browser:
+//    private class MyBrowser extends WebViewClient {
+//        @Override
+//        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+//            view.loadUrl(url);
+//            return true;
+//        }
+//    }
+
 
 }
