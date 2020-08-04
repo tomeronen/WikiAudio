@@ -19,12 +19,11 @@ import android.webkit.WebView;
 import android.widget.ProgressBar;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.fileManager.FileManager;
+import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.wikipedia.WikiPage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class WikiRecordActivity extends AppCompatActivity {
