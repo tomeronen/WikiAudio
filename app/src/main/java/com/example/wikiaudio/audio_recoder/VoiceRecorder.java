@@ -1,22 +1,19 @@
 package com.example.wikiaudio.audio_recoder;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.provider.MediaStore;
 
-import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.UUID;
 
 public class VoiceRecorder
 {
+    static boolean record = true;
     private int audioSource = MediaRecorder.AudioSource.MIC;
     private int sampleRateInHz = 11025;
     private int channelConfig = AudioFormat.CHANNEL_IN_MONO;
@@ -34,73 +31,74 @@ public class VoiceRecorder
     Sixteen bits will take up more space and processing power, while the representation of
     the audio will be closer to reality.
     */
-    private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    private int audioFormat = AudioFormat.ENCODING_DEFAULT;
 
-    private int bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz,
-                                                                channelConfig,
-                                                                ~ audioFormat);
 
-    private AudioRecord audioRecord = new AudioRecord(audioSource,
-                                                sampleRateInHz,
-                                                channelConfig,
-                                                ~ audioFormat,
-                                                bufferSizeInBytes);
-
+    private short[] audioBuffer;
     private DataOutputStream dos;
-    private short[] audioBuffer = new short[bufferSizeInBytes/4];
+    private int bufferSizeInBytes;
+    private AudioRecord audioRecord;
+    private UUID workId = null;
+    private FileOutputStream fileOutputStream;
+    private String fileOutPutPath;
+    private Audio_Record a;
+    private Context context;
 
-    public VoiceRecorder(FileOutputStream fileOutputStream) {
-
-        // wrap output stream in buffered output stream for performance:
-        BufferedOutputStream bOutputStream = new BufferedOutputStream(fileOutputStream);
-         this.dos = new DataOutputStream(bOutputStream); // TODO -- why?
-
-    }
-
-    public int startRecording()
-    {
-
-        // Todo -- there is still some work here.
-        //  (1) make asyncronized
-        //  (2) make a stop function.
-        //  (3) test.
-
+    public VoiceRecorder(String fileOutPutPath, Context context) {
+        this.context = context;
         try {
-
-
-            int bufferReadResult;
-            audioRecord.startRecording();
-
-            // read recorded values in to audioBuffer then to dos, until we do not have no more.
-            do {
-
-                // read values to buffer
-                bufferReadResult = audioRecord.read(audioBuffer,
-                        0, bufferSizeInBytes/4);
-
-                // read values to output stream
-                for (int i = 0; i < bufferReadResult; i++) {
-                    dos.writeShort(audioBuffer[i]);
-                }
-            }
-            while (bufferReadResult > 0);
-
-        } catch (IOException e) {
+            a = new Audio_Record(fileOutPutPath, context);
+            this.fileOutPutPath = fileOutPutPath;
+            this.fileOutputStream = new FileOutputStream(fileOutPutPath);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        return 1;
     }
 
-    public int stopRecording()
+    public void startRecording()
     {
-        try {
-            this.audioRecord.stop();
-            this.dos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return 1;
+        //
+        a.startRecording();
+
+        //
+//
+//
+//        record = true;
+//        WorkRequest recordReq =
+//                new OneTimeWorkRequest
+//                        .Builder(RecorderWorker.class)
+//                        .setInputData(new Data.Builder()
+//                        .putString("filePath", fileOutPutPath).build())
+//                        .build();
+//        WorkManager.getInstance().enqueue(recordReq);
+//        workId = recordReq.getId();
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }).toString();
     }
 
+
+    public void stopRecording() throws IOException {
+        if(a != null)
+        {
+            a.stopRecording();
+        }
+        record = false;
+//        if(workId != null)
+//        {
+//            Log.d("workId", workId.toString());
+//            WorkManager.getInstance().cancelWorkById(workId);
+//            workId = null;
+//        }
+    }
+
+    public int pauseRecording()
+    {
+        return 1;
+    }
 
 }

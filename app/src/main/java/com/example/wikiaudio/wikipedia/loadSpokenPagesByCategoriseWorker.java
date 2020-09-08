@@ -6,10 +6,12 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -27,25 +29,28 @@ public class loadSpokenPagesByCategoriseWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        Response<Object> response = null;
-        try {
-            response = WikiServerHolder.getInstance().callGetSpokenPagesByCategories(category).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Result.failure();
-        }
-        if (response.code() != 200 || !response.isSuccessful()) {
-            // TODO -- what to do if fails.
-            return Result.failure();
-        } else {
-            ArrayList<String> links = new ArrayList<>();
-            LinkedTreeMap<String, LinkedTreeMap<String, ArrayList<LinkedTreeMap<String, Object>>>> a = (LinkedTreeMap<String, LinkedTreeMap<String, ArrayList<LinkedTreeMap<String, Object>>>>) response.body();
-            ArrayList<LinkedTreeMap<String, Object>> c = a.get("parse").get("links");
-            for (int i = 0; i < c.size(); ++i) {
-                links.add((String) c.get(i).get("*"));
-            }
-            Wikipedia.getInstance().spokenCategories.put(category, links);
+//        Response<Object> response = null;
+//        try {
+//            response = WikiServerHolder.getInstance().callGetSpokenPagesByCategories(category).execute();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return Result.failure();
+//        }
+//        if (response.code() != 200 || !response.isSuccessful()) {
+//             TODO -- what to do if fails.
+//            return Result.failure();
+//        } else {
+//            ArrayList<String> pageNames = new ArrayList<>();
+//            LinkedTreeMap<String,
+//                    LinkedTreeMap<String, ArrayList<LinkedTreeMap<String, Object>>>> a =
+//                    (LinkedTreeMap<String,
+//                            LinkedTreeMap<String,
+//                                    ArrayList<LinkedTreeMap<String, Object>>>>) response.body();
+//            ArrayList<LinkedTreeMap<String, Object>> c = a.get("parse").get("links");
+//            for (int i = 0; i < c.size(); ++i) {
+//                pageNames.add((String) c.get(i).get("*"));
+//            }
+//            Wikipedia.getInstance().spokenCategories.put(category, pageNames);
             return Result.success();
         }
-    }
 }

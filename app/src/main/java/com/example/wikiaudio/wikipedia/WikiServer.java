@@ -16,26 +16,36 @@ import retrofit2.http.Query;
 
 public interface WikiServer {
 
+    @GET("/w/api.php?" +
+            "action=query&" + // get data from wikipedia
+            "prop=description&" + // properties to get for queried pages
+            "inprop=url&" +
+            "format=json") // format for queried pages (json recommended)
+    public Call<QuarryResponse> callGetPageByName(@Query("titles") String pageName);
+
 // Example full get request:
 //https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url|watchers&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
     @GET("/w/api.php?" +
             "action=query&" + // get data from wikipedia
-            "prop=coordinates|description|extracts&" + // properties to get for queried pages
-            "inprop=url&" +
+            "prop=coordinates|info|description|extracts|pageviews&" + // properties to get for queried pages
             "generator=geosearch&" +
-            "ggsradius=10000&" + // the radius from Coordinates to query pages in.
             "ggslimit=10&" + // max number of pages to query (50 max)
+            "inprop=url&" +
             "format=json") // format for queried pages (json recommended)
-    public Call<Object> callGetPagesNearby(@Query("ggscoord") String geoCoordinates);
+    public Call<QuarryResponse> callGetPagesNearby(@Query("ggscoord") String geoCoordinates,
+                                                   @Query("ggsradius") String radius,
+                                                   @Query("prop") String prop,
+                                                   @Query("inprop") String inprop);
 
 
     @GET("/w/api.php?" +
             "action=query&" +
-            "inprop=url&" +
             "generator=categorymembers&" +
-            "gcmnamespace=0&" + // only articles (code name space '0')
-            "&prop=info")
-    public Call<Object> callGetPagesByCategory(@Query("gcmtitle") String category);
+            "gcmnamespace=0&"  // only articles (code name space '0')
+            )
+    public Call<QuarryResponse> callGetPagesByCategory(@Query("gcmtitle") String category,
+                                               @Query("prop") String prop,
+                                               @Query("inprop") String inprop);
 
     @GET("/w/api.php?" +
             "format=json" + // the format of response.
@@ -52,7 +62,7 @@ public interface WikiServer {
             "&page=Wikipedia:Spoken_articles" +
             "&format=json" +
             "&prop=links")
-    public Call<Object> callGetSpokenPagesByCategory(@Query("section") String category);
+    public Call<QuarryResponse> callGetSpokenPagesByCategory(@Query("section") String category);
 
 //    @POST()
 //    gets loginToken:

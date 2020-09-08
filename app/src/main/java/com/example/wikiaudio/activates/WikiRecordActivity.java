@@ -8,8 +8,10 @@ import androidx.core.view.GestureDetectorCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -19,12 +21,23 @@ import android.webkit.WebView;
 import android.widget.ProgressBar;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.audio_recoder.VoiceRecorder;
 import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.wikipedia.WikiPage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 public class WikiRecordActivity extends AppCompatActivity {
 
@@ -54,47 +67,33 @@ public class WikiRecordActivity extends AppCompatActivity {
         wikiPage = gson.fromJson(getIntent()
                                                 .getStringExtra(WIKI_PAGE_TAG), WikiPage.class);
         progressBar.setMax(wikiPage.numberOfSections() - 1); // '-1' - we start at zero.
-        wikiPageView.loadData(wikiPage.getSection(curSection)
-                                            ,"text/html", "UTF-8");
+//        wikiPageView.loadData(wikiPage.getSection(curSection)
+//                                            ,"text/html", "UTF-8");
         activity = this;
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
         setOnRecordButton();
-        setSwipeDetector();
-        // TODO - play recording just for debugging.
-//        try {
-//            MediaPlayer mp = new MediaPlayer();
-//            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
-//            mp.setDataSource(fp);
-//            mp.prepare();
-//            mp.start();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-    }
+//        setSwipeDetector();
+        }
 
     private void setSwipeDetector() {
         SwipeFunctions sf = new SwipeFunctions() {
             @Override
             public void onRightSwipe() {
-                if(curSection + 1 < wikiPage.numberOfSections())
+                if(curSection > 0)
                 {
-                    ++curSection;
-                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
-                            "text/html", "UTF-8");
+                    --curSection;
+//                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
+//                            "text/html", "UTF-8");
                     progressBar.setProgress(curSection);
                 }
             }
 
             @Override
             public void onLeftSwipe() {
-                if(curSection > 0)
+                if(curSection + 1 < wikiPage.numberOfSections())
                 {
-                    --curSection;
-                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
-                            "text/html", "UTF-8");
+                    ++curSection;
+//                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
+//                            "text/html", "UTF-8");
                     progressBar.setProgress(curSection);
                 }
             }
@@ -116,41 +115,33 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean havePermissions = checkRecordingPermissions();
-                if (startRecording && havePermissions) {
+                String fp = fileManager.getFilePath(wikiPage.getTitle(), curSection);
+                Log.d("file", fp);
+                File f = new File(fp);
+                Log.d("file path:", f.getAbsolutePath());
+                Log.d("file exists:", Boolean.toString(f.exists()));
+                VoiceRecorder voiceRecorder  = new VoiceRecorder(fp, activity);
 
-                    try {
-                        // TODO TAKE OUT TO SPECIAL CLASS
-                            startRecording = false;
-                            startBlinkingAnimation(recordButton);
-                            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
-                            recorder.setOutputFile(fp);
-                            recorder.prepare();
-                            recorder.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (startRecording && havePermissions) {
+                        startRecording = false;
+                        startBlinkingAnimation(recordButton);
+                        voiceRecorder.startRecording();
+//                      recorder.setOutputFile(fp);
+//                      recorder.prepare();
+//                      recorder.start();
                 } else if (!havePermissions) {
                     ActivityCompat.requestPermissions(activity,
-                            new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            new String[]{Manifest.permission.RECORD_AUDIO,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE},
                             REQ_RECORD_PERMISSION);
                 } else {
                     startRecording = true;
                     stopBlinkingAnimation(recordButton);
-                    if(recorder != null)
-                    {
-                        recorder.pause();
-                        recorder.stop();
-                        recorder.release();
-//                         TODO - play recording just for debugging.
-//                        try {
-//                            MediaPlayer mp = new MediaPlayer();
-//                            String fp =  fileManager.getFilePath(wikiPage.getTitle(), curSection);
-//                            mp.setDataSource(fp);
-//                            mp.prepare();
-//                            mp.start();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
+                    try {
+                        voiceRecorder.stopRecording();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -161,10 +152,13 @@ public class WikiRecordActivity extends AppCompatActivity {
     private boolean checkRecordingPermissions() {
         int writeToStoragePermission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int readFromStoragePermission =  ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
         int recordPermission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO);
         return writeToStoragePermission == PackageManager.PERMISSION_GRANTED &&
-                recordPermission == PackageManager.PERMISSION_GRANTED;
+                recordPermission == PackageManager.PERMISSION_GRANTED &&
+                readFromStoragePermission == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -175,7 +169,8 @@ public class WikiRecordActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQ_RECORD_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                        grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                        grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                         // TODO - START RECORDING OUR MAKE PRESS AGAIN?
 
                 } else {

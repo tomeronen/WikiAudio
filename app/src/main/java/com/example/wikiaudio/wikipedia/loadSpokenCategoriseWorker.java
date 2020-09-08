@@ -12,12 +12,16 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class loadSpokenCategoriseWorker extends Worker {
+
+    public static String listTag = "listTag";
+    private List outputList;
 
     public loadSpokenCategoriseWorker(@NonNull Context context,
                                       @NonNull WorkerParameters workerParams) {
@@ -39,9 +43,10 @@ public class loadSpokenCategoriseWorker extends Worker {
         if (response.code() != 200 || !response.isSuccessful()) {
             // TODO -- what to do if fails.
             return Result.failure();
-        } else {
+        }
+        else
+        {
             ArrayList<String> allCategories = new ArrayList<>();
-            String a = response.body().toString();
             LinkedTreeMap<String, LinkedTreeMap<String, Object>> b = (LinkedTreeMap<String, LinkedTreeMap<String, Object>>) response.body();
             ArrayList<LinkedTreeMap<String, Object>> c = (ArrayList<LinkedTreeMap<String, Object>>) b.get("parse").get("sections");
             for (int i = 0; i < c.size(); ++i) {
