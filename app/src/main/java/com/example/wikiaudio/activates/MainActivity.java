@@ -45,12 +45,12 @@ public class MainActivity extends AppCompatActivity {
         wikipedia = Wikipedia.getInstance();
         activity = this;
         showCategories();
-//        WikiHtmlParser h = new WikiHtmlParser("https://en.wikipedia.org/wiki/One_Times_Square");
         final List<WikiPage> pagesNear = new ArrayList<>();
         ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.coordinates);
         pageAttributes.add(PageAttributes.content);
+        wikipedia.getWikiPage("One Times Square", pageAttributes);
         wikipedia.getPagesNearby(32.0623506,
                                 34.7747997,
                                     10000,
@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                             recyclerView.setLayoutManager(new GridLayoutManager(activity,
                                     3));
                             recyclerView.setAdapter(categoryAdapter);
+                            wikipedia.loadSpokenPagesByCategories(activity, "Philosophy", null,null);
                         }
                         else
                         {

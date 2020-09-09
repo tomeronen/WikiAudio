@@ -3,6 +3,7 @@ package com.example.wikiaudio.wikipedia;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -29,28 +30,16 @@ public class loadSpokenPagesByCategoriseWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-//        Response<Object> response = null;
-//        try {
-//            response = WikiServerHolder.getInstance().callGetSpokenPagesByCategories(category).execute();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return Result.failure();
-//        }
-//        if (response.code() != 200 || !response.isSuccessful()) {
-//             TODO -- what to do if fails.
-//            return Result.failure();
-//        } else {
-//            ArrayList<String> pageNames = new ArrayList<>();
-//            LinkedTreeMap<String,
-//                    LinkedTreeMap<String, ArrayList<LinkedTreeMap<String, Object>>>> a =
-//                    (LinkedTreeMap<String,
-//                            LinkedTreeMap<String,
-//                                    ArrayList<LinkedTreeMap<String, Object>>>>) response.body();
-//            ArrayList<LinkedTreeMap<String, Object>> c = a.get("parse").get("links");
-//            for (int i = 0; i < c.size(); ++i) {
-//                pageNames.add((String) c.get(i).get("*"));
-//            }
-//            Wikipedia.getInstance().spokenCategories.put(category, pageNames);
-            return Result.success();
+        List<PageAttributes> pageAttr = new ArrayList<>();
+        pageAttr.add(PageAttributes.title);
+        try {
+            List<String> pageNames
+                    = WikiServerHolder.callGetSpokenPagesNamesByCategories(category);
+            Wikipedia.getInstance().spokenCategories.put(category, pageNames);
+            return Result.success(new Data.Builder().putString("a","a").build());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Result.failure();
         }
+    }
 }

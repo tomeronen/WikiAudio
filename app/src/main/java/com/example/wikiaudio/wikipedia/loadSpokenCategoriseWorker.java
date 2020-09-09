@@ -32,28 +32,12 @@ public class loadSpokenCategoriseWorker extends Worker {
     @Override
     public Result doWork() {
         // TODO - not finished just for basic debugging
-        Call<Object> call = WikiServerHolder.getInstance().callGetSpokenPagesCategories();
-        Response<Object> response = null;
         try {
-            response = call.execute();
-        } catch (IOException e) {
-            // TODO -- what to do if fails.
-            e.printStackTrace();
-        }
-        if (response.code() != 200 || !response.isSuccessful()) {
-            // TODO -- what to do if fails.
-            return Result.failure();
-        }
-        else
-        {
-            ArrayList<String> allCategories = new ArrayList<>();
-            LinkedTreeMap<String, LinkedTreeMap<String, Object>> b = (LinkedTreeMap<String, LinkedTreeMap<String, Object>>) response.body();
-            ArrayList<LinkedTreeMap<String, Object>> c = (ArrayList<LinkedTreeMap<String, Object>>) b.get("parse").get("sections");
-            for (int i = 0; i < c.size(); ++i) {
-                allCategories.add((String) c.get(i).get("line"));
-            }
-            Wikipedia.getInstance().spokenPagesCategories = allCategories;
+            List<String> categorise = WikiServerHolder.getInstance().callGetSpokenPagesCategories();
             return Result.success();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Result.failure();
         }
     }
 }

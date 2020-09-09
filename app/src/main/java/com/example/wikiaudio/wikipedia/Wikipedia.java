@@ -1,5 +1,7 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.util.Log;
+
 import androidx.activity.ComponentActivity;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -26,7 +28,7 @@ public class Wikipedia {
 
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
-    LinkedTreeMap<String, ArrayList<String>> spokenCategories;
+    LinkedTreeMap<String, List<String>> spokenCategories;
 
     synchronized static public Wikipedia getInstance(){
         if (instance == null) {
@@ -60,10 +62,11 @@ public class Wikipedia {
             @Override
             public void run() {
                 try {
-                    listToFill.addAll(WikiServerHolder.getPagesNearby(latitude,
-                                                                        longitude,
-                                                                        radius,
-                                                                        pageAttributes));
+                    List<WikiPage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
+                            longitude,
+                            radius,
+                            pageAttributes);
+                    listToFill.addAll(pagesNearby);
                     // task was successful.
                     workerListener.onSuccess();
                 } catch (IOException e) {
@@ -94,7 +97,9 @@ public class Wikipedia {
     }
 
     public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity,
-                                            final String category)
+                                            final String category,
+                                            List<PageAttributes> p,
+                                            WorkerListener workerListener)
     {
         WorkRequest loadSpokenCategoriseWorkerReq =
                 new OneTimeWorkRequest
@@ -111,16 +116,24 @@ public class Wikipedia {
 //        WikiServerHolder.getInstance().callLogin(a,b);
 //    }
 
-    public WikiPage getWikiPage(String name, List<PageAttributes> pageAttributes)
+    public void getWikiPage(final String name,
+                            final List<PageAttributes> pageAttributes)
     {
-        try {
-            WikiPage wikiPage = WikiServerHolder.getInstance().getPage(name, pageAttributes);
+        //todo make async.
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    WikiPage wikiPage = WikiServerHolder.getInstance().getPage(name, pageAttributes);
+                    if(wikiPage.getTitle() == "")
+                    {
+                        Log.d("","");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
-            return wikiPage;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

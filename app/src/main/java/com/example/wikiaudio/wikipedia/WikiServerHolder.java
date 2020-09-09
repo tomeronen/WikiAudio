@@ -1,8 +1,15 @@
 package com.example.wikiaudio.wikipedia;
 
+import androidx.work.ListenableWorker;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +20,6 @@ import java.util.Set;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -46,14 +52,26 @@ public class WikiServerHolder {
                 .create(WikiServer.class);
     }
 
-    public WikiPage getPage(String name, List<PageAttributes> pageAttributes)
+    public WikiPage getPage(String name, List<PageAttributes> pageAttr)
             throws IOException
     {
-        WikiPage wikiPage = new WikiPage();
-        String prop = getQueryProp(pageAttributes);
-        Call<QuarryResponse> quarryResponseCall = server.callGetPageByName(name);
-
-        return wikiPage;
+        String prop = getQueryProp(pageAttr);
+        String inprop = getQueryInProp(pageAttr);
+        Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop).execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
+            List<WikiPage> wikiPageList = parseQuarryResponse(response.body());
+            if(pageAttr.contains(content) ||
+                    pageAttr.contains(audioUrl) ||
+                    pageAttr.contains(thumbnail))
+            {
+                WikiHtmlParser.parseAdvanceAttr(wikiPageList.get(0));
+            }
+            return wikiPageList.get(0);
+        } else {
+            // task failed.
+            throw new IOException();
+        }
     }
 
 
@@ -94,11 +112,13 @@ public class WikiServerHolder {
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<WikiPage> wikiPageList = parseQuarryResponse(response.body());
-            if(pageAttr.contains(content))
+            if(pageAttr.contains(content) ||
+                    pageAttr.contains(audioUrl) ||
+                        pageAttr.contains(thumbnail))
             {
                 for(WikiPage wikiPage: wikiPageList)
                 {
-                    wikiPage.setSections(WikiHtmlParser.parseContent(wikiPage.getUrl()));
+                    WikiHtmlParser.parseAdvanceAttr(wikiPage);
                 }
             }
             return wikiPageList;
@@ -108,7 +128,8 @@ public class WikiServerHolder {
         }
     }
 
-    private static List<WikiPage> parseQuarryResponse(QuarryResponse quarryResponse) {
+    private static List<WikiPage> parseQuarryResponse(QuarryResponse quarryResponse)
+            throws IOException {
         if (quarryResponse != null
                 && quarryResponse.query != null
                 && quarryResponse.query.pages != null) {
@@ -122,33 +143,52 @@ public class WikiServerHolder {
         }
         else
         {
-            return null;
+            throw new IOException();
         }
     }
 
 
-    Call<Object> callGetSpokenPagesCategories()
-    {
-        return this.server.callGetSpokenPagesCategories();
-    }
-
-    List<WikiPage> callGetSpokenPagesByCategories(String category, List<PageAttributes> pageAttr)
-    {
-        String prop = getQueryProp(pageAttr);
-        String inprop = getQueryInProp(pageAttr);
-        if(Wikipedia.getInstance().spokenPagesCategories == null)
-        {
-            // TODO - implement what if categorise were not loaded yet. (load categorise and continue)
-            return null;
+    List<String> callGetSpokenPagesCategories() throws IOException {
+        ArrayList<String> allCategories = new ArrayList<>();
+        Response<Object> response = this.server.callGetSpokenPagesCategories().execute();
+        if (response.code() != 200 || !response.isSuccessful()) {
+            throw new IOException();
         }
         else
         {
-            String CategoryIndex =
-                    Integer.toString(Wikipedia.getInstance().spokenPagesCategories.indexOf(category) + 1 );
-            Call<QuarryResponse> quarryResponseCall
-                    = this.server.callGetSpokenPagesByCategory(CategoryIndex);
+            LinkedTreeMap<String, LinkedTreeMap<String, Object>> b =
+                    (LinkedTreeMap<String, LinkedTreeMap<String, Object>>) response.body();
+            ArrayList<LinkedTreeMap<String, Object>> c =
+                    (ArrayList<LinkedTreeMap<String, Object>>) b.get("parse").get("sections");
+            for (int i = 0; i < c.size(); ++i) {
+                allCategories.add((String) c.get(i).get("line"));
+            }
+            Wikipedia.getInstance().spokenPagesCategories = allCategories;
         }
-        return null;
+        return allCategories;
+    }
+
+    static List<String> callGetSpokenPagesNamesByCategories(String category) throws IOException {
+        List<String> pageNames = new ArrayList<>();
+        String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
+        Document doc = Jsoup.connect(url).get();
+        Elements elements = doc.select(".mw-headline, li");
+        for (int i = 1; i < elements.size(); i++) {
+            Element curElement = elements.get(i);
+            if ("mw-headline".equals(curElement.className()) && curElement.text().equals(category))
+            {
+                ++i;
+                curElement = elements.get(i);
+                while(i < elements.size() && !"mw-headline".equals(curElement.className()))
+                {
+                    pageNames.add(curElement.text());
+                    ++i;
+                    curElement = elements.get(i);
+                }
+                break;
+            }
+        }
+        return pageNames;
     }
 
     //todo implement.
@@ -185,15 +225,15 @@ public class WikiServerHolder {
 //        return null;
 //    }
 
+
     private static WikiPage parseWikiData(QuarryResponse.PageData pageData) {
-        // todo complete.
         WikiPage curWikiPage = new WikiPage();
         curWikiPage.setTitle(pageData.title);
         curWikiPage.setUrl(pageData.fullurl);
         curWikiPage.setDescription(pageData.description);
         curWikiPage.setWatchers(pageData.watchers);
         List<QuarryResponse.CoordinatesData> coordinates = pageData.coordinates;
-        if(coordinates.size() > 0)
+        if(coordinates != null && coordinates.size() > 0)
         {
             curWikiPage.setLat(pageData.coordinates.get(0).lat);
             curWikiPage.setLon(pageData.coordinates.get(0).lon);
@@ -201,11 +241,10 @@ public class WikiServerHolder {
         QuarryResponse.ThumbnailData thumbnail = pageData.thumbnail;
         if(thumbnail != null)
         {
-           curWikiPage.setThumbnailSrc(thumbnail.source);
+            curWikiPage.setThumbnailSrc(thumbnail.source);
         }
         return curWikiPage;
     }
-
 
     private static String getQueryProp(List<PageAttributes> pageAttributes) {
         Set<String> props = new HashSet<>();

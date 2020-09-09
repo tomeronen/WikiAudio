@@ -18,10 +18,8 @@ public class WikiHtmlParser {
 
     String url;
 
-   static public List<WikiPage.Section> parseContent(String url) throws IOException {
-        Document doc = Jsoup.connect(url).get();
-
-
+   static public void parseAdvanceAttr(WikiPage wikiPage) throws IOException {
+        Document doc = Jsoup.connect(wikiPage.getUrl()).get();
         // parse text
         List<WikiPage.Section> sections = new ArrayList<>();
         String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
@@ -39,7 +37,32 @@ public class WikiHtmlParser {
                 paragraphsInSection = new ArrayList<>();
             }
         }
-        return sections;
+        wikiPage.setSections(sections);
+
+
+//     parse indicators
+       Elements indicators = doc.getElementsByClass("mw-indicator");
+       List<String> indicatorsValues = new ArrayList<>();
+       for (Element e : indicators) {
+           indicatorsValues.add(e.id());
+           switch (e.id()) {
+               case "mw-indicator-spoken-wikipedia":
+               case "mw-indicator-spoken-icon":
+                   String audioPageUrl =
+                           e.select("a").attr("href");
+                   String a = BASE_URL + audioPageUrl;
+                   Document d = Jsoup.connect(BASE_URL + audioPageUrl).get();
+
+//     todo - assumes first internal link is to audio file, not good!
+
+                   String internal = d.getElementsByClass("internal").text();
+                   wikiPage.setAudioUrl
+                           (d.getElementsByClass("internal").first()
+                                   .attr("href"));
+                   break;
+           }
+       }
+       wikiPage.setIndicators(indicatorsValues);
     }
 
 
@@ -47,27 +70,4 @@ public class WikiHtmlParser {
 //            String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
 //            wikiPage.setTitle(pageTitle);
 
-    // parse indicators
-//            Elements indicators = doc.getElementsByClass("mw-indicator");
-//            List<String> indicatorsValues = new ArrayList<>();
-//            for (Element e : indicators) {
-//                indicatorsValues.add(e.id());
-//                switch (e.id()) {
-//                    case "mw-indicator-spoken-wikipedia":
-//                    case "mw-indicator-spoken-icon":
-//                        String audioPageUrl =
-//                                e.select("a").attr("href");
-//                        String a = BASE_URL + audioPageUrl;
-//                        Document d = Jsoup.connect(BASE_URL + audioPageUrl).get();
-//
-    // todo - assumes first internal link is to audio file, not good!
-
-//                        String internal = d.getElementsByClass("internal").text();
-//                        wikiPage.setAudioUrl
-//                                (d.getElementsByClass("internal").first()
-//                                        .attr("href"));
-//                        break;
-//                }
-//            }
-//            wikiPage.setIndicators(indicatorsValues);
 }
