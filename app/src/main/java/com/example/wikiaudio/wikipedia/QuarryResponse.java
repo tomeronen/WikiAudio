@@ -5,6 +5,7 @@ import android.media.Image;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,11 @@ public class QuarryResponse {
 
     public static class QueryData{
         LinkedTreeMap<String, PageData> pages;
+        ArrayList<PageData> search;
+
+    }
+    public static class SearchResults{
+        String title;
     }
 
     public static class PageData{

@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import retrofit2.Call;
-import retrofit2.Response;
-
-
 /**
  * Facade singleton class to all interaction with wikipedia.
  * Main purpose is to manage requests to wikipedia and decide what is the best method
@@ -37,9 +33,36 @@ public class Wikipedia {
         return instance;
     }
 
-    private Wikipedia(){
-    }
+    /**
+     * Search a name for relevant wiki pages.
+     * Fills list to fill with relevant wiki pages with name and id data.
+     * Does not handle bad writing.
+     * (if you now the exact name of the page you want use `getPage()` ).
+     * @param pageName the value to search.
+     * @param attributes currently not in use. can be null.
+     * @param listToFill the list to fill with result.
+     * @param workerListener what to do if task fails or is successful.
+     */
+    public void searchForPage(final String pageName,
+                           final List<PageAttributes> attributes,
+                           final List<WikiPage> listToFill,
+                           final WorkerListener workerListener)
+    {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    listToFill.addAll(WikiServerHolder
+                                                    .getInstance().searchPage(pageName));
+                    workerListener.onSuccess();
+            } catch (IOException e) {
+                    e.printStackTrace();
+                    workerListener.onFailure();
+                }
 
+            }
+        }).start();
+    }
 
     /**
      * gets wikiPages nearby the given coordinates. if successful,
@@ -66,8 +89,8 @@ public class Wikipedia {
                             longitude,
                             radius,
                             pageAttributes);
-                    listToFill.addAll(pagesNearby);
                     // task was successful.
+                    listToFill.addAll(pagesNearby);
                     workerListener.onSuccess();
                 } catch (IOException e) {
                     // task failed with a exception.
@@ -110,30 +133,36 @@ public class Wikipedia {
         WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
         return loadSpokenCategoriseWorkerReq.getId();
     }
-//todo finish implement.
 
-//    public void login(String a, String b) {
-//        WikiServerHolder.getInstance().callLogin(a,b);
-//    }
 
+    /**
+     *
+     * @param name the name of wiki page to get.
+     * @param pageAttributes the Attributes to get on the page.
+     * @param pageToFill the wiki page to fill with the data.
+     * @param workerListener what to do if task fails or is successful.
+     */
     public void getWikiPage(final String name,
-                            final List<PageAttributes> pageAttributes)
+                            final List<PageAttributes> pageAttributes,
+                            final WikiPage pageToFill,
+                            final WorkerListener workerListener)
     {
-        //todo make async.
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    WikiPage wikiPage = WikiServerHolder.getInstance().getPage(name, pageAttributes);
-                    if(wikiPage.getTitle() == "")
-                    {
-                        Log.d("","");
-                    }
+                    pageToFill.copy(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+                    workerListener.onSuccess();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    workerListener.onFailure();
                 }
             }
         }).start();
-
     }
+
+//todo finish implement.
+//    public void login(String a, String b) {
+//        WikiServerHolder.getInstance().callLogin(a,b);
+//    }
 }

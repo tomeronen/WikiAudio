@@ -46,11 +46,12 @@ public class MainActivity extends AppCompatActivity {
         activity = this;
         showCategories();
         final List<WikiPage> pagesNear = new ArrayList<>();
+        final List<WikiPage> searchResults = new ArrayList<>();
         ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.coordinates);
         pageAttributes.add(PageAttributes.content);
-        wikipedia.getWikiPage("One Times Square", pageAttributes);
+
         wikipedia.getPagesNearby(32.0623506,
                                 34.7747997,
                                     10000,
@@ -93,41 +94,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void showCategories() {
         UUID loadCategoriesId = wikipedia.loadSpokenPagesCategories(this);
-        WorkManager.getInstance(this)
-                .getWorkInfoByIdLiveData(loadCategoriesId)
-                .observe(this, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo == null) {
 
-                        }
-                        if (workInfo.getState() == WorkInfo.State.FAILED)
-                        {
-
-                        }
-                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
-                        {
-                            CategoryAdapter categoryAdapter =
-                                    new CategoryAdapter(activity,
-                                            Wikipedia.getInstance().spokenPagesCategories,
-                                    new CategoryClickListeners(){
-                                        @Override
-                                        public void onClick(String string) {
-                                            Toast.makeText(activity, string, Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-
-                            RecyclerView recyclerView = findViewById(R.id.categorys);
-                            recyclerView.setLayoutManager(new GridLayoutManager(activity,
-                                    3));
-                            recyclerView.setAdapter(categoryAdapter);
-                            wikipedia.loadSpokenPagesByCategories(activity, "Philosophy", null,null);
-                        }
-                        else
-                        {
-
-                        }
-                    }
-                });
     }
 }

@@ -80,4 +80,9 @@ public interface WikiServer {
         "&type=login")
     public Call<Object> getToken();
 
+
+    @GET("/w/api.php?action=query" +
+            "&list=search" +
+            "&format=json")
+    Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);
 }

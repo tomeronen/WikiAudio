@@ -5,11 +5,24 @@ import java.util.List;
 public class WikiPage {
 
 
+    public WikiPage() {}
 
     public void setIndicators(List<String> indicators) {
         this.indicators = indicators;
     }
 
+    public void copy(WikiPage page) {
+        this.title = page.getTitle();
+        this.url = page.getUrl();
+        this.description = page.getDescription();
+        this.sections = page.getSections();
+        this.indicators = page.getIndicators();
+        this.watchers = page.getWatchers();
+        this.lat = page.getLat();
+        this.lon = page.getLon();
+        this.audioUrl = page.getAudioUrl();
+        this.thumbnailSrc = page.getThumbnailSrc();
+    }
 
 
     // TODO - make to outer class?

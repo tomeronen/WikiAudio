@@ -52,6 +52,37 @@ public class WikiServerHolder {
                 .create(WikiServer.class);
     }
 
+    public List<WikiPage> searchPage(String pageName)
+            throws IOException {
+        Response<QuarryResponse> response = server.searchPage(pageName).execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
+            List<WikiPage> wikiPageList = parseSearchResponse(response.body());
+            return wikiPageList;
+        } else {
+            // task failed.
+            throw new IOException();
+        }
+    }
+
+    private List<WikiPage> parseSearchResponse(QuarryResponse searchResponse)
+            throws IOException {
+        if (searchResponse != null
+                && searchResponse.query != null
+                && searchResponse.query.search != null) {
+            List<WikiPage> resultList = new ArrayList<>();
+            for(QuarryResponse.PageData pageData: searchResponse.query.search)
+            {
+                resultList.add(parseWikiData(pageData));
+            }
+            return resultList;
+        }
+        else
+        {
+            throw new IOException();
+        }
+    }
+
     public WikiPage getPage(String name, List<PageAttributes> pageAttr)
             throws IOException
     {
@@ -227,23 +258,27 @@ public class WikiServerHolder {
 
 
     private static WikiPage parseWikiData(QuarryResponse.PageData pageData) {
-        WikiPage curWikiPage = new WikiPage();
-        curWikiPage.setTitle(pageData.title);
-        curWikiPage.setUrl(pageData.fullurl);
-        curWikiPage.setDescription(pageData.description);
-        curWikiPage.setWatchers(pageData.watchers);
-        List<QuarryResponse.CoordinatesData> coordinates = pageData.coordinates;
-        if(coordinates != null && coordinates.size() > 0)
+        if(pageData != null)
         {
-            curWikiPage.setLat(pageData.coordinates.get(0).lat);
-            curWikiPage.setLon(pageData.coordinates.get(0).lon);
+            WikiPage curWikiPage = new WikiPage();
+            curWikiPage.setTitle(pageData.title);
+            curWikiPage.setUrl(pageData.fullurl);
+            curWikiPage.setDescription(pageData.description);
+            curWikiPage.setWatchers(pageData.watchers);
+            List<QuarryResponse.CoordinatesData> coordinates = pageData.coordinates;
+            if(coordinates != null && coordinates.size() > 0)
+            {
+                curWikiPage.setLat(pageData.coordinates.get(0).lat);
+                curWikiPage.setLon(pageData.coordinates.get(0).lon);
+            }
+            QuarryResponse.ThumbnailData thumbnail = pageData.thumbnail;
+            if(thumbnail != null)
+            {
+                curWikiPage.setThumbnailSrc(thumbnail.source);
+            }
+            return curWikiPage;
         }
-        QuarryResponse.ThumbnailData thumbnail = pageData.thumbnail;
-        if(thumbnail != null)
-        {
-            curWikiPage.setThumbnailSrc(thumbnail.source);
-        }
-        return curWikiPage;
+        return null;
     }
 
     private static String getQueryProp(List<PageAttributes> pageAttributes) {
