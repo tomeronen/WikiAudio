@@ -1,6 +1,9 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.speech.tts.TextToSpeech;
+
 import java.util.List;
+import java.util.Locale;
 
 public class WikiPage {
 
@@ -12,16 +15,32 @@ public class WikiPage {
     }
 
     public void copy(WikiPage page) {
-        this.title = page.getTitle();
-        this.url = page.getUrl();
-        this.description = page.getDescription();
-        this.sections = page.getSections();
-        this.indicators = page.getIndicators();
-        this.watchers = page.getWatchers();
-        this.lat = page.getLat();
-        this.lon = page.getLon();
-        this.audioUrl = page.getAudioUrl();
-        this.thumbnailSrc = page.getThumbnailSrc();
+        if(page != null && page != this)
+        {
+            this.title = page.getTitle();
+            this.url = page.getUrl();
+            this.description = page.getDescription();
+            this.sections = page.getSections();
+            this.indicators = page.getIndicators();
+            this.watchers = page.getWatchers();
+            this.lat = page.getLat();
+            this.lon = page.getLon();
+            this.audioUrl = page.getAudioUrl();
+            this.thumbnailSrc = page.getThumbnailSrc();
+        }
+
+    }
+
+    public String getFullText() {
+        String fullText = "";
+        for (Section s:sections) {
+            fullText += s.title + ".";
+            for (String paragraph:s.contents
+                 ) {
+                fullText += paragraph;
+            }
+        }
+        return fullText;
     }
 
 
@@ -53,7 +72,6 @@ public class WikiPage {
     }
 
 
-
     // ************************* Getters and setters ***********************************************
 
     public String getTitle() {
@@ -71,6 +89,7 @@ public class WikiPage {
     public void setThumbnailSrc(String thumbnailSrc) {
         this.thumbnailSrc = thumbnailSrc;
     }
+
     public int getWatchers() {
         return watchers;
     }
