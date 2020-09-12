@@ -10,6 +10,7 @@ import androidx.work.WorkManager;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -38,6 +39,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.wikiaudio.wikipedia.Wikipedia;
+
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements
@@ -65,42 +68,75 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Intent rec = new Intent(this, SearchPageActivity.class);
+        startActivity(rec);
         initVars();
         initMap();
 
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
+//        wikipedia = Wikipedia.getInstance();
+//        activity = this;
+//        showCategories();
+//        final List<WikiPage> pagesNear = new ArrayList<>();
+//        final List<WikiPage> searchResults = new ArrayList<>();
+//        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.coordinates);
+//        pageAttributes.add(PageAttributes.content);
+//
+//        wikipedia.getPagesNearby(32.0623506,
+//                                34.7747997,
+//                                    10000,
+//                                            pagesNear,
+//                                            pageAttributes,
+//                                            new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        if(pagesNear.size() == 10)
+//                        {
+//                            Log.d("s","s");
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure() {
+//
+//                    }
+//                });
 
-        wikipedia = Wikipedia.getInstance();
-        activity = this;
-        showCategories();
-        final List<WikiPage> pagesNear = new ArrayList<>();
-        final List<WikiPage> searchResults = new ArrayList<>();
-        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
-        pageAttributes.add(PageAttributes.title);
-        pageAttributes.add(PageAttributes.coordinates);
-        pageAttributes.add(PageAttributes.content);
-
-        wikipedia.getPagesNearby(32.0623506,
-                34.7747997,
-                10000,
-                pagesNear,
-                pageAttributes,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        if (pagesNear.size() == 10) {
-                            Log.d("s", "s");
-                        }
-
-                    }
-
-                    @Override
-                    public void onFailure() {
-
-                    }
-                });
+//        wikipedia = Wikipedia.getInstance();
+//        activity = this;
+//        showCategories();
+//        final List<WikiPage> pagesNear = new ArrayList<>();
+//        final List<WikiPage> searchResults = new ArrayList<>();
+//        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.coordinates);
+//        pageAttributes.add(PageAttributes.content);
+//
+//        wikipedia.getPagesNearby(32.0623506,
+//                                34.7747997,
+//                                    10000,
+//                                            pagesNear,
+//                                            pageAttributes,
+//                                            new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        if(pagesNear.size() == 10)
+//                        {
+//                            Log.d("s","s");
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure() {
+//
+//                    }
+//                });
 
 
 //        WikiPage wp = WikiPage.getPageForTesting();
@@ -113,13 +149,14 @@ public class MainActivity extends AppCompatActivity implements
 
 //        WikiPage a = WikiTextParser.parseWikiHtml("https://en.wikipedia.org/wiki/Quark");
 //        wikipedia.login("a","b");
-        // for debug:
+                    // for debug:
 
 //        wikipedia = Wikipedia.getInstance();
 //        wikipedia.getPagesNearby(this,32.443814,34.892546);
 //        showCategories();
 //        locationTracker = new LocationTracker(this);
     }
+
 
     private void initVars() {
         //Check for location perms

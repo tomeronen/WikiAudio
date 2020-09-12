@@ -1,15 +1,13 @@
 package com.example.wikiaudio.wikipedia;
-
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
-
 import androidx.activity.ComponentActivity;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
-
 import com.google.gson.internal.LinkedTreeMap;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +23,10 @@ public class Wikipedia {
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
     LinkedTreeMap<String, List<String>> spokenCategories;
+    private Activity activ;
 
-    synchronized static public Wikipedia getInstance(){
-        if (instance == null) {
-            instance = new Wikipedia();
-        }
-        return instance;
+    public Wikipedia(Activity activity) {
+        activ = activity;
     }
 
     /**
@@ -54,10 +50,20 @@ public class Wikipedia {
                 try {
                     listToFill.addAll(WikiServerHolder
                                                     .getInstance().searchPage(pageName));
-                    workerListener.onSuccess();
-            } catch (IOException e) {
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
+                        }
+                    });
+                } catch (IOException e) {
                     e.printStackTrace();
-                    workerListener.onFailure();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
+                        }
+                    });
                 }
 
             }
@@ -91,10 +97,20 @@ public class Wikipedia {
                             pageAttributes);
                     // task was successful.
                     listToFill.addAll(pagesNearby);
-                    workerListener.onSuccess();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
+                        }
+                    });
                 } catch (IOException e) {
                     // task failed with a exception.
-                    workerListener.onFailure();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
+                        }
+                    });
                     e.printStackTrace();
                 }
             }
@@ -152,16 +168,30 @@ public class Wikipedia {
             public void run() {
                 try {
                     pageToFill.copy(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-                    workerListener.onSuccess();
+
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
+                        }
+                    });
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    workerListener.onFailure();
+                    // task failed with a exception.
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
+                        }
+                    });
                 }
             }
         }).start();
     }
 
+
+
 //todo finish implement.
+
 //    public void login(String a, String b) {
 //        WikiServerHolder.getInstance().callLogin(a,b);
 //    }

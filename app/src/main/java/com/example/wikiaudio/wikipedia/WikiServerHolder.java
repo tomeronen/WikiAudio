@@ -194,7 +194,8 @@ public class WikiServerHolder {
             for (int i = 0; i < c.size(); ++i) {
                 allCategories.add((String) c.get(i).get("line"));
             }
-            Wikipedia.getInstance().spokenPagesCategories = allCategories;
+            //todo come back to this!
+//            Wikipedia.getInstance().spokenPagesCategories = allCategories;
         }
         return allCategories;
     }
@@ -288,6 +289,7 @@ public class WikiServerHolder {
         if(pageAttributes.contains(title)) props.add("title");
         if(pageAttributes.contains(url))   props.add("info");
         if(pageAttributes.contains(content)) props.add("info");
+        if(pageAttributes.contains(audioUrl)) props.add("info");
         if(pageAttributes.contains(watchers))   props.add("info");
         if(pageAttributes.contains(description))  props.add("description");
         if(pageAttributes.contains(categories)) props.add("categories");
@@ -316,6 +318,7 @@ public class WikiServerHolder {
 
         if(pageAttr.contains(url))   inprops.add("url");
         if(pageAttr.contains(content)) inprops.add("url");
+        if(pageAttr.contains(audioUrl)) inprops.add("url");
         if(pageAttr.contains(watchers))   inprops.add("watchers");
 
         boolean first = true;
