@@ -19,6 +19,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.Location.LocationHandler;
 import com.example.wikiaudio.location.LocationTracker;
 import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.WikiPage;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationClickListener,
         GoogleMap.OnMyLocationButtonClickListener,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "MainActivity";
 
@@ -55,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements
     //Location related
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Boolean mLocationPermissionGranted = false;
-    LocationTracker locationTracker;
+    LocationHandler locationHandler;
 
     //Map related
     private GoogleMap mMap;
@@ -65,20 +68,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-
-        if (isGoogleServicesOK()) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.fragmentMap);
-            if (mapFragment == null) {
-                Log.d(TAG, "onCreate: mapFragment is null");
-            } else {
-                mapFragment.getMapAsync(this);
-//                initMap();
-            }
-
-        } else {
-            Log.d(TAG, "google services not ok");
-        }
+        initMap();
 
         WorkManager.getInstance(this).cancelAllWork();  // todo debug
 
@@ -141,18 +131,23 @@ public class MainActivity extends AppCompatActivity implements
                         == PackageManager.PERMISSION_GRANTED;
     }
 
+    private void initMap() {
+        if (isGoogleServicesOK()) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.fragmentMap);
+            if (mapFragment == null) {
+                Log.d(TAG, "onCreate: mapFragment is null");
+            } else {
+                mapFragment.getMapAsync(this);
+            }
+        } else {
+            Log.d(TAG, "google services is not ok");
+        }
+    }
+
     private void showCategories() {
         UUID loadCategoriesId = wikipedia.loadSpokenPagesCategories(this);
 
-    }
-
-    private void initMap() {
-        Log.d(TAG, "initMap: tried to init the map");
-        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
-        FragmentTransaction fragmentTransaction =
-                getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.fragmentMap, mapFragment);
-        fragmentTransaction.commit();
     }
 
     public boolean isGoogleServicesOK() {
@@ -208,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements
                 mMap.setOnMyLocationButtonClickListener(this);
                 mMap.setOnMyLocationClickListener(this);
                 enableMyLocation();
+                locationHandler = new LocationHandler(this, mMap);
             } else {
                 //request permissions
                 Log.d(TAG, "onMapReady: google map is NOT null & we DON'T have perm");
@@ -228,39 +224,11 @@ public class MainActivity extends AppCompatActivity implements
     private void enableMyLocation() {
         if (mLocationPermissionGranted) {
             if (mMap != null) {
-                Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
+                // todo: Add here marks etc. that you want to appear as soon as the map opens
+                // todo: for example,we can present the current playlist locations
+//                Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
                 mMap.setMyLocationEnabled(true);
-                Log.d(TAG, "enableMyLocation: setMyLocationEnabled is enabled");
-                // Getting LocationManager object from System Service LOCATION_SERVICE
-                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-                // Creating a criteria object to retrieve provider
-                Criteria criteria = new Criteria();
-
-                // Getting the name of the best provider
-                String provider = locationManager.getBestProvider(criteria, true);
-                if (provider == null) {
-                    Log.d(TAG, "enableMyLocation: null provider");
-                    return;
-                }
-
-                // Getting Current Location
-                Location location = locationManager.getLastKnownLocation(provider);
-                Log.d(TAG, "enableMyLocation: got current location");
-
-                if (location != null) {
-                    // Getting latitude of the current location
-                    double latitude = location.getLatitude();
-
-                    // Getting longitude of the current location
-                    double longitude = location.getLongitude();
-
-                    // Creating a LatLng object for the current location
-                    LatLng latLng = new LatLng(latitude, longitude);
-
-                    mMap.addMarker(new MarkerOptions().position(latLng).title("Start"));
-                    Log.d(TAG, "enableMyLocation: marker should be on");
-                }
+//                Log.d(TAG, "enableMyLocation: setMyLocationEnabled is enabled");
             } else {
                 requestLocationPermission();
             }
@@ -270,14 +238,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
+        //todo: Do we want anything to occur?
     }
 
     @Override
     public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
+        //todo: Do we want anything extra to occur?
+        return false;
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        // Retrieve the data from the marker.
+        // any data object tag = (any data object) marker.getTag();
+        // do something with that info, for example, transfer to its wiki page
+
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
         return false;
     }
 }
