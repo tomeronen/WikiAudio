@@ -57,7 +57,7 @@ public class WikiHtmlParser {
 
                    String internal = d.getElementsByClass("internal").text();
                    wikiPage.setAudioUrl
-                           (d.getElementsByClass("internal").first()
+                           ("https://" + d.getElementsByClass("internal").first()
                                    .attr("href"));
                    break;
            }

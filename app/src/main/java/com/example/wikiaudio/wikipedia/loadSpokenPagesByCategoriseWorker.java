@@ -21,9 +21,11 @@ import retrofit2.Response;
 public class loadSpokenPagesByCategoriseWorker extends Worker {
     public static final String categoryTag = "categoryTag";
     String category;
+    private Context context;
 
     public loadSpokenPagesByCategoriseWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
+        this.context = context;
         category = getInputData().getString(categoryTag);
     }
 
@@ -35,7 +37,8 @@ public class loadSpokenPagesByCategoriseWorker extends Worker {
         try {
             List<String> pageNames
                     = WikiServerHolder.callGetSpokenPagesNamesByCategories(category);
-            Wikipedia.getInstance().spokenCategories.put(category, pageNames);
+            // todo come back to this
+//            new Wikipedia(context).spokenCategories.put(category, pageNames);
             return Result.success(new Data.Builder().putString("a","a").build());
         } catch (IOException e) {
             e.printStackTrace();
