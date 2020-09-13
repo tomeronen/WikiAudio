@@ -28,28 +28,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocationHandler {
-
+    //For logs
     private static final String TAG = "LocationHandler";
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     private AppCompatActivity activity;
+
+    //Location related
     private GoogleMap mMap;
-    private Boolean mLocationPermissionGranted;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+
 
     public LocationHandler(AppCompatActivity activityCompat, GoogleMap mMap) {
         this.activity = activityCompat;
         this.mMap = mMap;
-
-        mLocationPermissionGranted = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.INTERNET)
-                        == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     * @return a latitude-longitude tuple of the user's current location
+     */
     public LatLng getCurrentLocation() {
-        if (mLocationPermissionGranted) {
+        if (isLocationPermissionGranted()) {
             // Getting LocationManager object from System Service LOCATION_SERVICE
             LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
             if (locationManager == null) {
@@ -74,14 +73,28 @@ public class LocationHandler {
             } else {
                 return null;
             }
-
-
         } else {
             requestLocationPermission();
             return null;
         }
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     * @return true if are granted, false ow.
+     */
+    private boolean isLocationPermissionGranted(){
+        return ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(activity, Manifest.permission.INTERNET)
+                        == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Pretty self-explanatory, really.
+     */
     private void requestLocationPermission() {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
@@ -90,20 +103,22 @@ public class LocationHandler {
                 LOCATION_PERMISSION_REQUEST_CODE);
     }
 
+    /**
+     * Marks the given wikipage object on the map using its title and coordinates
+     * @param wikiPage the article we would like to mark
+     */
     public void markLocation(WikiPage wikiPage) {
         if (wikiPage != null) {
             LatLng latLng = new LatLng(wikiPage.getLat(), wikiPage.getLon());
             mMap.addMarker(new MarkerOptions()
                                     .position(latLng).title(wikiPage.getTitle())).setTag(wikiPage);
-//            Log.d(TAG, "markLocation: marker should be on " + title);
         } else {
             Log.d(TAG, "markLocation: got null wikipage object");
         }
     }
 
-
     /**
-     * Creates marks on the map of the nearby wikipedia articles based on current location
+     * Create marks on the map of the nearby wikipedia articles based on current location
      * @param wikipedia: the wiki facade for getting the nearby articles
      */
     public void markWikipagesNearby(final Wikipedia wikipedia) {
@@ -140,8 +155,16 @@ public class LocationHandler {
                 });
     }
 
+    // TODO
     // do we want to create and display a path of the playlist's locations?
     // we will also have to play the articles in that same order
     public void createPath(Location[] locations) {
+    }
+
+    /**
+     * Removes all markers, overlays, and polylines from the map.
+     */
+    public void clearMap() {
+        mMap.clear();
     }
 }
