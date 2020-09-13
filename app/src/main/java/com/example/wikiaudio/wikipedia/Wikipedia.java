@@ -1,8 +1,4 @@
 package com.example.wikiaudio.wikipedia;
-import android.app.Activity;
-import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.ComponentActivity;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,9 +10,6 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
-import com.example.wikiaudio.R;
-import com.example.wikiaudio.activates.CategoryAdapter;
-import com.example.wikiaudio.activates.CategoryClickListeners;
 import com.google.gson.internal.LinkedTreeMap;
 import java.io.IOException;
 import java.util.ArrayList;

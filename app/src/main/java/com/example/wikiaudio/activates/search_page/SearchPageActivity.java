@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.activates.search_page;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
