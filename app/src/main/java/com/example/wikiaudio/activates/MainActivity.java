@@ -9,6 +9,7 @@ import androidx.work.WorkManager;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -31,6 +32,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.wikiaudio.activates.Location.LocationHandler;
+import com.example.wikiaudio.activates.search_page.SearchPageActivity;
+import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -60,13 +70,44 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Intent rec = new Intent(this, SearchPageActivity.class);
+        startActivity(rec);
         initVars();
         initMap();
-
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
+      
+//        wikipedia = Wikipedia.getInstance();
+//        activity = this;
+//        showCategories();
+//        final List<WikiPage> pagesNear = new ArrayList<>();
+//        final List<WikiPage> searchResults = new ArrayList<>();
+//        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.coordinates);
+//        pageAttributes.add(PageAttributes.content);
+//
+//        wikipedia.getPagesNearby(32.0623506,
+//                                34.7747997,
+//                                    10000,
+//                                            pagesNear,
+//                                            pageAttributes,
+//                                            new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        if(pagesNear.size() == 10)
+//                        {
+//                            Log.d("s","s");
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure() {
+//
+//                    }
+//                });
 
 //        wikipedia = Wikipedia.getInstance();
 //        activity = this;
@@ -329,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements
         // marker is centered and for the marker's info window to open, if it has one).
         return false;
     }
-
 
     /**
      * When the user clicks on the info box of the marker

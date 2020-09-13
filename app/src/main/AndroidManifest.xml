@@ -25,10 +25,11 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".activates.SearchPageActivity"></activity>
-        <activity android:name=".activates.WikiRecordActivity" />
+        <activity android:name=".activates.search_page.SearchPageActivity" />
+        <activity android:name=".activates.record_page.WikiRecordActivity" />
         <activity android:name=".activates.WikiPageActivity" />
         <activity android:name=".activates.MainActivity">
+          
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -36,5 +37,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.activates.record_page;
 
 public interface SwipeFunctions {
 

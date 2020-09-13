@@ -1,10 +1,11 @@
 package com.example.wikiaudio.wikipedia;
-import android.app.Activity;
-import android.content.Context;
-import android.util.Log;
 import androidx.activity.ComponentActivity;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 import com.google.gson.internal.LinkedTreeMap;
@@ -23,9 +24,9 @@ public class Wikipedia {
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
     LinkedTreeMap<String, List<String>> spokenCategories;
-    private Activity activ;
+    private AppCompatActivity activ;
 
-    public Wikipedia(Activity activity) {
+    public Wikipedia(AppCompatActivity activity) {
         activ = activity;
     }
 
@@ -100,7 +101,6 @@ public class Wikipedia {
                     activ.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Log.d("TASK STATE", "TASK WAS SUCCESSFUL");
                             workerListener.onSuccess();
                         }
                     });
@@ -121,10 +121,8 @@ public class Wikipedia {
 
     /**
      * loads the current spoken pages categories from wikipedia.
-     * @param ownerActivity the activity that sends the request (for work manager).
-     * @return UUID of the work (lets the caller see when and if work is successful).
      */
-    public UUID loadSpokenPagesCategories(ComponentActivity ownerActivity)
+    public void loadSpokenPagesCategories(final WorkerListener workerListener)
     {
         WorkRequest loadSpokenCategoriseWorkerReq =
                 new OneTimeWorkRequest
@@ -132,14 +130,38 @@ public class Wikipedia {
                         .setInputData(new Data.Builder()
                                 .build())
                         .build();
-        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
-        return loadSpokenCategoriseWorkerReq.getId();
+        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
+        WorkManager.getInstance(activ)
+                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
+                .observe(activ, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        if (workInfo.getState() == WorkInfo.State.FAILED)
+                        {
+                            activ.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                         workerListener.onFailure();
+                                }
+                            });
+                        }
+                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
+                        {
+                            activ.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    workerListener.onSuccess();
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
     public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity,
                                             final String category,
                                             List<PageAttributes> p,
-                                            WorkerListener workerListener)
+                                            final WorkerListener workerListener)
     {
         WorkRequest loadSpokenCategoriseWorkerReq =
                 new OneTimeWorkRequest
@@ -148,6 +170,25 @@ public class Wikipedia {
                         .putString(loadSpokenPagesByCategoriseWorker.categoryTag, category).build())
                         .build();
         WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
+        // todo is activity a life cycle owner?
+        WorkManager.getInstance(ownerActivity)
+                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
+                .observe((LifecycleOwner) activ, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        if(workInfo.getState() == WorkInfo.State.SUCCEEDED)
+                        {
+                            activ.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    workerListener.onSuccess();
+                                }
+                            });
+                        }
+
+
+                    }
+                });
         return loadSpokenCategoriseWorkerReq.getId();
     }
 
@@ -176,7 +217,7 @@ public class Wikipedia {
                             workerListener.onSuccess();
                         }
                     });
-                } catch (IOException e) {
+ } catch (IOException e) {
                     // task failed with a exception.
                     activ.runOnUiThread(new Runnable() {
                         @Override
@@ -189,7 +230,18 @@ public class Wikipedia {
         }).start();
     }
 
-
+    public void login(final String userName, final String password) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    WikiServerHolder.getInstance().login(userName,password);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
 //todo finish implement.
 

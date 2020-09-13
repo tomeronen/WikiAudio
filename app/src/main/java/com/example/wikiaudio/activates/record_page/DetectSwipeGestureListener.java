@@ -1,6 +1,5 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.activates.record_page;
 
-import android.app.Activity;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 

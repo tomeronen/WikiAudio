@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.activates.choosen_category;
 
 import android.content.Context;
 import android.view.LayoutInflater;
