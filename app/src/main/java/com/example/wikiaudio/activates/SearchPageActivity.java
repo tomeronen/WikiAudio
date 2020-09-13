@@ -39,7 +39,7 @@ public class SearchPageActivity extends AppCompatActivity {
         resultsView = findViewById(R.id.searchResults);
         searchButton = findViewById(R.id.searchButton);
         wikipedia = new Wikipedia(this);
-        wikipediaPlayer = new WikipediaPlayer(getApplicationContext(), Locale.ENGLISH);
+        wikipediaPlayer = new WikipediaPlayer(getApplicationContext(), Locale.ENGLISH, 0.8f);
         app = getApplicationContext();
 
         searchButton.setOnClickListener(new View.OnClickListener() {
@@ -65,8 +65,8 @@ public class SearchPageActivity extends AppCompatActivity {
                                             @Override
                                             public void onSuccess() {
                                                 WikipediaPlayer wikipediaPlayer
-                                                        = new WikipediaPlayer(app, Locale.ENGLISH);
-                                                wikipediaPlayer.playWiki(wikiPage, app);
+                                                        = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
+                                                wikipediaPlayer.playWiki(wikiPage);
                                             }
 
                                             @Override

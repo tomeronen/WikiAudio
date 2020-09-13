@@ -100,6 +100,7 @@ public class Wikipedia {
                     activ.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("TASK STATE", "TASK WAS SUCCESSFUL");
                             workerListener.onSuccess();
                         }
                     });
