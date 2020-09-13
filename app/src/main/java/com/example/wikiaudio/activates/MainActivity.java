@@ -1,14 +1,19 @@
 package com.example.wikiaudio.activates;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.login_acticity.LoginActivity;
 import com.example.wikiaudio.location.LocationTracker;
 import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.example.wikiaudio.wikipedia.WorkerListener;
 
 import java.util.UUID;
 
@@ -20,10 +25,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
+        WorkManager.getInstance(this).cancelAllWork();  // todo for debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent rec = new Intent(this, SearchPageActivity.class);
+        Intent rec = new Intent(this, LoginActivity.class);
         startActivity(rec);
 
 //        wikipedia = Wikipedia.getInstance();
@@ -77,7 +82,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showCategories() {
-        UUID loadCategoriesId = wikipedia.loadSpokenPagesCategories(this);
+        wikipedia.loadSpokenPagesCategories(new WorkerListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
 
     }
 }

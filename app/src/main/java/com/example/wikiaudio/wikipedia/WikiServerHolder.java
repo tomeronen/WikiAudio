@@ -32,7 +32,7 @@ public class WikiServerHolder {
     private static WikiServerHolder instance = null;
     private final WikiServer server;
 
-    synchronized static WikiServerHolder getInstance(){
+    public synchronized static WikiServerHolder getInstance(){
         if (instance == null) {
             instance = new WikiServerHolder();
         }
@@ -224,38 +224,17 @@ public class WikiServerHolder {
     }
 
     //todo implement.
-//    Call<Object> callLogin(String userName, String password)
-//    {
-//            this.server.getToken()
-//                    .enqueue(new Callback<Object>() {
-//                @Override
-//                public void onResponse(Call<Object> call, Response<Object> response) {
-//                        LinkedTreeMap<String, // query->LinkedTreeMap;
-//                                LinkedTreeMap<String, // tokens->LinkedTreeMap
-//                                        LinkedTreeMap<String, String>>> // logintoken->token
-//                          res = (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>) response.body();
-//                        String token = res.get("query").get("tokens").get("logintoken");
-//                        server.login("logintoken="+token).enqueue(new Callback<Object>() {
-//                            @Override
-//                            public void onResponse(Call<Object> call, Response<Object> response) {
-//                                String c = response.body().toString();
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Call<Object> call, Throwable t) {
-//                                String c = t.getMessage();
-//                            }
-//                        });
-//                }
-//
-//                @Override
-//                public void onFailure(Call<Object> call, Throwable t) {
-//                    String s = t.getLocalizedMessage();
-//                }
-//            });
-////            this.server.login().execute();
-//        return null;
-//    }
+    public Call<Object> login(String userName, String password)
+            throws IOException {
+        Response<Object> response = this.server.getToken().execute();
+        LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>> res =
+                (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>)
+                        response.body();
+        String token = res.get("query").get("tokens").get("logintoken");
+        Response<Object> execute1 = server.login(token).execute();
+        Object body = execute1.body();
+        return null;
+    }
 
 
     private static WikiPage parseWikiData(QuarryResponse.PageData pageData) {
@@ -337,4 +316,5 @@ public class WikiServerHolder {
         }
         return inprop.toString();
     }
+
 }

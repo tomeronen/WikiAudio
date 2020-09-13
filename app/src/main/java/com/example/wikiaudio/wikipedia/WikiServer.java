@@ -12,7 +12,7 @@ import retrofit2.http.Query;
 //  important wiki documentation:
 //    (1)  main decimation - https://www.mediawiki.org/wiki/API:Main_page
 //    (2)  query decimation - https://www.mediawiki.org/w/api.php?action=help&modules=query
-
+//    (3) REST api - https://en.wikipedia.org/api/rest_v1/#/
 
 public interface WikiServer {
 
@@ -68,21 +68,31 @@ public interface WikiServer {
 //    gets loginToken:
 //    https://en.wikipedia.org/w/api.php?action=query&meta=tokens&format=json&type=login
 
-@POST("/w/api.php?action=clientlogin" +
-        "&username=tomer+ronen" +
-        "&password=xTGHTibZAL3cBws" +
-        "&loginreturnurl=http://example.org/")
-    public Call<Object> login(@Body String s);
+@POST("/w/api.php?action=login" +
+        "&lgname=tomer_ronen" +
+        "&lgpassword=WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv" +
+        "&format=json")
+    public Call<Object> login(@Query("lgtoken") String token);
 
-@GET("/w/api.php?action=query" +
-        "&meta=tokens" +
-        "&format=json" +
-        "&type=login")
-    public Call<Object> getToken();
+
+    @GET("/w/api.php?action=query" +
+            "&meta=tokens" +
+            "&format=json" +
+            "&type=login")
+        public Call<Object> getToken();
 
 
     @GET("/w/api.php?action=query" +
             "&list=search" +
             "&format=json")
     Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);
+
+
+    @POST("/w/api.php?" +
+            "action=upload" +
+            "&format=json" +
+            "&ignorewarnings=1?")
+    Call<Object> uploadFile(@Query("filename") String fileName,
+                            @Query("file") String filePath,
+                            @Query("token") String token);
 }

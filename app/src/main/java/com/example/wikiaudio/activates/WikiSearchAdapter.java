@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.wikiaudio.activates.ResultClickListeners;
 import com.example.wikiaudio.wikipedia.WikiPage;
 
 import java.util.List;
