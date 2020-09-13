@@ -32,7 +32,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.activates.Location.LocationHandler;
+import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.common.ConnectionResult;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Intent rec = new Intent(this, SearchPageActivity.class);
-        startActivity(rec);
+//        startActivity(rec);
         initVars();
         initMap();
       
