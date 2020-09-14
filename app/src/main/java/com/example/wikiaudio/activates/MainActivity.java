@@ -17,8 +17,22 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.location.LocationHandler;
+import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.example.wikiaudio.activates.Location.LocationHandler;
-import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.common.ConnectionResult;
@@ -33,13 +47,16 @@ public class MainActivity extends AppCompatActivity implements
         GoogleMap.OnMyLocationClickListener,
         GoogleMap.OnMyLocationButtonClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener {
 
+    //For logs
     private static final String TAG = "MainActivity";
-    private static final int CHOOSE_CATEGORIES = 12924;
 
-    Wikipedia wikipedia;
     AppCompatActivity activity;
+
+    //Wikipedia facade object
+    Wikipedia wikipedia;
 
     //Google services related (error for handling when the google service version is incorrect)
     private static final int ERROR_DIALOG_REQUEST = 9002;
@@ -47,25 +64,104 @@ public class MainActivity extends AppCompatActivity implements
     //Location related
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Boolean mLocationPermissionGranted = false;
-    LocationHandler locationHandler;
-
-    //Map related
+    private Boolean isGPSEnabled = false;
     private GoogleMap mMap;
+    LocationHandler locationHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        initVars();
-//        initMap();
+        Intent rec = new Intent(this, SearchPageActivity.class);
+        startActivity(rec);
+        initVars();
+        initMap();
+      
+//        wikipedia = Wikipedia.getInstance();
+//        activity = this;
+//        showCategories();
+//        final List<WikiPage> pagesNear = new ArrayList<>();
+//        final List<WikiPage> searchResults = new ArrayList<>();
+//        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.coordinates);
+//        pageAttributes.add(PageAttributes.content);
+//
+//        wikipedia.getPagesNearby(32.0623506,
+//                                34.7747997,
+//                                    10000,
+//                                            pagesNear,
+//                                            pageAttributes,
+//                                            new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        if(pagesNear.size() == 10)
+//                        {
+//                            Log.d("s","s");
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure() {
+//
+//                    }
+//                });
 
-        //TODO for debugging
-        Intent rec = new Intent(this, ChooseCategoriesActivity.class);
-        startActivityForResult(rec, CHOOSE_CATEGORIES);
+//        wikipedia = Wikipedia.getInstance();
+//        activity = this;
+//        showCategories();
+//        final List<WikiPage> pagesNear = new ArrayList<>();
+//        final List<WikiPage> searchResults = new ArrayList<>();
+//        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.coordinates);
+//        pageAttributes.add(PageAttributes.content);
+//
+//        wikipedia.getPagesNearby(32.0623506,
+//                                34.7747997,
+//                                    10000,
+//                                            pagesNear,
+//                                            pageAttributes,
+//                                            new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        if(pagesNear.size() == 10)
+//                        {
+//                            Log.d("s","s");
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure() {
+//
+//                    }
+//                });
+
+
+//        WikiPage wp = WikiPage.getPageForTesting();
+//        Gson gson = new Gson();
+//        String pageJsonString = gson.toJson(wp);
+//        Intent rec = new Intent(this, WikiRecordActivity.class);
+//        rec.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, pageJsonString);
+//        startActivity(rec);
+
+
+//        WikiPage a = WikiTextParser.parseWikiHtml("https://en.wikipedia.org/wiki/Quark");
+//        wikipedia.login("a","b");
+        // for debug:
+
+//        wikipedia = Wikipedia.getInstance();
+//        wikipedia.getPagesNearby(this,32.443814,34.892546);
+//        showCategories();
+//        locationTracker = new LocationTracker(this);
     }
 
-
+    /**
+     * Pretty self-explanatory, really.
+     */
     private void initVars() {
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -74,26 +170,31 @@ public class MainActivity extends AppCompatActivity implements
                         == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED;
+        activity = this;
+        wikipedia = new Wikipedia(this);
     }
 
+    /**
+     * For initializing the GoogleMaps fragment
+     */
     private void initMap() {
         if (isGoogleServicesOK()) {
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.fragmentMap);
             if (mapFragment == null) {
-                Log.d(TAG, "onCreate: mapFragment is null");
+                Log.d(TAG, "initMap: mapFragment is null");
             } else {
                 mapFragment.getMapAsync(this);
             }
         } else {
-            Log.d(TAG, "google services is not ok");
+            Log.d(TAG, "initMap: google services is not ok :(");
         }
     }
 
-    private void showCategories() {
-
-    }
-
+    /**
+     * Pretty self-explanatory, really.
+     * @return true if the version will enable our used Google API, false ow.
+     */
     public boolean isGoogleServicesOK() {
         Log.d(TAG, "isGoogleServicesOK: verifying Google services' version");
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this);
@@ -109,32 +210,50 @@ public class MainActivity extends AppCompatActivity implements
             dialog.show();
         } else {
             // nothing we can do :(
-            Toast.makeText(this, "Oops, can't make any map requests", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "Oops, can't make any map requests", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
 
+    /**
+     * Simple permission request callback handler
+     * @param requestCode int code of the permission request we made
+     * @param permissions a list of strings representing the permissions
+     * @param grantResults the results of each permission request from the user
+     */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        //TODO this will change when we'll add audio and storing permissions
         mLocationPermissionGranted = false;
-        Log.d(TAG, "onRequestPermissionsResult: ");
+//        Log.d(TAG, "onRequestPermissionsResult: ");
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0) {
                 for (int grantResult : grantResults) {
                     if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionGranted = false;
-                        break;
+                        Toast.makeText(activity,
+                                "Can't create a location based playlist without your location :)",
+                                Toast.LENGTH_LONG).show();
+                        return;
                     }
                 }
                 mLocationPermissionGranted = true;
-                enableMyLocation();
+                onMapReady(mMap);
             } else {
                 // explain why we need these permissions
-                Toast.makeText(this, "Can't create a location bases playlist without the location :)", Toast.LENGTH_LONG).show();
+                Toast.makeText(activity,
+                        "Can't create a location based playlist without your location :)",
+                        Toast.LENGTH_LONG).show();
             }
         }
     }
 
+    /**
+     * Callback for when the GoogleMaps map is ready
+     * This is where we set all related listeners, init location and map related objects
+     * @param googleMap our map object
+     */
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -143,11 +262,14 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "onMapReady: google map is null; map related actions will not work");
         } else {
             if (mLocationPermissionGranted) {
-                Log.d(TAG, "onMapReady: google map is NOT null & we have perm");
+//                Log.d(TAG, "onMapReady: google map is NOT null & we have perm");
                 mMap.setOnMyLocationButtonClickListener(this);
                 mMap.setOnMyLocationClickListener(this);
-                enableMyLocation();
-                locationHandler = new LocationHandler(this, mMap);
+                mMap.setOnInfoWindowClickListener(this);
+
+                locationHandler = new LocationHandler(activity, mMap);
+                GPSEnabler(); //TODO
+                initUserLocationAndMap();
             } else {
                 //request permissions
                 Log.d(TAG, "onMapReady: google map is NOT null & we DON'T have perm");
@@ -156,6 +278,9 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    /**
+     * A simple location permission request for FINE, COARSE and INTERNET
+     */
     private void requestLocationPermission() {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
@@ -164,44 +289,96 @@ public class MainActivity extends AppCompatActivity implements
                 LOCATION_PERMISSION_REQUEST_CODE);
     }
 
+    /**
+     * Enables GoogleMaps location tracking, focuses the camera on the user's location and
+     * presents nearby wikipages as markers
+     */
     @SuppressLint("MissingPermission")
-    private void enableMyLocation() {
-        if (mLocationPermissionGranted) {
-            if (mMap != null) {
-                // todo: Add here marks etc. that you want to appear as soon as the map opens
-                // todo: for example,we can present the current playlist locations
-//                Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
-                mMap.setMyLocationEnabled(true);
-//                Log.d(TAG, "enableMyLocation: setMyLocationEnabled is enabled");
-            } else {
-                requestLocationPermission();
+    private void initUserLocationAndMap() {
+        if (mMap != null) {
+            //Add here any action that you would like to appear as soon as the map opens if
+            //we have the user's location
+            Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
+            mMap.setMyLocationEnabled(true);
+
+            //Zoom to user's location + show nearby wikipages
+            LatLng currentLatLng = locationHandler.getCurrentLocation();
+            if (currentLatLng != null) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                locationHandler.markWikipagesNearby(wikipedia);
             }
-        }
+       }
     }
 
+    //TODO
+    private void GPSEnabler() {
+        LocationServices
+                .getSettingsClient(activity)
+                .checkLocationSettings(new LocationSettingsRequest.Builder().build())
+                .addOnSuccessListener(activity,
+                        new OnSuccessListener<LocationSettingsResponse>()
+                        {
+                            @Override
+                            public void onSuccess(LocationSettingsResponse
+                                                          locationSettingsResponse) {
+                                isGPSEnabled = true;
+                                Log.d(TAG, "GPSEnabler: GPS IS ON");
+                            }
+                        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        isGPSEnabled = false;
+                        Log.d(TAG, "GPSEnabler: GPS IS OFF");
+                        Toast.makeText(activity, "Please enable your GPS for location services", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
 
+    /**
+     * When the user clicks on a location on the map
+     * We must implement this as part of the GoogleMaps API
+     * We don't want that kind of interaction on the map
+     */
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-        //todo: Do we want anything to occur?
     }
 
+    /**
+     * The "center me" button in the right up edge of the map
+     * Centers and zooms the user to its location
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
-        //todo: Do we want anything extra to occur?
+        if (!isGPSEnabled) {
+            //TODO
+            Toast.makeText(activity, "Please enable your GPS for location services",
+                    Toast.LENGTH_LONG).show();
+        }
         return false;
     }
-
+    /**
+     * When the user clicks on a marker on the map, will show the marker's title in the info box
+     * Other than this default action we don't want more interactions
+     */
     @Override
     public boolean onMarkerClick(Marker marker) {
-        // Retrieve the data from the marker.
-        // any data object tag = (any data object) marker.getTag();
-        // do something with that info, for example, transfer to its wiki page
-
         // Return false to indicate that we have not consumed the event and that we wish
         // for the default behavior to occur (which is for the camera to move such that the
         // marker is centered and for the marker's info window to open, if it has one).
         return false;
+    }
+
+    /**
+     * When the user clicks on the info box of the marker
+     * @param marker GoogleMaps marker that contains the Wikipage tag
+     */
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+//        WikiPage tag = (WikiPage) marker.getTag();
+//        TODO transfer to wikipage activity
+        Toast.makeText(activity, "You clicked on wikipage: " + marker.getTitle(), Toast.LENGTH_SHORT).show();
     }
 }

@@ -5,7 +5,7 @@ import android.speech.tts.TextToSpeech;
 import java.util.List;
 import java.util.Locale;
 
-public class WikiPage {
+public class        WikiPage {
 
 
     public WikiPage() {}

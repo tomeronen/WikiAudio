@@ -1,5 +1,4 @@
 package com.example.wikiaudio.wikipedia;
-
 import androidx.activity.ComponentActivity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleOwner;
@@ -9,7 +8,6 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
-
 import com.google.gson.internal.LinkedTreeMap;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -245,7 +243,7 @@ public class Wikipedia {
                             workerListener.onSuccess();
                         }
                     });
-                } catch (IOException e) {
+ } catch (IOException e) {
                     // task failed with a exception.
                     activ.runOnUiThread(new Runnable() {
                         @Override
@@ -270,7 +268,6 @@ public class Wikipedia {
             }
         }).start();
     }
-
 
 //todo finish implement.
 
