@@ -27,7 +27,7 @@
 
         <activity android:name=".activates.search_page.SearchPageActivity" />
         <activity android:name=".activates.record_page.WikiRecordActivity" />
-        <activity android:name=".activates.WikiPageActivity" />
+        <activity android:name=".activates.WikipageActivity" />
         <activity android:name=".activates.MainActivity">
           
             <intent-filter>

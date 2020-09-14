@@ -4,66 +4,73 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activates.WikiPageActivity"
+    tools:context=".activates.WikipageActivity"
     >
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/recoredButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_x="201dp"
-        android:layout_y="156dp"
-        android:clickable="true"
-        app:backgroundTint="#B7F1B9"
-        app:layout_constraintEnd_toEndOf="parent"
+    <LinearLayout
+        android:id="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_btn_speak_now" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton2"
-        android:layout_width="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/webBackground"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@android:drawable/ic_media_play"
-        tools:layout_editor_absoluteX="176dp" />
+        android:layout_marginLeft="1.5dp"
+        android:layout_marginRight="1.5dp"
+        android:layout_marginTop="1.5dp"
+        android:layout_marginBottom="2dp"
+        android:orientation="horizontal" >
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/floatingActionButton2"
-        app:layout_constraintEnd_toStartOf="@+id/floatingActionButton2"
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Title"
+            android:textColor="#1d1817"
+            android:textSize="20sp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="Title" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/webBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="77dp"
+        android:layout_marginBottom="97dp"
+        android:background="#4d4d4d"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/floatingActionButton2"
-        app:srcCompat="@android:drawable/ic_media_rew" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/floatingActionButton2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/floatingActionButton2"
-        app:layout_constraintTop_toTopOf="@+id/floatingActionButton2"
-        app:srcCompat="@android:drawable/ic_media_ff" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <WebView
-        android:layout_width="409dp"
-        android:layout_height="657dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/floatingActionButton2"
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="100dp"
+        android:layout_marginLeft="1.5dp"
+        android:layout_marginRight="1.5dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingRecordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="10dp"
+        app:srcCompat="@drawable/recording_mic"
+        app:backgroundTint="#f38a8e"
+        android:clickable="true"
+        android:focusable="true" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 
