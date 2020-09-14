@@ -32,7 +32,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.activates.Location.LocationHandler;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.common.ConnectionResult;
