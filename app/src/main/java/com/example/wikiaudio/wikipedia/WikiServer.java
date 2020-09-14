@@ -4,8 +4,11 @@ import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -64,15 +67,19 @@ public interface WikiServer {
             "&prop=links")
     public Call<Object> callGetSpokenPagesByCategory(@Query("section") String category);
 
-//    @POST()
 //    gets loginToken:
 //    https://en.wikipedia.org/w/api.php?action=query&meta=tokens&format=json&type=login
+//    @POST("w/api.php")
+//    public Call<Object> login(@Body String body);
+//
 
-@POST("/w/api.php?action=login" +
-        "&lgname=tomer_ronen" +
-        "&lgpassword=WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv" +
-        "&format=json")
-    public Call<Object> login(@Query("lgtoken") String token);
+    @POST("/w/api.php")
+    @FormUrlEncoded
+    public Call<Object> login(@Field("action") String act,
+                              @Field("format") String format,
+                              @Field("lgtoken") String token,
+                              @Field("lgname") String name,
+                              @Field("lgpassword") String password);
 
 
     @GET("/w/api.php?action=query" +
@@ -88,11 +95,17 @@ public interface WikiServer {
     Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);
 
 
-    @POST("/w/api.php?" +
-            "action=upload" +
-            "&format=json" +
-            "&ignorewarnings=1?")
-    Call<Object> uploadFile(@Query("filename") String fileName,
-                            @Query("file") String filePath,
-                            @Query("token") String token);
+    @POST("/w/api.php")
+    @FormUrlEncoded
+    Call<Object> uploadFile(@Field("action") String action,
+                            @Field("filename") String fiName,
+                            @Field("format") String format,
+                            @Field("token") String token,
+                            @Field("ignorewarnings") String ignoreWarnings);
+
+
+    @GET("/w/api.php?action=query" +
+            "&meta=tokens" +
+            "&format=json")
+    Call<Object> getCsrfToken();
 }

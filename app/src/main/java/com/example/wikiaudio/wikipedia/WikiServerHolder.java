@@ -12,13 +12,18 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -28,7 +33,7 @@ import static com.example.wikiaudio.wikipedia.PageAttributes.*;
 
 public class WikiServerHolder {
     static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
-    private static final String BASE_URL = "https://en.wikipedia.org";
+    private static final String BASE_URL = "https://www.mediawiki.org/";
     private static WikiServerHolder instance = null;
     private final WikiServer server;
 
@@ -44,8 +49,22 @@ public class WikiServerHolder {
                 .setPrettyPrinting()
                 .create();
 
+
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        // init cookie manager
+        CookieHandler cookieHandler = new CookieManager();
+
+        OkHttpClient client = new OkHttpClient.Builder().addNetworkInterceptor(interceptor)
+                .cookieJar(new JavaNetCookieJar(cookieHandler))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+
         this.server = new Retrofit.Builder()
-                .client(new OkHttpClient())
+                .client(client)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
@@ -222,7 +241,6 @@ public class WikiServerHolder {
         }
         return pageNames;
     }
-
     //todo implement.
     public Call<Object> login(String userName, String password)
             throws IOException {
@@ -231,8 +249,13 @@ public class WikiServerHolder {
                 (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>)
                         response.body();
         String token = res.get("query").get("tokens").get("logintoken");
-        Response<Object> execute1 = server.login(token).execute();
-        Object body = execute1.body();
+        Response<Object> execute2   = server.login("login",
+                "json",
+                token,
+                "Tomer_ronen@WikiAudio",
+                "tkpemajv20jm4t1ofm2amr5mb7p1v9cv").execute();
+        Response<Object> execute = server.getCsrfToken().execute();
+        Object body = execute.body();
         return null;
     }
 

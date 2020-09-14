@@ -59,6 +59,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
                             .getAppData()
                             .saveChosenCategories(categoryAdapter._categoriesChosen);
                 }
+                finish();
             }
         });
 

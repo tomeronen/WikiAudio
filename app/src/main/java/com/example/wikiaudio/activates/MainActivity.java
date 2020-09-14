@@ -17,6 +17,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.common.ConnectionResult;
@@ -72,10 +73,11 @@ public class MainActivity extends AppCompatActivity implements
         WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent rec = new Intent(this, SearchPageActivity.class);
-        startActivity(rec);
         initVars();
         initMap();
+        String userName = "tomer_ronen";
+        String password = "xTGHTibZAL3cBws";
+        wikipedia.login(userName, password);
     }
 
     /**
