@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates.choosen_category;
+package com.example.wikiaudio.activates.choose_categories;
 
 public interface CategoryClickListeners {
     public void onClick(String string);

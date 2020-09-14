@@ -124,40 +124,66 @@ public class Wikipedia {
     /**
      * loads the current spoken pages categories from wikipedia.
      */
-    public void loadSpokenPagesCategories(final WorkerListener workerListener)
+    public void loadSpokenPagesCategories(final List<String> listToFill,
+                                          final WorkerListener workerListener)
     {
-        WorkRequest loadSpokenCategoriseWorkerReq =
-                new OneTimeWorkRequest
-                        .Builder(loadSpokenCategoriseWorker.class)
-                        .setInputData(new Data.Builder()
-                                .build())
-                        .build();
-        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
-        WorkManager.getInstance(activ)
-                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
-                .observe(activ, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo.getState() == WorkInfo.State.FAILED)
-                        {
-                            activ.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                         workerListener.onFailure();
-                                }
-                            });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    listToFill
+                            .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
                         }
-                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
-                        {
-                            activ.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    workerListener.onSuccess();
-                                }
-                            });
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
                         }
-                    }
-                });
+                    });
+                }
+
+
+            }
+        }).start();
+//        WorkRequest loadSpokenCategoriseWorkerReq =
+//                new OneTimeWorkRequest
+//                        .Builder(loadSpokenCategoriseWorker.class)
+//                        .setInputData(new Data.Builder()
+//                                .build())
+//                        .build();
+//        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
+//        WorkManager.getInstance(activ)
+//                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
+//                .observe(activ, new Observer<WorkInfo>() {
+//                    @Override
+//                    public void onChanged(WorkInfo workInfo) {
+//                        if (workInfo.getState() == WorkInfo.State.FAILED)
+//                        {
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                         workerListener.onFailure();
+//                                }
+//                            });
+//                        }
+//                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
+//                        {
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    workerListener.onSuccess();
+//                                }
+//                            });
+//                        }
+//                    }
+//                });
     }
 
     public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity,

@@ -67,11 +67,6 @@ public class WikiPage {
         private String audioUrl;
         private String thumbnailSrc;
 
-    public static WikiPage getPageForTesting() {
-        return null;
-    }
-
-
     // ************************* Getters and setters ***********************************************
 
     public String getTitle() {

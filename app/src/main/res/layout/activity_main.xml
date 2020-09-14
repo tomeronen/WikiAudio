@@ -7,16 +7,16 @@
     tools:context=".activates.MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categorys"
+        android:id="@+id/categoriesView"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:layout_marginStart="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
+        app:layout_constraintTop_toBottomOf="@+id/searchCategorysView" />
 
     <SearchView
-        android:id="@+id/searchView"
+        android:id="@+id/searchCategorysView"
         android:layout_width="match_parent"
         android:layout_height="63dp"
         app:layout_constraintEnd_toEndOf="parent"
