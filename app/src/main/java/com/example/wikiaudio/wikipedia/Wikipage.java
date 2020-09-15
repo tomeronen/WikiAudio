@@ -1,20 +1,17 @@
 package com.example.wikiaudio.wikipedia;
 
-import android.speech.tts.TextToSpeech;
-
 import java.util.List;
-import java.util.Locale;
 
-public class        WikiPage {
+public class Wikipage {
 
 
-    public WikiPage() {}
+    public Wikipage() {}
 
     public void setIndicators(List<String> indicators) {
         this.indicators = indicators;
     }
 
-    public void copy(WikiPage page) {
+    public void copy(Wikipage page) {
         if(page != null && page != this)
         {
             this.title = page.getTitle();
@@ -67,7 +64,7 @@ public class        WikiPage {
         private String audioUrl;
         private String thumbnailSrc;
 
-    public static WikiPage getPageForTesting() {
+    public static Wikipage getPageForTesting() {
         return null;
     }
 

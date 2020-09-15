@@ -22,7 +22,7 @@ import android.widget.ProgressBar;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.audio_recoder.VoiceRecorder;
 import com.example.wikiaudio.file_manager.FileManager;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
@@ -37,7 +37,7 @@ public class WikiRecordActivity extends AppCompatActivity {
     ProgressBar progressBar;
     FloatingActionButton recordButton;
     AppCompatActivity activity;
-    WikiPage wikiPage;
+    Wikipage wikiPage;
     FileManager fileManager;
     private GestureDetectorCompat gestureDetectorCompat = null;
     private MediaRecorder recorder;
@@ -55,7 +55,7 @@ public class WikiRecordActivity extends AppCompatActivity {
         fileManager = new FileManager(this);
         Gson gson = new Gson();
         wikiPage = gson.fromJson(getIntent()
-                                                .getStringExtra(WIKI_PAGE_TAG), WikiPage.class);
+                                                .getStringExtra(WIKI_PAGE_TAG), Wikipage.class);
         progressBar.setMax(wikiPage.numberOfSections() - 1); // '-1' - we start at zero.
 //        wikiPageView.loadData(wikiPage.getSection(curSection)
 //                                            ,"text/html", "UTF-8");

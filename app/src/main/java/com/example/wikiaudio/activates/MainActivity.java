@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.location.LocationHandler;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -32,15 +33,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -73,12 +66,11 @@ public class MainActivity extends AppCompatActivity implements
         WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent rec = new Intent(this, SearchPageActivity.class);
-//        startActivity(rec);
-        Intent wikipage = new Intent(this, WikipageActivity.class);
-        startActivity(wikipage);
         initVars();
         initMap();
+
+        Intent rec = new Intent(this, SearchPageActivity.class);
+//        startActivity(rec);
     }
 
     /**
@@ -294,13 +286,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * When the user clicks on the info box of the marker
+     * When the user clicks on the info box of the marker, we start that wikipage's activity
      * @param marker GoogleMaps marker that contains the Wikipage tag
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-//        WikiPage tag = (WikiPage) marker.getTag();
-//        TODO transfer to wikipage activity
-        Toast.makeText(activity, "You clicked on wikipage: " + marker.getTitle(), Toast.LENGTH_SHORT).show();
+        Wikipage tag = (Wikipage) marker.getTag();
+        if (tag != null) {
+            String title = tag.getTitle();
+            Intent wikipageIntent = new Intent(this, WikipageActivity.class);
+            wikipageIntent.putExtra("title", title);
+            startActivity(wikipageIntent);
+        } else {
+            Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
+        }
     }
 }

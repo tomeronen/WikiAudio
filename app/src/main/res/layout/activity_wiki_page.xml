@@ -4,30 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activates.WikipageActivity"
-    >
+    tools:context=".activates.WikipageActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/webBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="1.5dp"
-        android:layout_marginRight="1.5dp"
         android:layout_marginTop="1.5dp"
+        android:layout_marginRight="1.5dp"
         android:layout_marginBottom="2dp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/webBackground"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="UseCompoundDrawables">
 
         <TextView
             android:id="@+id/title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:text="Title"
-            android:textColor="#1d1817"
-            android:textSize="20sp"
+            android:layout_marginStart="2dp"
             android:layout_weight="1"
             android:gravity="center_vertical"
+            android:text=""
+            android:textColor="#1d1817"
+            android:textSize="20sp"
             android:textStyle="bold" />
 
         <ImageView
@@ -35,8 +36,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@mipmap/ic_launcher"
-            android:contentDescription="Title" />
+            android:contentDescription="Title"
+            android:src="@mipmap/ic_launcher" />
     </LinearLayout>
 
     <TextView
@@ -53,24 +54,23 @@
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="80dp"
-        android:layout_marginBottom="100dp"
         android:layout_marginLeft="1.5dp"
-        android:layout_marginRight="1.5dp" />
+        android:layout_marginTop="80dp"
+        android:layout_marginRight="1.5dp"
+        android:layout_marginBottom="100dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingRecordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="100dp"
         android:layout_marginEnd="10dp"
-        app:srcCompat="@drawable/recording_mic"
-        app:backgroundTint="#f38a8e"
         android:clickable="true"
-        android:focusable="true" />
-
+        android:focusable="true"
+        app:backgroundTint="#f38a8e"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/recording_mic" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

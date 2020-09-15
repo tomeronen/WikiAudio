@@ -1,7 +1,5 @@
 package com.example.wikiaudio.wikipedia;
 
-import androidx.work.ListenableWorker;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -52,25 +50,25 @@ public class WikiServerHolder {
                 .create(WikiServer.class);
     }
 
-    public List<WikiPage> searchPage(String pageName)
+    public List<Wikipage> searchPage(String pageName)
             throws IOException {
         Response<QuarryResponse> response = server.searchPage(pageName).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<WikiPage> wikiPageList = parseSearchResponse(response.body());
-            return wikiPageList;
+            List<Wikipage> wikipageList = parseSearchResponse(response.body());
+            return wikipageList;
         } else {
             // task failed.
             throw new IOException();
         }
     }
 
-    private List<WikiPage> parseSearchResponse(QuarryResponse searchResponse)
+    private List<Wikipage> parseSearchResponse(QuarryResponse searchResponse)
             throws IOException {
         if (searchResponse != null
                 && searchResponse.query != null
                 && searchResponse.query.search != null) {
-            List<WikiPage> resultList = new ArrayList<>();
+            List<Wikipage> resultList = new ArrayList<>();
             for(QuarryResponse.PageData pageData: searchResponse.query.search)
             {
                 resultList.add(parseWikiData(pageData));
@@ -83,7 +81,7 @@ public class WikiServerHolder {
         }
     }
 
-    public WikiPage getPage(String name, List<PageAttributes> pageAttr)
+    public Wikipage getPage(String name, List<PageAttributes> pageAttr)
             throws IOException
     {
         String prop = getQueryProp(pageAttr);
@@ -91,14 +89,14 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<WikiPage> wikiPageList = parseQuarryResponse(response.body());
+            List<Wikipage> wikipageList = parseQuarryResponse(response.body());
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ||
                     pageAttr.contains(thumbnail))
             {
-                WikiHtmlParser.parseAdvanceAttr(wikiPageList.get(0));
+                WikiHtmlParser.parseAdvanceAttr(wikipageList.get(0));
             }
-            return wikiPageList.get(0);
+            return wikipageList.get(0);
         } else {
             // task failed.
             throw new IOException();
@@ -107,7 +105,7 @@ public class WikiServerHolder {
 
 
 
-    List<WikiPage> getPagesByCategory(String categoryName, List<PageAttributes> pageAttr)
+    List<Wikipage> getPagesByCategory(String categoryName, List<PageAttributes> pageAttr)
             throws IOException
     {
         String prop = getQueryProp(pageAttr);
@@ -126,7 +124,7 @@ public class WikiServerHolder {
         }
     }
 
-    static List<WikiPage> getPagesNearby(Double latitude,
+    static List<Wikipage> getPagesNearby(Double latitude,
                                          Double longitude,
                                          int radius,
                                          List<PageAttributes> pageAttr)
@@ -142,29 +140,29 @@ public class WikiServerHolder {
                                     inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<WikiPage> wikiPageList = parseQuarryResponse(response.body());
+            List<Wikipage> wikipageList = parseQuarryResponse(response.body());
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ||
                         pageAttr.contains(thumbnail))
             {
-                for(WikiPage wikiPage: wikiPageList)
+                for(Wikipage wikiPage: wikipageList)
                 {
                     WikiHtmlParser.parseAdvanceAttr(wikiPage);
                 }
             }
-            return wikiPageList;
+            return wikipageList;
         } else {
             // task failed.
             throw new IOException();
         }
     }
 
-    private static List<WikiPage> parseQuarryResponse(QuarryResponse quarryResponse)
+    private static List<Wikipage> parseQuarryResponse(QuarryResponse quarryResponse)
             throws IOException {
         if (quarryResponse != null
                 && quarryResponse.query != null
                 && quarryResponse.query.pages != null) {
-            List<WikiPage> resultList = new ArrayList<>();
+            List<Wikipage> resultList = new ArrayList<>();
             for(QuarryResponse.PageData pageData:
                     quarryResponse.query.pages.values())
             {
@@ -237,26 +235,26 @@ public class WikiServerHolder {
     }
 
 
-    private static WikiPage parseWikiData(QuarryResponse.PageData pageData) {
+    private static Wikipage parseWikiData(QuarryResponse.PageData pageData) {
         if(pageData != null)
         {
-            WikiPage curWikiPage = new WikiPage();
-            curWikiPage.setTitle(pageData.title);
-            curWikiPage.setUrl(pageData.fullurl);
-            curWikiPage.setDescription(pageData.description);
-            curWikiPage.setWatchers(pageData.watchers);
+            Wikipage curWikipage = new Wikipage();
+            curWikipage.setTitle(pageData.title);
+            curWikipage.setUrl(pageData.fullurl);
+            curWikipage.setDescription(pageData.description);
+            curWikipage.setWatchers(pageData.watchers);
             List<QuarryResponse.CoordinatesData> coordinates = pageData.coordinates;
             if(coordinates != null && coordinates.size() > 0)
             {
-                curWikiPage.setLat(pageData.coordinates.get(0).lat);
-                curWikiPage.setLon(pageData.coordinates.get(0).lon);
+                curWikipage.setLat(pageData.coordinates.get(0).lat);
+                curWikipage.setLon(pageData.coordinates.get(0).lon);
             }
             QuarryResponse.ThumbnailData thumbnail = pageData.thumbnail;
             if(thumbnail != null)
             {
-                curWikiPage.setThumbnailSrc(thumbnail.source);
+                curWikipage.setThumbnailSrc(thumbnail.source);
             }
-            return curWikiPage;
+            return curWikipage;
         }
         return null;
     }

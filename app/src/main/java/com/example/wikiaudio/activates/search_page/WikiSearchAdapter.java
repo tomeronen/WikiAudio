@@ -7,12 +7,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 
 import java.util.List;
 
 class WikiSearchAdapter extends RecyclerView.Adapter {
-    private List<WikiPage> results;
+    private List<Wikipage> results;
     private ResultClickListeners resultClickListeners;
 
     public static class ResultViewHolder extends RecyclerView.ViewHolder{
@@ -36,7 +36,7 @@ class WikiSearchAdapter extends RecyclerView.Adapter {
 
 
 
-    public WikiSearchAdapter(List<WikiPage> results, ResultClickListeners resultClickListeners) {
+    public WikiSearchAdapter(List<Wikipage> results, ResultClickListeners resultClickListeners) {
         this.results = results;
         this.resultClickListeners = resultClickListeners;
     }

@@ -42,7 +42,7 @@ public class Wikipedia {
      */
     public void searchForPage(final String pageName,
                            final List<PageAttributes> attributes,
-                           final List<WikiPage> listToFill,
+                           final List<Wikipage> listToFill,
                            final WorkerListener workerListener)
     {
         new Thread(new Runnable() {
@@ -84,7 +84,7 @@ public class Wikipedia {
     public void getPagesNearby(final double latitude,
                                final double longitude,
                                final int radius,
-                               final List<WikiPage> listToFill,
+                               final List<Wikipage> listToFill,
                                final List<PageAttributes> pageAttributes,
                                final WorkerListener workerListener)
     {
@@ -92,7 +92,7 @@ public class Wikipedia {
             @Override
             public void run() {
                 try {
-                    List<WikiPage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
+                    List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
                             longitude,
                             radius,
                             pageAttributes);
@@ -202,7 +202,7 @@ public class Wikipedia {
      */
     public void getWikiPage(final String name,
                             final List<PageAttributes> pageAttributes,
-                            final WikiPage pageToFill,
+                            final Wikipage pageToFill,
                             final WorkerListener workerListener)
     {
         new Thread(new Runnable() {

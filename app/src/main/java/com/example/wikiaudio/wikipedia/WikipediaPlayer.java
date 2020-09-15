@@ -32,7 +32,7 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
      * plays the given wiki
      * @param wikiPage
      */
-    public void playWiki(WikiPage wikiPage)
+    public void playWiki(Wikipage wikiPage)
     {
         if(playingTextToSpeach || playingUrl) {
             // already playing

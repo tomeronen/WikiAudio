@@ -1,5 +1,4 @@
 package com.example.wikiaudio.wikipedia;
-import android.util.Log;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -8,9 +7,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class WikiHtmlParser {
     private static final String TITLE_CLASS = "firstHeading";
@@ -18,10 +15,10 @@ public class WikiHtmlParser {
 
     String url;
 
-   static public void parseAdvanceAttr(WikiPage wikiPage) throws IOException {
+   static public void parseAdvanceAttr(Wikipage wikiPage) throws IOException {
         Document doc = Jsoup.connect(wikiPage.getUrl()).get();
         // parse text
-        List<WikiPage.Section> sections = new ArrayList<>();
+        List<Wikipage.Section> sections = new ArrayList<>();
         String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
         String curSectionName = pageTitle;
         Elements elements = doc.select(".mw-headline, p");
@@ -32,7 +29,7 @@ public class WikiHtmlParser {
             if (!"mw-headline".equals(curElement.className())) // element is not a p
                 paragraphsInSection.add(curElement.text());
             else {
-                sections.add(new WikiPage.Section(curSectionName, paragraphsInSection));
+                sections.add(new Wikipage.Section(curSectionName, paragraphsInSection));
                 curSectionName = curElement.text();
                 paragraphsInSection = new ArrayList<>();
             }

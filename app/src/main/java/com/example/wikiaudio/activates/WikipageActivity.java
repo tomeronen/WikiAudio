@@ -3,8 +3,8 @@ package com.example.wikiaudio.activates;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -13,10 +13,10 @@ import android.widget.TextView;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WorkerListener;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,63 +25,98 @@ public class WikipageActivity extends AppCompatActivity {
     //For logs
     private static final String TAG = "WikipageActivity";
 
+    private AppCompatActivity activity;
+
+    private String title;
+    private Wikipedia wikipedia;
+    private List<PageAttributes> pageAttributes;
+    private Wikipage wikipage;
+
+    private FloatingActionButton recordButton;
+    private TextView background;
+    private WebView webView;
+    private TextView articleTitle;
+    private ImageView articleImage;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wiki_page);
+        Intent intent = getIntent();
+        title = intent.getStringExtra("title");
+        if (title == null) {
+            Log.d(TAG, "onCreate: null title from intent extra");
+            finish();
+        }
+        initVars();
+        fetchWikipage();
+    }
 
-        String pageName = "Grammy Award for Best Contemporary Jazz Album";
-        Wikipedia wikipedia = new Wikipedia(this);
+    private void initVars() {
+        activity = this;
+        articleTitle = (TextView) findViewById(R.id.title);
+        background = (TextView) findViewById(R.id.webBackground);
+        webView = (WebView) findViewById(R.id.webView);
+        articleImage = (ImageView) findViewById(R.id.image);
+        recordButton = (FloatingActionButton) findViewById(R.id.floatingRecordButton);
+//        setDisplayVisible(View.GONE);
 
-        List<PageAttributes> pageAttributes = new ArrayList<>();
+        wikipedia = new Wikipedia(this);
+        pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.url);
+        wikipage = new Wikipage();
+    }
 
-        final WikiPage result = new WikiPage();
+    private void setDisplayVisible(int isVisible) {
+        webView.setVisibility(isVisible);
+        articleTitle.setVisibility(isVisible);
+        articleImage.setVisibility(isVisible);
+        recordButton.setVisibility(isVisible);
+        background.setVisibility(isVisible);
+    }
 
+    private void fetchWikipage() {
+        wikipedia.getWikiPage(title, pageAttributes, wikipage, new WorkerListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "onSuccess, getWikiPage");
+                setLayout();
+            }
 
-        wikipedia.getWikiPage(pageName,
-                pageAttributes,
-                result, new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        String title = result.getTitle();
-                        Double lat = result.getLat();
-                        Double lon  = result.getLon();
-                        Log.d("", "onSuccess, WikiPage??");
-                    }
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "fetchWikipage-getWikiPage-onFailure: couldn't get the wikipage");
+            }
+        });
+    }
 
-                    @Override
-                    public void onFailure() {
-                        // something went wrong :(
-                    }
-                });
-
-        SystemClock.sleep(10000);
-
-
-        if (result.getTitle() == null) {
-            Log.d(TAG, "result title's is null");
-        } else {
-            WebView wv;
-            TextView articleTitle;
-            ImageView articleImage;
-
-            Log.d(TAG, "result title's is " + result.getTitle());
-            wv = (WebView) findViewById(R.id.webView);
-            articleTitle = (TextView) findViewById(R.id.title);
-            articleImage = (ImageView) findViewById(R.id.image); //TODO
-
-            articleTitle.setText(result.getTitle());
-
-            wv.setWebViewClient(new WebViewClient());
-            wv.getSettings().setJavaScriptEnabled(true);
-            wv.loadUrl(result.getUrl());
-
+    //    Because WebView consumes web content that can include HTML and JavaScript, which may cause
+//    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
+//    which is a form of hacking and by enabling client-side script into WebView which user is
+//    accessing from application and this way you are opening up your application to such attacks.
+    //I enabled it so the user can actually view the page and not be redirected to the google
+    // chrome app. We should consider changing this.
+    @SuppressLint("SetJavaScriptEnabled")
+    private void setLayout() {
+        if (wikipage.getTitle() == null || wikipage.getUrl() == null) {
+            Log.d(TAG, "setLayout: got null title or url");
         }
 
+        //Title
+        articleTitle.setText(wikipage.getTitle());
 
+        //Image
+        //todo
+
+        //WebView
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl(wikipage.getUrl());
+
+//        setDisplayVisible(View.VISIBLE);
     }
+
 }
