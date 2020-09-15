@@ -2,6 +2,7 @@ package com.example.wikiaudio.wikipedia;
 
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -9,7 +10,9 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 //  important wiki documentation:
@@ -75,7 +78,7 @@ public interface WikiServer {
 
     @POST("/w/api.php")
     @FormUrlEncoded
-    public Call<Object> login(@Field("action") String act,
+    public Call<QuarryResponse> login(@Field("action") String act,
                               @Field("format") String format,
                               @Field("lgtoken") String token,
                               @Field("lgname") String name,
@@ -86,7 +89,7 @@ public interface WikiServer {
             "&meta=tokens" +
             "&format=json" +
             "&type=login")
-        public Call<Object> getToken();
+        public Call<QuarryResponse> getToken();
 
 
     @GET("/w/api.php?action=query" +
@@ -95,17 +98,26 @@ public interface WikiServer {
     Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);
 
 
+//    @POST("/w/api.php")
+//    @FormUrlEncoded
+//    Call<Object> uploadFile(@Field("action") String action,
+//                            @Field("filename") String fiName,
+//                            @Field("url") String url,
+//                            @Field("format") String format,
+//                            @Field("token") String token,
+//                            @Field("ignorewarnings") int i);
+//
+    @Multipart
     @POST("/w/api.php")
-    @FormUrlEncoded
-    Call<Object> uploadFile(@Field("action") String action,
-                            @Field("filename") String fiName,
-                            @Field("format") String format,
-                            @Field("token") String token,
-                            @Field("ignorewarnings") String ignoreWarnings);
-
+    Call<Object> uploadFile(@Part("action") String action,
+                            @Part("filename") String fiName,
+                            @Part("format") String format,
+                            @Part("token") String token,
+                            @Part("ignorewarnings") int ignoreWarnings,
+                            @Part MultipartBody.Part file);
 
     @GET("/w/api.php?action=query" +
             "&meta=tokens" +
             "&format=json")
-    Call<Object> getCsrfToken();
+    Call<QuarryResponse> getCsrfToken();
 }

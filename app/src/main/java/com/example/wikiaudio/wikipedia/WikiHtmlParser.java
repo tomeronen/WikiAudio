@@ -30,7 +30,10 @@ public class WikiHtmlParser {
             // todo bad implantation does not take last element.
             Element curElement = elements.get(i);
             if (!"mw-headline".equals(curElement.className())) // element is not a p
-                paragraphsInSection.add(curElement.text());
+            {
+                Element paragraph = curElement.removeClass("reference");
+                paragraphsInSection.add(paragraph.text());
+            }
             else {
                 sections.add(new WikiPage.Section(curSectionName, paragraphsInSection));
                 curSectionName = curElement.text();

@@ -1,7 +1,10 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.util.Log;
+
 import androidx.work.ListenableWorker;
 
+import com.example.wikiaudio.file_manager.FileManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -11,6 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -22,7 +26,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.JavaNetCookieJar;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -33,8 +40,9 @@ import static com.example.wikiaudio.wikipedia.PageAttributes.*;
 
 public class WikiServerHolder {
     static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
-    private static final String BASE_URL = "https://www.mediawiki.org/";
+    private static final String BASE_URL = "https://en.wikipedia.org";
     private static WikiServerHolder instance = null;
+    private static FileManager fileManager;
     private final WikiServer server;
 
     public synchronized static WikiServerHolder getInstance(){
@@ -242,20 +250,62 @@ public class WikiServerHolder {
         return pageNames;
     }
     //todo implement.
-    public Call<Object> login(String userName, String password)
+    public Call<Object> uploadFile(String fileName, String filePath)
             throws IOException {
-        Response<Object> response = this.server.getToken().execute();
-        LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>> res =
-                (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>)
-                        response.body();
-        String token = res.get("query").get("tokens").get("logintoken");
-        Response<Object> execute2   = server.login("login",
+
+        // todo add tests if something went wrong.
+        QuarryResponse tokenResponse = this.server.getToken().execute().body();
+
+        String logintoken = null;
+        if (tokenResponse != null) {
+            logintoken = tokenResponse.query.tokens.logintoken;
+            Log.d("file upload status", "got login token");
+        }
+        QuarryResponse loginResponse = server.login("login",
                 "json",
-                token,
+                logintoken,
                 "Tomer_ronen@WikiAudio",
-                "tkpemajv20jm4t1ofm2amr5mb7p1v9cv").execute();
-        Response<Object> execute = server.getCsrfToken().execute();
-        Object body = execute.body();
+                "tkpemajv20jm4t1ofm2amr5mb7p1v9cv").execute().body();
+        //todo add check if login failed
+        QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
+        if (csrfResponse != null) {
+            String csrfToken = csrfResponse.query.tokens.csrftoken;
+            Log.d("file upload status", "got csrf token");
+            File file = new File(filePath);
+            long length = file.length();
+            if(file.exists())
+            {
+                RequestBody requestFile =
+                        RequestBody.create(
+                                MediaType.parse("3gp"),
+                                file
+                        );
+                MultipartBody.Part body =
+                        MultipartBody.Part.createFormData("file",
+                                fileName,
+                                requestFile);
+                Log.d("file upload status", "opened file");
+                Response<Object> execute =
+                        server.uploadFile("upload",
+                            fileName,
+                            "json",
+                            csrfToken,
+                            1,
+                            body).execute();
+
+//                Response<Object> execute =
+//                        server.uploadFile("upload",
+//                                "testimg.jpg",
+//                                "https://cdn.pixabay.com/photo/2018/07/26/07/45/valais-3562988_1280.jpg",
+//                                "json",
+//                                csrfToken,
+//                                1).execute();
+                Object body1  = execute.body();
+                Log.d("file upload status", "file uploaded");
+            }
+        }
+
+
         return null;
     }
 

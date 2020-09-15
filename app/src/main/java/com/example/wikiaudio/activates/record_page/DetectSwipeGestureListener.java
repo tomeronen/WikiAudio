@@ -1,5 +1,6 @@
 package com.example.wikiaudio.activates.record_page;
 
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 
@@ -10,8 +11,8 @@ import android.view.MotionEvent;
 public class DetectSwipeGestureListener extends GestureDetector.SimpleOnGestureListener {
 
     // Minimal x and y axis swipe distance.
-    private static int MIN_SWIPE_DISTANCE_X = 220;
-    private static int MIN_SWIPE_DISTANCE_Y = 220;
+    private static int MIN_SWIPE_DISTANCE_X = 50;
+    private static int MIN_SWIPE_DISTANCE_Y = 50;
 
     // Maximal x and y axis swipe distance.
     private static int MAX_SWIPE_DISTANCE_X = 1000;
@@ -27,6 +28,7 @@ public class DetectSwipeGestureListener extends GestureDetector.SimpleOnGestureL
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
+            Log.d("fliing", "was fliing");
         // Get swipe delta value in x axis.
         float deltaX = e1.getX() - e2.getX();
 

@@ -27,7 +27,6 @@ public class LoginActivity extends AppCompatActivity {
         // todo for debugging only
         userName = "tomer_ronen";
         password = "xTGHTibZAL3cBws";
-        wikipedia.login(userName, password);
     }
 }
 

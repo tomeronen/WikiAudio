@@ -54,6 +54,22 @@ public class        WikiPage {
             this.title = section_one;
             this.contents = content_one;
         }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public List<String> getContents() {
+            return contents;
+        }
+
+        public void setContents(List<String> contents) {
+            this.contents = contents;
+        }
     }
 
         private String title;

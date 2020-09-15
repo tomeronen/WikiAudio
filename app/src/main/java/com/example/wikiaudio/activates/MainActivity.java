@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.work.Data;
 import androidx.work.WorkManager;
 
 import android.Manifest;
@@ -18,8 +19,13 @@ import android.widget.Toast;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
+import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
+import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.location.LocationHandler;
+import com.example.wikiaudio.wikipedia.PageAttributes;
+import com.example.wikiaudio.wikipedia.WikiPage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationServices;
@@ -41,6 +47,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Marker;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -75,9 +85,35 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         initVars();
         initMap();
-        String userName = "tomer_ronen";
-        String password = "xTGHTibZAL3cBws";
-        wikipedia.login(userName, password);
+        testWikiRecordActivity();
+
+    }
+
+    private void testWikiRecordActivity() {
+        final WikiPage testPage = new WikiPage();
+        String pageName = "Hurricane_Irene_(2005)";
+        List<PageAttributes> pageAttributes = new ArrayList<>();
+        pageAttributes.add(PageAttributes.title);
+        pageAttributes.add(PageAttributes.content);
+        wikipedia.getWikiPage(pageName,
+                pageAttributes,
+                testPage,
+                new WorkerListener() {
+                    @Override
+                    public void onSuccess() {
+                        Intent intent = new Intent(activity, WikiRecordActivity.class);
+                        Gson gson = new Gson();
+                        String wiki = gson.toJson(testPage);
+                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onFailure() {
+
+                    }
+                }
+        );
     }
 
     /**

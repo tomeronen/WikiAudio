@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
+import java.io.SequenceInputStream;
 
 public class FileManager {
 
@@ -14,7 +15,7 @@ public class FileManager {
         this.activity = activity;
     }
 
-    public String getFilePath(String wikiName, int section)
+    public String getFilePath(String wikiName, int section, int paragraph)
     {
         File file = new File(activity.getExternalFilesDir(
                 Environment.DIRECTORY_MUSIC),
@@ -29,7 +30,7 @@ public class FileManager {
                 Log.e("file problem:", "Directory not created");
             }
         }
-        return  file.getAbsolutePath() + "/" + wikiName + "_" + section;
+        return file.getAbsolutePath() + "/" + wikiName + "_" + section + "_" + paragraph;
 
 //        File f = new File(filePath);
 //        if(f.exists())

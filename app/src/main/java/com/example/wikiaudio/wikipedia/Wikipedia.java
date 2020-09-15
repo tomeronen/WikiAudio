@@ -256,12 +256,12 @@ public class Wikipedia {
         }).start();
     }
 
-    public void login(final String userName, final String password) {
+    public void uploadFile(final String fileName, final String filePath) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    WikiServerHolder.getInstance().login(userName,password);
+                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

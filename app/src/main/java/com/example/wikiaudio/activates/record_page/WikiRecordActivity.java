@@ -8,7 +8,8 @@ import androidx.core.view.GestureDetectorCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.MediaRecorder;
+import android.media.AudioAttributes;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,34 +17,38 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
-import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.audio_recoder.VoiceRecorder;
+import com.example.wikiaudio.audio_recoder.VoiceRecorderOptionB;
 import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
-import java.io.File;
 import java.io.IOException;
 
 public class WikiRecordActivity extends AppCompatActivity {
 
     private static final int REQ_RECORD_PERMISSION = 12;
     public static final String WIKI_PAGE_TAG = "wikiPageTag" ;
-    WebView wikiPageView;
+    TextView wikiPageView;
     ProgressBar progressBar;
     FloatingActionButton recordButton;
     AppCompatActivity activity;
     WikiPage wikiPage;
     FileManager fileManager;
     private GestureDetectorCompat gestureDetectorCompat = null;
-    private MediaRecorder recorder;
+    private VoiceRecorderOptionB recorder;
     boolean startRecording = true; // when button pressed record our stop recording?
-    String DEBUG_URL = "https://en.wikipedia.org/wiki/Android_(operating_system)";
     int curSection = 0;
+    int curParagraph = 0;
+    String format;
+    Button nextButton;
+    Button previousButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +58,61 @@ public class WikiRecordActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         recordButton = findViewById(R.id.recoredButton);
         fileManager = new FileManager(this);
+        recorder = new VoiceRecorderOptionB();
+        format  = recorder.format;
         Gson gson = new Gson();
         wikiPage = gson.fromJson(getIntent()
                                                 .getStringExtra(WIKI_PAGE_TAG), WikiPage.class);
-        progressBar.setMax(wikiPage.numberOfSections() - 1); // '-1' - we start at zero.
-//        wikiPageView.loadData(wikiPage.getSection(curSection)
-//                                            ,"text/html", "UTF-8");
+        int paragraphAmount = 0;
+        for(WikiPage.Section section: wikiPage.getSections())
+        {
+            paragraphAmount += section.getContents().size();
+
+        }
+        progressBar.setMax(wikiPage.numberOfSections() + paragraphAmount +  - 1); // '-1' - we start at zero.
+        loadWikiDataToView(curSection, curParagraph);
         activity = this;
         setOnRecordButton();
+
+        nextButton = findViewById(R.id.nextButton);
+        previousButton = findViewById(R.id.previuos);
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Swipe Detector", "left");
+                ++curParagraph;
+                if(curParagraph > wikiPage.getSection(curSection).getContents().size())
+                { // got to end of section
+                    curParagraph = 0;
+                    curSection++;
+                }
+                loadWikiDataToView(curSection, curParagraph);
+                progressBar.setProgress(curSection);
+            }
+        });
+        previousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("Swipe Detector", "right");
+                --curParagraph;
+                if(curParagraph < 0)
+                { // got to end of section
+                    if(curSection > 0)
+                    {
+                        curSection--;
+                        curParagraph = wikiPage.getSection(curSection).getContents().size();
+                    }
+                    else
+                    {
+                        curParagraph = 0;
+                    }
+                }
+                loadWikiDataToView(curSection, curParagraph);
+                progressBar.setProgress(curSection);
+            }
+        });
+
+        // todo there is a problem with swipe
 //        setSwipeDetector();
         }
 
@@ -70,9 +122,9 @@ public class WikiRecordActivity extends AppCompatActivity {
             public void onRightSwipe() {
                 if(curSection > 0)
                 {
+                    Log.d("Swipe Detector", "right");
                     --curSection;
-//                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
-//                            "text/html", "UTF-8");
+                    loadWikiDataToView(curSection, curParagraph);
                     progressBar.setProgress(curSection);
                 }
             }
@@ -81,23 +133,38 @@ public class WikiRecordActivity extends AppCompatActivity {
             public void onLeftSwipe() {
                 if(curSection + 1 < wikiPage.numberOfSections())
                 {
+                    Log.d("Swipe Detector", "left");
                     ++curSection;
-//                    wikiPageView.loadData(wikiPage.getSection(curSection)  ,
-//                            "text/html", "UTF-8");
+                    loadWikiDataToView(curSection, curParagraph);
                     progressBar.setProgress(curSection);
                 }
             }
         };
         DetectSwipeGestureListener gestureListener
                 = new DetectSwipeGestureListener(sf);
+
+
         this.gestureDetectorCompat = new GestureDetectorCompat(this, gestureListener);
         this.wikiPageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                Log.d("touch", "was touched");
                 gestureDetectorCompat.onTouchEvent(event);
                 return wikiPageView.onTouchEvent(event);
             }
         });
+    }
+
+    private void loadWikiDataToView(int curSection, int curParagraph) {
+        if(curParagraph == 0)
+        {
+            wikiPageView.setText(wikiPage.getSection(curSection).getTitle());
+        }
+        else
+        {
+            wikiPageView.setText(
+                    wikiPage.getSection(curSection).getContents().get(curParagraph - 1));
+        }
     }
 
     private void setOnRecordButton() {
@@ -105,20 +172,15 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean havePermissions = checkRecordingPermissions();
-                String fp = fileManager.getFilePath(wikiPage.getTitle(), curSection);
-                Log.d("file", fp);
-                File f = new File(fp);
-                Log.d("file path:", f.getAbsolutePath());
-                Log.d("file exists:", Boolean.toString(f.exists()));
-                VoiceRecorder voiceRecorder  = new VoiceRecorder(fp, activity);
-
+//                VoiceRecorder voiceRecorder  = new VoiceRecorder(fp, activity);
                 if (startRecording && havePermissions) {
                         startRecording = false;
                         startBlinkingAnimation(recordButton);
-                        voiceRecorder.startRecording();
-//                      recorder.setOutputFile(fp);
-//                      recorder.prepare();
-//                      recorder.start();
+                        String fp = fileManager.getFilePath(wikiPage.getTitle(),
+                                                                curSection,
+                                                                curParagraph)
+                                + "." + recorder.format;
+                    recorder.startRecording(fp);
                 } else if (!havePermissions) {
                     ActivityCompat.requestPermissions(activity,
                             new String[]{Manifest.permission.RECORD_AUDIO,
@@ -128,11 +190,14 @@ public class WikiRecordActivity extends AppCompatActivity {
                 } else {
                     startRecording = true;
                     stopBlinkingAnimation(recordButton);
-                    try {
-                        voiceRecorder.stopRecording();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    recorder.stopRecording();
+                    Wikipedia wikipedia = new Wikipedia(activity);
+                    String fp = fileManager.getFilePath(wikiPage.getTitle(),
+                            curSection,
+                            curParagraph)
+                            + "." + recorder.format;
+                    String fileName = "Hurricane Irene (2005)_0_0.3gp";
+                    wikipedia.uploadFile(fileName,fp);
                 }
             }
 
