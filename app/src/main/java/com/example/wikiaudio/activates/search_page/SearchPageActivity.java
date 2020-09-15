@@ -55,18 +55,18 @@ public class SearchPageActivity extends AppCompatActivity {
                                 new ResultClickListeners() {
                                     @Override
                                     public void onClick(String string) {
-                                        final Wikipage wikiPage = new Wikipage();
+                                        final Wikipage Wikipage = new Wikipage();
                                         List<PageAttributes> pageAttributes = new ArrayList<>();
                                         pageAttributes.add(PageAttributes.audioUrl);
                                         pageAttributes.add(PageAttributes.content);
                                         pageAttributes.add(PageAttributes.title);
-                                        wikipedia.getWikiPage(string, pageAttributes, wikiPage,
+                                        wikipedia.getWikipage(string, pageAttributes, Wikipage,
                                                 new WorkerListener() {
                                             @Override
                                             public void onSuccess() {
                                                 WikipediaPlayer wikipediaPlayer
                                                         = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
-                                                wikipediaPlayer.playWiki(wikiPage);
+                                                wikipediaPlayer.playWiki(Wikipage);
                                             }
 
                                             @Override

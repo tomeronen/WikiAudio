@@ -15,8 +15,8 @@ public class WikiHtmlParser {
 
     String url;
 
-   static public void parseAdvanceAttr(Wikipage wikiPage) throws IOException {
-        Document doc = Jsoup.connect(wikiPage.getUrl()).get();
+   static public void parseAdvanceAttr(Wikipage Wikipage) throws IOException {
+        Document doc = Jsoup.connect(Wikipage.getUrl()).get();
         // parse text
         List<Wikipage.Section> sections = new ArrayList<>();
         String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
@@ -27,14 +27,17 @@ public class WikiHtmlParser {
             // todo bad implantation does not take last element.
             Element curElement = elements.get(i);
             if (!"mw-headline".equals(curElement.className())) // element is not a p
-                paragraphsInSection.add(curElement.text());
+            {
+                Element paragraph = curElement.removeClass("reference");
+                paragraphsInSection.add(paragraph.text());
+            }
             else {
                 sections.add(new Wikipage.Section(curSectionName, paragraphsInSection));
                 curSectionName = curElement.text();
                 paragraphsInSection = new ArrayList<>();
             }
         }
-        wikiPage.setSections(sections);
+        Wikipage.setSections(sections);
 
 
 //     parse indicators
@@ -53,18 +56,18 @@ public class WikiHtmlParser {
 //     todo - assumes first internal link is to audio file, not good!
 
                    String internal = d.getElementsByClass("internal").text();
-                   wikiPage.setAudioUrl
+                   Wikipage.setAudioUrl
                            ("https://" + d.getElementsByClass("internal").first()
                                    .attr("href"));
                    break;
            }
        }
-       wikiPage.setIndicators(indicatorsValues);
+       Wikipage.setIndicators(indicatorsValues);
     }
 
 
     // parse title
 //            String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
-//            wikiPage.setTitle(pageTitle);
+//            Wikipage.setTitle(pageTitle);
 
 }

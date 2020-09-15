@@ -1,7 +1,5 @@
 package com.example.wikiaudio.activates;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +8,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.PageAttributes;
@@ -30,7 +30,7 @@ public class WikipageActivity extends AppCompatActivity {
     private String title;
     private Wikipedia wikipedia;
     private List<PageAttributes> pageAttributes;
-    private Wikipage wikipage;
+    private Wikipage Wikipage;
 
     private FloatingActionButton recordButton;
     private TextView background;
@@ -60,40 +60,29 @@ public class WikipageActivity extends AppCompatActivity {
         webView = (WebView) findViewById(R.id.webView);
         articleImage = (ImageView) findViewById(R.id.image);
         recordButton = (FloatingActionButton) findViewById(R.id.floatingRecordButton);
-//        setDisplayVisible(View.GONE);
-
         wikipedia = new Wikipedia(this);
         pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.url);
-        wikipage = new Wikipage();
-    }
-
-    private void setDisplayVisible(int isVisible) {
-        webView.setVisibility(isVisible);
-        articleTitle.setVisibility(isVisible);
-        articleImage.setVisibility(isVisible);
-        recordButton.setVisibility(isVisible);
-        background.setVisibility(isVisible);
+        Wikipage = new Wikipage();
     }
 
     private void fetchWikipage() {
-        wikipedia.getWikiPage(title, pageAttributes, wikipage, new WorkerListener() {
+        wikipedia.getWikipage(title, pageAttributes, Wikipage, new WorkerListener() {
             @Override
             public void onSuccess() {
-                Log.d(TAG, "onSuccess, getWikiPage");
+                Log.d(TAG, "onSuccess, getWikipage");
                 setLayout();
             }
-
             @Override
             public void onFailure() {
-                Log.d(TAG, "fetchWikipage-getWikiPage-onFailure: couldn't get the wikipage");
+                Log.d(TAG, "fetchWikipage-getWikipage-onFailure: couldn't get the Wikipage");
             }
         });
     }
 
-    //    Because WebView consumes web content that can include HTML and JavaScript, which may cause
+//    Because WebView consumes web content that can include HTML and JavaScript, which may cause
 //    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
 //    which is a form of hacking and by enabling client-side script into WebView which user is
 //    accessing from application and this way you are opening up your application to such attacks.
@@ -101,12 +90,12 @@ public class WikipageActivity extends AppCompatActivity {
     // chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
-        if (wikipage.getTitle() == null || wikipage.getUrl() == null) {
+        if (Wikipage.getTitle() == null || Wikipage.getUrl() == null) {
             Log.d(TAG, "setLayout: got null title or url");
         }
 
         //Title
-        articleTitle.setText(wikipage.getTitle());
+        articleTitle.setText(Wikipage.getTitle());
 
         //Image
         //todo
@@ -114,9 +103,6 @@ public class WikipageActivity extends AppCompatActivity {
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(wikipage.getUrl());
-
-//        setDisplayVisible(View.VISIBLE);
+        webView.loadUrl(Wikipage.getUrl());
     }
-
 }

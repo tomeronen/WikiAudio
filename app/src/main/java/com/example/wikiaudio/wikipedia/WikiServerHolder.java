@@ -1,5 +1,8 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.util.Log;
+
+import com.example.wikiaudio.file_manager.FileManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -9,25 +12,43 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.JavaNetCookieJar;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.example.wikiaudio.wikipedia.PageAttributes.*;
+import static com.example.wikiaudio.wikipedia.PageAttributes.audioUrl;
+import static com.example.wikiaudio.wikipedia.PageAttributes.categories;
+import static com.example.wikiaudio.wikipedia.PageAttributes.content;
+import static com.example.wikiaudio.wikipedia.PageAttributes.coordinates;
+import static com.example.wikiaudio.wikipedia.PageAttributes.description;
+import static com.example.wikiaudio.wikipedia.PageAttributes.thumbnail;
+import static com.example.wikiaudio.wikipedia.PageAttributes.title;
+import static com.example.wikiaudio.wikipedia.PageAttributes.url;
+import static com.example.wikiaudio.wikipedia.PageAttributes.watchers;
 
 public class WikiServerHolder {
     static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
     private static final String BASE_URL = "https://en.wikipedia.org";
     private static WikiServerHolder instance = null;
+    private static FileManager fileManager;
     private final WikiServer server;
 
     public synchronized static WikiServerHolder getInstance(){
@@ -42,8 +63,22 @@ public class WikiServerHolder {
                 .setPrettyPrinting()
                 .create();
 
+
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        // init cookie manager
+        CookieHandler cookieHandler = new CookieManager();
+
+        OkHttpClient client = new OkHttpClient.Builder().addNetworkInterceptor(interceptor)
+                .cookieJar(new JavaNetCookieJar(cookieHandler))
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build();
+
         this.server = new Retrofit.Builder()
-                .client(new OkHttpClient())
+                .client(client)
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
@@ -55,8 +90,8 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.searchPage(pageName).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> wikipageList = parseSearchResponse(response.body());
-            return wikipageList;
+            List<Wikipage> WikipageList = parseSearchResponse(response.body());
+            return WikipageList;
         } else {
             // task failed.
             throw new IOException();
@@ -89,14 +124,14 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> wikipageList = parseQuarryResponse(response.body());
+            List<Wikipage> WikipageList = parseQuarryResponse(response.body());
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ||
                     pageAttr.contains(thumbnail))
             {
-                WikiHtmlParser.parseAdvanceAttr(wikipageList.get(0));
+                WikiHtmlParser.parseAdvanceAttr(WikipageList.get(0));
             }
-            return wikipageList.get(0);
+            return WikipageList.get(0);
         } else {
             // task failed.
             throw new IOException();
@@ -135,22 +170,22 @@ public class WikiServerHolder {
         String inprop = getQueryInProp(pageAttr);
         Response<QuarryResponse> response = getInstance().server.
                 callGetPagesNearby(latitude + "|" + longitude,
-                                    Integer.toString(radius),
-                                    prop,
-                                    inprop).execute();
+                        Integer.toString(radius),
+                        prop,
+                        inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> wikipageList = parseQuarryResponse(response.body());
+            List<Wikipage> WikipageList = parseQuarryResponse(response.body());
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ||
-                        pageAttr.contains(thumbnail))
+                    pageAttr.contains(thumbnail))
             {
-                for(Wikipage wikiPage: wikipageList)
+                for(Wikipage Wikipage: WikipageList)
                 {
-                    WikiHtmlParser.parseAdvanceAttr(wikiPage);
+                    WikiHtmlParser.parseAdvanceAttr(Wikipage);
                 }
             }
-            return wikipageList;
+            return WikipageList;
         } else {
             // task failed.
             throw new IOException();
@@ -220,17 +255,63 @@ public class WikiServerHolder {
         }
         return pageNames;
     }
-
     //todo implement.
-    public Call<Object> login(String userName, String password)
+    public Call<Object> uploadFile(String fileName, String filePath)
             throws IOException {
-        Response<Object> response = this.server.getToken().execute();
-        LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>> res =
-                (LinkedTreeMap<String, LinkedTreeMap<String, LinkedTreeMap<String, String>>>)
-                        response.body();
-        String token = res.get("query").get("tokens").get("logintoken");
-        Response<Object> execute1 = server.login(token).execute();
-        Object body = execute1.body();
+
+        // todo add tests if something went wrong.
+        QuarryResponse tokenResponse = this.server.getToken().execute().body();
+
+        String logintoken = null;
+        if (tokenResponse != null) {
+            logintoken = tokenResponse.query.tokens.logintoken;
+            Log.d("file upload status", "got login token");
+        }
+        QuarryResponse loginResponse = server.login("login",
+                "json",
+                logintoken,
+                "Tomer_ronen@WikiAudio",
+                "tkpemajv20jm4t1ofm2amr5mb7p1v9cv").execute().body();
+        //todo add check if login failed
+        QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
+        if (csrfResponse != null) {
+            String csrfToken = csrfResponse.query.tokens.csrftoken;
+            Log.d("file upload status", "got csrf token");
+            File file = new File(filePath);
+            long length = file.length();
+            if(file.exists())
+            {
+                RequestBody requestFile =
+                        RequestBody.create(
+                                MediaType.parse("3gp"),
+                                file
+                        );
+                MultipartBody.Part body =
+                        MultipartBody.Part.createFormData("file",
+                                fileName,
+                                requestFile);
+                Log.d("file upload status", "opened file");
+                Response<Object> execute =
+                        server.uploadFile("upload",
+                                fileName,
+                                "json",
+                                csrfToken,
+                                1,
+                                body).execute();
+
+//                Response<Object> execute =
+//                        server.uploadFile("upload",
+//                                "testimg.jpg",
+//                                "https://cdn.pixabay.com/photo/2018/07/26/07/45/valais-3562988_1280.jpg",
+//                                "json",
+//                                csrfToken,
+//                                1).execute();
+                Object body1  = execute.body();
+                Log.d("file upload status", "file uploaded");
+            }
+        }
+
+
         return null;
     }
 

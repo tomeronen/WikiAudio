@@ -2,7 +2,7 @@ package com.example.wikiaudio.wikipedia;
 
 import java.util.List;
 
-public class Wikipage {
+public class        Wikipage {
 
 
     public Wikipage() {}
@@ -33,7 +33,7 @@ public class Wikipage {
         for (Section s:sections) {
             fullText += s.title + ".";
             for (String paragraph:s.contents
-                 ) {
+            ) {
                 fullText += paragraph;
             }
         }
@@ -51,23 +51,34 @@ public class Wikipage {
             this.title = section_one;
             this.contents = content_one;
         }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public List<String> getContents() {
+            return contents;
+        }
+
+        public void setContents(List<String> contents) {
+            this.contents = contents;
+        }
     }
 
-        private String title;
-        private String url;
-        private String description;
-        private List<Section> sections;
-        private List<String> indicators;
-        private int watchers;
-        private Double lat;
-        private Double lon;
-        private String audioUrl;
-        private String thumbnailSrc;
-
-    public static Wikipage getPageForTesting() {
-        return null;
-    }
-
+    private String title;
+    private String url;
+    private String description;
+    private List<Section> sections;
+    private List<String> indicators;
+    private int watchers;
+    private Double lat;
+    private Double lon;
+    private String audioUrl;
+    private String thumbnailSrc;
 
     // ************************* Getters and setters ***********************************************
 

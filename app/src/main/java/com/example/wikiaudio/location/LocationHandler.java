@@ -104,16 +104,16 @@ public class LocationHandler {
     }
 
     /**
-     * Marks the given wikipage object on the map using its title and coordinates
-     * @param wikiPage the article we would like to mark
+     * Marks the given Wikipage object on the map using its title and coordinates
+     * @param Wikipage the article we would like to mark
      */
-    public void markLocation(Wikipage wikiPage) {
-        if (wikiPage != null) {
-            LatLng latLng = new LatLng(wikiPage.getLat(), wikiPage.getLon());
+    public void markLocation(Wikipage Wikipage) {
+        if (Wikipage != null) {
+            LatLng latLng = new LatLng(Wikipage.getLat(), Wikipage.getLon());
             mMap.addMarker(new MarkerOptions()
-                                    .position(latLng).title(wikiPage.getTitle())).setTag(wikiPage);
+                                    .position(latLng).title(Wikipage.getTitle())).setTag(Wikipage);
         } else {
-            Log.d(TAG, "markLocation: got null wikipage object");
+            Log.d(TAG, "markLocation: got null Wikipage object");
         }
     }
 

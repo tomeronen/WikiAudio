@@ -19,13 +19,20 @@ public class QuarryResponse {
 
     public static class QueryData{
         LinkedTreeMap<String, PageData> pages;
+        Tokens tokens;
         ArrayList<PageData> search;
 
     }
+
     public static class SearchResults{
         String title;
     }
 
+    public static class Tokens
+    {
+        public String csrftoken;
+        public String logintoken;
+    }
     public static class PageData{
         String title;
         String fullurl;

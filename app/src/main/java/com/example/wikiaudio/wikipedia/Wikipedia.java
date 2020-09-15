@@ -72,12 +72,12 @@ public class Wikipedia {
     }
 
     /**
-     * gets wikiPages nearby the given coordinates. if successful,
+     * gets Wikipages nearby the given coordinates. if successful,
      * fills the 'listToFill' with found pages. And then runs workerListener.
      * @param latitude the latitude to preform the search on.
      * @param longitude the longitude to preform the search on.
      * @param radius the radius from coordinates to search in.
-     * @param listToFill the wikiPage list to be filled with results.
+     * @param listToFill the Wikipage list to be filled with results.
      * @param pageAttributes the attributes to get on each wiki page found.
      * @param workerListener what to do if task fails or is successful.
      */
@@ -122,40 +122,66 @@ public class Wikipedia {
     /**
      * loads the current spoken pages categories from wikipedia.
      */
-    public void loadSpokenPagesCategories(final WorkerListener workerListener)
+    public void loadSpokenPagesCategories(final List<String> listToFill,
+                                          final WorkerListener workerListener)
     {
-        WorkRequest loadSpokenCategoriseWorkerReq =
-                new OneTimeWorkRequest
-                        .Builder(loadSpokenCategoriseWorker.class)
-                        .setInputData(new Data.Builder()
-                                .build())
-                        .build();
-        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
-        WorkManager.getInstance(activ)
-                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
-                .observe(activ, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if (workInfo.getState() == WorkInfo.State.FAILED)
-                        {
-                            activ.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                         workerListener.onFailure();
-                                }
-                            });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    listToFill
+                            .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
                         }
-                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
-                        {
-                            activ.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    workerListener.onSuccess();
-                                }
-                            });
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
                         }
-                    }
-                });
+                    });
+                }
+
+
+            }
+        }).start();
+//        WorkRequest loadSpokenCategoriseWorkerReq =
+//                new OneTimeWorkRequest
+//                        .Builder(loadSpokenCategoriseWorker.class)
+//                        .setInputData(new Data.Builder()
+//                                .build())
+//                        .build();
+//        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
+//        WorkManager.getInstance(activ)
+//                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
+//                .observe(activ, new Observer<WorkInfo>() {
+//                    @Override
+//                    public void onChanged(WorkInfo workInfo) {
+//                        if (workInfo.getState() == WorkInfo.State.FAILED)
+//                        {
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                         workerListener.onFailure();
+//                                }
+//                            });
+//                        }
+//                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
+//                        {
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    workerListener.onSuccess();
+//                                }
+//                            });
+//                        }
+//                    }
+//                });
     }
 
     public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity,
@@ -200,7 +226,7 @@ public class Wikipedia {
      * @param pageToFill the wiki page to fill with the data.
      * @param workerListener what to do if task fails or is successful.
      */
-    public void getWikiPage(final String name,
+    public void getWikipage(final String name,
                             final List<PageAttributes> pageAttributes,
                             final Wikipage pageToFill,
                             final WorkerListener workerListener)
@@ -230,12 +256,12 @@ public class Wikipedia {
         }).start();
     }
 
-    public void login(final String userName, final String password) {
+    public void uploadFile(final String fileName, final String filePath) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    WikiServerHolder.getInstance().login(userName,password);
+                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

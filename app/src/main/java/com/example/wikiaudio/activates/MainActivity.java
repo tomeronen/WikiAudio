@@ -1,11 +1,5 @@
 package com.example.wikiaudio.activates;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.work.WorkManager;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -16,10 +10,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.WorkManager;
+
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
 import com.example.wikiaudio.location.LocationHandler;
+import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationServices;
@@ -33,7 +36,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -69,8 +75,32 @@ public class MainActivity extends AppCompatActivity implements
         initVars();
         initMap();
 
-        Intent rec = new Intent(this, SearchPageActivity.class);
-//        startActivity(rec);
+//        testWikiRecordActivity();
+    }
+
+    private void testWikiRecordActivity() {
+        final Wikipage testPage = new Wikipage();
+        String pageName = "Hurricane_Irene_(2005)";
+        List<PageAttributes> pageAttributes = new ArrayList<>();
+        pageAttributes.add(PageAttributes.title);
+        pageAttributes.add(PageAttributes.content);
+        wikipedia.getWikipage(pageName,
+                pageAttributes,
+                testPage,
+                new WorkerListener() {
+                    @Override
+                    public void onSuccess() {
+                        Intent intent = new Intent(activity, WikiRecordActivity.class);
+                        Gson gson = new Gson();
+                        String wiki = gson.toJson(testPage);
+                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+                        startActivity(intent);
+                    }
+                    @Override
+                    public void onFailure() {
+                    }
+                }
+        );
     }
 
     /**
@@ -205,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Enables GoogleMaps location tracking, focuses the camera on the user's location and
-     * presents nearby wikipages as markers
+     * presents nearby Wikipages as markers
      */
     @SuppressLint("MissingPermission")
     private void initUserLocationAndMap() {
@@ -215,13 +245,13 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
             mMap.setMyLocationEnabled(true);
 
-            //Zoom to user's location + show nearby wikipages
+            //Zoom to user's location + show nearby Wikipages
             LatLng currentLatLng = locationHandler.getCurrentLocation();
             if (currentLatLng != null) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 locationHandler.markWikipagesNearby(wikipedia);
             }
-       }
+        }
     }
 
     //TODO
@@ -286,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * When the user clicks on the info box of the marker, we start that wikipage's activity
+     * When the user clicks on the info box of the marker, we start that Wikipage's activity
      * @param marker GoogleMaps marker that contains the Wikipage tag
      */
     @Override
@@ -294,9 +324,9 @@ public class MainActivity extends AppCompatActivity implements
         Wikipage tag = (Wikipage) marker.getTag();
         if (tag != null) {
             String title = tag.getTitle();
-            Intent wikipageIntent = new Intent(this, WikipageActivity.class);
-            wikipageIntent.putExtra("title", title);
-            startActivity(wikipageIntent);
+            Intent WikipageIntent = new Intent(this, WikipageActivity.class);
+            WikipageIntent.putExtra("title", title);
+            startActivity(WikipageIntent);
         } else {
             Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
         }

@@ -1,7 +1,7 @@
 package com.example.wikiaudio.wikipedia;
 
 /**
- *      a list of page attributes you van ask to get on a page when querying.
+ *      a list of page attributes you בan ask to get on a page when querying.
  *     title - title of page.
  *     url - url of page.
  *     content - content of page.
