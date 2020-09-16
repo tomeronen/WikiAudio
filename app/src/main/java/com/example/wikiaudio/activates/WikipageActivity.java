@@ -12,6 +12,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.loading.LoadingActivity;
+import com.example.wikiaudio.activates.loading.LoadingHelper;
 import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
@@ -26,11 +28,12 @@ public class WikipageActivity extends AppCompatActivity {
     private static final String TAG = "WikipageActivity";
 
     private AppCompatActivity activity;
+    private LoadingHelper loadingHelper;
 
     private String title;
     private Wikipedia wikipedia;
     private List<PageAttributes> pageAttributes;
-    private Wikipage Wikipage;
+    private Wikipage wikipage;
 
     private FloatingActionButton recordButton;
     private TextView background;
@@ -43,18 +46,22 @@ public class WikipageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wiki_page);
+
         Intent intent = getIntent();
         title = intent.getStringExtra("title");
         if (title == null) {
             Log.d(TAG, "onCreate: null title from intent extra");
             finish();
         }
+
         initVars();
         fetchWikipage();
+        setLoadingScreen();
     }
 
     private void initVars() {
         activity = this;
+        loadingHelper = LoadingHelper.getInstance();
         articleTitle = (TextView) findViewById(R.id.title);
         background = (TextView) findViewById(R.id.webBackground);
         webView = (WebView) findViewById(R.id.webView);
@@ -65,11 +72,11 @@ public class WikipageActivity extends AppCompatActivity {
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.url);
-        Wikipage = new Wikipage();
+        wikipage = new Wikipage();
     }
 
     private void fetchWikipage() {
-        wikipedia.getWikipage(title, pageAttributes, Wikipage, new WorkerListener() {
+        wikipedia.getWikipage(title, pageAttributes, wikipage, new WorkerListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "onSuccess, getWikipage");
@@ -82,6 +89,17 @@ public class WikipageActivity extends AppCompatActivity {
         });
     }
 
+    private void setLoadingScreen(){
+        int index = loadingHelper.loadWikipage(wikipage);
+        if (index == -1) {
+            Log.d(TAG, "setLoadingScreen: error loading wikipage to loading helper");
+        } else {
+            Intent loadingScreen = new Intent(activity, LoadingActivity.class);
+            loadingScreen.putExtra("index", index);
+            startActivity(loadingScreen);
+        }
+    }
+
 //    Because WebView consumes web content that can include HTML and JavaScript, which may cause
 //    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
 //    which is a form of hacking and by enabling client-side script into WebView which user is
@@ -90,12 +108,12 @@ public class WikipageActivity extends AppCompatActivity {
     // chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
-        if (Wikipage.getTitle() == null || Wikipage.getUrl() == null) {
+        if (wikipage.getTitle() == null || wikipage.getUrl() == null) {
             Log.d(TAG, "setLayout: got null title or url");
         }
 
         //Title
-        articleTitle.setText(Wikipage.getTitle());
+        articleTitle.setText(wikipage.getTitle());
 
         //Image
         //todo
@@ -103,6 +121,6 @@ public class WikipageActivity extends AppCompatActivity {
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(Wikipage.getUrl());
+        webView.loadUrl(wikipage.getUrl());
     }
 }

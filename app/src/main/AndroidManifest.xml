@@ -25,18 +25,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
+        <activity android:name=".activates.loading.LoadingActivity" />
         <activity android:name=".activates.search_page.SearchPageActivity" />
         <activity android:name=".activates.record_page.WikiRecordActivity" />
         <activity android:name=".activates.WikipageActivity" />
         <activity android:name=".activates.MainActivity">
-          
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
-        <activity android:name=".activates.SplashActivity"
+        <activity android:name=".activates.loading.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
