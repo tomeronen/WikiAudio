@@ -1,10 +1,12 @@
 package com.example.wikiaudio.activates;
 
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.work.Data;
+import androidx.fragment.app.Fragment;
 import androidx.work.WorkManager;
 
 import android.Manifest;
@@ -18,9 +20,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.WikiPage;
@@ -39,18 +41,23 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.wikiaudio.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+
+import com.example.wikiaudio.activates.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -77,16 +84,51 @@ public class MainActivity extends AppCompatActivity implements
     private Boolean isGPSEnabled = false;
     private GoogleMap mMap;
     LocationHandler locationHandler;
+    ArrayList<PlayListFragment> playLists = new ArrayList<>();
+    private List<String> chosenCategories;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        loadPlayLists();
         initVars();
         initMap();
-        testWikiRecordActivity();
+    }
 
+    private void loadPlayLists() {
+        PlayListsFragmentAdapter playListsFragmentAdapter =
+                new PlayListsFragmentAdapter(getSupportFragmentManager());
+        chosenCategories  = ((WikiAudioApp) getApplication())
+                .getAppData().getChosenCategories();
+        chosenCategories.add("pages Nearby");
+        for(String category: chosenCategories)
+        {
+            List<WikiPage> testingContent = new ArrayList<>();
+            WikiPage wikiPage = new WikiPage();
+            wikiPage.setTitle("test");
+            testingContent.add(wikiPage);
+            PlayListFragment playListFragment = new PlayListFragment(testingContent);
+            playListsFragmentAdapter.addFrag(playListFragment);
+        }
+        ViewPager viewPager =
+                findViewById(R.id.view_pager);
+        viewPager.setAdapter(playListsFragmentAdapter);
+        TabLayout tabs = findViewById(R.id.tabs);
+        tabs.setupWithViewPager(viewPager);
+        int counter = 0;
+        for(String category: chosenCategories) // todo - not best. we do this twice.
+        {
+            tabs.getTabAt(counter).setText(category);
+            counter++;
+        }
+    }
+
+
+    private void testChooseCategoriesActivity() {
+        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
+        startActivity(intent);
     }
 
     private void testWikiRecordActivity() {
@@ -264,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 locationHandler.markWikipagesNearby(wikipedia);
             }
-       }
+        }
     }
 
     //TODO
@@ -338,4 +380,5 @@ public class MainActivity extends AppCompatActivity implements
 //        TODO transfer to wikipage activity
         Toast.makeText(activity, "You clicked on wikipage: " + marker.getTitle(), Toast.LENGTH_SHORT).show();
     }
+
 }
