@@ -3,9 +3,11 @@ package com.example.wikiaudio.activates;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -25,17 +27,12 @@ import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -64,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Boolean mLocationPermissionGranted = false;
     private Boolean isGPSEnabled = false;
+    private Boolean mapWasInit= false;
     private GoogleMap mMap;
     LocationHandler locationHandler;
 
@@ -183,7 +181,10 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }
                 mLocationPermissionGranted = true;
-                onMapReady(mMap);
+                if (!mapWasInit) {
+                    Log.d(TAG, "onRequestPermissionsResult: map was not init, initing it now");
+                    onMapReady(mMap);
+                }
             } else {
                 // explain why we need these permissions
                 Toast.makeText(activity,
@@ -205,19 +206,20 @@ public class MainActivity extends AppCompatActivity implements
         if (mMap == null) {
             Log.d(TAG, "onMapReady: google map is null; map related actions will not work");
         } else {
-            if (mLocationPermissionGranted) {
+            if (mLocationPermissionGranted && !mapWasInit) {
 //                Log.d(TAG, "onMapReady: google map is NOT null & we have perm");
                 mMap.setOnMyLocationButtonClickListener(this);
                 mMap.setOnMyLocationClickListener(this);
                 mMap.setOnInfoWindowClickListener(this);
 
                 locationHandler = new LocationHandler(activity, mMap);
-                GPSEnabler(); //TODO
+                isLocationEnabled();
                 initUserLocationAndMap();
             } else {
                 //request permissions
                 Log.d(TAG, "onMapReady: google map is NOT null & we DON'T have perm");
                 requestLocationPermission();
+                mapWasInit = false;
             }
         }
     }
@@ -239,44 +241,40 @@ public class MainActivity extends AppCompatActivity implements
      */
     @SuppressLint("MissingPermission")
     private void initUserLocationAndMap() {
-        if (mMap != null) {
-            //Add here any action that you would like to appear as soon as the map opens if
-            //we have the user's location
-            Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
+        if (mMap != null && mLocationPermissionGranted) {
+            //Add here any action that you would like to appear as soon as the map opens
+//            Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
             mMap.setMyLocationEnabled(true);
 
             //Zoom to user's location + show nearby Wikipages
-            LatLng currentLatLng = locationHandler.getCurrentLocation();
-            if (currentLatLng != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                locationHandler.markWikipagesNearby(wikipedia);
+            if (isGPSEnabled) {
+                LatLng currentLatLng = locationHandler.getCurrentLocation();
+                if (currentLatLng != null) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                    locationHandler.markWikipagesNearby(wikipedia);
+                }
             }
         }
     }
 
-    //TODO
-    private void GPSEnabler() {
-        LocationServices
-                .getSettingsClient(activity)
-                .checkLocationSettings(new LocationSettingsRequest.Builder().build())
-                .addOnSuccessListener(activity,
-                        new OnSuccessListener<LocationSettingsResponse>()
-                        {
-                            @Override
-                            public void onSuccess(LocationSettingsResponse
-                                                          locationSettingsResponse) {
-                                isGPSEnabled = true;
-                                Log.d(TAG, "GPSEnabler: GPS IS ON");
-                            }
-                        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        isGPSEnabled = false;
-                        Log.d(TAG, "GPSEnabler: GPS IS OFF");
-                        Toast.makeText(activity, "Please enable your GPS for location services", Toast.LENGTH_LONG).show();
-                    }
-                });
+    /**
+     * Checks if location services are on.
+     * If not, displays a request to turn them on.
+     */
+    public void isLocationEnabled() {
+        LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        if (lm == null) {
+            isGPSEnabled = false;
+            Log.d(TAG, "GPSEnabler: null locationManager, something went wrong");
+        } else {
+            isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            if (!isGPSEnabled) {
+                Toast.makeText(activity, "Please enable your GPS for location services",
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Log.d(TAG, "GPSEnabler: GPS is Enabled");
+            }
+        }
     }
 
     /**
@@ -296,11 +294,7 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onMyLocationButtonClick() {
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
-        if (!isGPSEnabled) {
-            //TODO
-            Toast.makeText(activity, "Please enable your GPS for location services",
-                    Toast.LENGTH_LONG).show();
-        }
+        isLocationEnabled();
         return false;
     }
     /**
@@ -332,3 +326,4 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 }
+
