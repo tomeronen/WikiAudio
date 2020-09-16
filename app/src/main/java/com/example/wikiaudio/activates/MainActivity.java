@@ -111,15 +111,29 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onResume(){
         super.onResume();
-
         // todo change to set? what happens if we take down and add again. order changes.
-        if(chosenCategories != ((WikiAudioApp)getApplication()).getAppData().getChosenCategories())
+        boolean diff = false;
+        if(tabs != null)
         {
-            // reload playlists
-            loadPlayLists();
+            int tabCount = tabs.getTabCount();
+            if(tabCount != chosenCategories.size())
+            {
+                loadPlayLists();
+                return;
+            }
         }
 
-    }
+//        for (int i =0; i < tabCount; i++)
+//        {
+//
+//        }
+//        if(chosenCategories != ((WikiAudioApp)getApplication()).getAppData().getChosenCategories())
+//        {
+//             reload playlists
+//            loadPlayLists();
+//        }
+
+        }
 
     private void setOnClickButtons() {
         chooseCategories.setOnClickListener(new View.OnClickListener() {
@@ -150,10 +164,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void loadPlayLists() {
+        loadingIcon.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                loadingIcon.setVisibility(View.VISIBLE);
                 final PlayListsFragmentAdapter playListsFragmentAdapter =
                         new PlayListsFragmentAdapter(getSupportFragmentManager());
                 chosenCategories = ((WikiAudioApp) getApplication())
