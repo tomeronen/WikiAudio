@@ -1,15 +1,7 @@
 package com.example.wikiaudio.activates.record_page;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GestureDetectorCompat;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -21,25 +13,29 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GestureDetectorCompat;
+
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.audio_recoder.VoiceRecorderOptionB;
 import com.example.wikiaudio.file_manager.FileManager;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
-import java.io.IOException;
-
 public class WikiRecordActivity extends AppCompatActivity {
 
     private static final int REQ_RECORD_PERMISSION = 12;
-    public static final String WIKI_PAGE_TAG = "wikiPageTag" ;
-    TextView wikiPageView;
+    public static final String WIKI_PAGE_TAG = "WikipageTag" ;
+    TextView WikipageView;
     ProgressBar progressBar;
     FloatingActionButton recordButton;
     AppCompatActivity activity;
-    WikiPage wikiPage;
+    Wikipage Wikipage;
     FileManager fileManager;
     private GestureDetectorCompat gestureDetectorCompat = null;
     private VoiceRecorderOptionB recorder;
@@ -54,22 +50,22 @@ public class WikiRecordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wiki_recored_acrivaty);
-        wikiPageView = findViewById(R.id.wikiPage);
+        WikipageView = findViewById(R.id.Wikipage);
         progressBar = findViewById(R.id.progressBar);
         recordButton = findViewById(R.id.recoredButton);
         fileManager = new FileManager(this);
         recorder = new VoiceRecorderOptionB();
         format  = recorder.format;
         Gson gson = new Gson();
-        wikiPage = gson.fromJson(getIntent()
-                                                .getStringExtra(WIKI_PAGE_TAG), WikiPage.class);
+        Wikipage = gson.fromJson(getIntent()
+                .getStringExtra(WIKI_PAGE_TAG), Wikipage.class);
         int paragraphAmount = 0;
-        for(WikiPage.Section section: wikiPage.getSections())
+        for(Wikipage.Section section: Wikipage.getSections())
         {
             paragraphAmount += section.getContents().size();
 
         }
-        progressBar.setMax(wikiPage.numberOfSections() + paragraphAmount +  - 1); // '-1' - we start at zero.
+        progressBar.setMax(Wikipage.numberOfSections() + paragraphAmount +  - 1); // '-1' - we start at zero.
         loadWikiDataToView(curSection, curParagraph);
         activity = this;
         setOnRecordButton();
@@ -81,7 +77,7 @@ public class WikiRecordActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d("Swipe Detector", "left");
                 ++curParagraph;
-                if(curParagraph > wikiPage.getSection(curSection).getContents().size())
+                if(curParagraph > Wikipage.getSection(curSection).getContents().size())
                 { // got to end of section
                     curParagraph = 0;
                     curSection++;
@@ -100,7 +96,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                     if(curSection > 0)
                     {
                         curSection--;
-                        curParagraph = wikiPage.getSection(curSection).getContents().size();
+                        curParagraph = Wikipage.getSection(curSection).getContents().size();
                     }
                     else
                     {
@@ -114,7 +110,7 @@ public class WikiRecordActivity extends AppCompatActivity {
 
         // todo there is a problem with swipe
 //        setSwipeDetector();
-        }
+    }
 
     private void setSwipeDetector() {
         SwipeFunctions sf = new SwipeFunctions() {
@@ -131,7 +127,7 @@ public class WikiRecordActivity extends AppCompatActivity {
 
             @Override
             public void onLeftSwipe() {
-                if(curSection + 1 < wikiPage.numberOfSections())
+                if(curSection + 1 < Wikipage.numberOfSections())
                 {
                     Log.d("Swipe Detector", "left");
                     ++curSection;
@@ -145,12 +141,12 @@ public class WikiRecordActivity extends AppCompatActivity {
 
 
         this.gestureDetectorCompat = new GestureDetectorCompat(this, gestureListener);
-        this.wikiPageView.setOnTouchListener(new View.OnTouchListener() {
+        this.WikipageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 Log.d("touch", "was touched");
                 gestureDetectorCompat.onTouchEvent(event);
-                return wikiPageView.onTouchEvent(event);
+                return WikipageView.onTouchEvent(event);
             }
         });
     }
@@ -158,12 +154,12 @@ public class WikiRecordActivity extends AppCompatActivity {
     private void loadWikiDataToView(int curSection, int curParagraph) {
         if(curParagraph == 0)
         {
-            wikiPageView.setText(wikiPage.getSection(curSection).getTitle());
+            WikipageView.setText(Wikipage.getSection(curSection).getTitle());
         }
         else
         {
-            wikiPageView.setText(
-                    wikiPage.getSection(curSection).getContents().get(curParagraph - 1));
+            WikipageView.setText(
+                    Wikipage.getSection(curSection).getContents().get(curParagraph - 1));
         }
     }
 
@@ -174,12 +170,12 @@ public class WikiRecordActivity extends AppCompatActivity {
                 boolean havePermissions = checkRecordingPermissions();
 //                VoiceRecorder voiceRecorder  = new VoiceRecorder(fp, activity);
                 if (startRecording && havePermissions) {
-                        startRecording = false;
-                        startBlinkingAnimation(recordButton);
-                        String fp = fileManager.getFilePath(wikiPage.getTitle(),
-                                                                curSection,
-                                                                curParagraph)
-                                + "." + recorder.format;
+                    startRecording = false;
+                    startBlinkingAnimation(recordButton);
+                    String fp = fileManager.getFilePath(Wikipage.getTitle(),
+                            curSection,
+                            curParagraph)
+                            + "." + recorder.format;
                     recorder.startRecording(fp);
                 } else if (!havePermissions) {
                     ActivityCompat.requestPermissions(activity,
@@ -192,7 +188,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                     stopBlinkingAnimation(recordButton);
                     recorder.stopRecording();
                     Wikipedia wikipedia = new Wikipedia(activity);
-                    String fp = fileManager.getFilePath(wikiPage.getTitle(),
+                    String fp = fileManager.getFilePath(Wikipage.getTitle(),
                             curSection,
                             curParagraph)
                             + "." + recorder.format;
@@ -226,7 +222,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                         grantResults[1] == PackageManager.PERMISSION_GRANTED &&
                         grantResults[2] == PackageManager.PERMISSION_GRANTED) {
-                        // TODO - START RECORDING OUR MAKE PRESS AGAIN?
+                    // TODO - START RECORDING OUR MAKE PRESS AGAIN?
 
                 } else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this,

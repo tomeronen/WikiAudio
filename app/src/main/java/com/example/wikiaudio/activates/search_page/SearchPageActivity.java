@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WikipediaPlayer;
 import com.example.wikiaudio.wikipedia.WorkerListener;
@@ -46,7 +46,7 @@ public class SearchPageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String textToSearch = searchText.getText().toString();
-                final List<WikiPage> results = new ArrayList<>();
+                final List<Wikipage> results = new ArrayList<>();
                 wikipedia.searchForPage(textToSearch, null, results,
                         new WorkerListener() {
                     @Override
@@ -55,18 +55,18 @@ public class SearchPageActivity extends AppCompatActivity {
                                 new ResultClickListeners() {
                                     @Override
                                     public void onClick(String string) {
-                                        final WikiPage wikiPage = new WikiPage();
+                                        final Wikipage Wikipage = new Wikipage();
                                         List<PageAttributes> pageAttributes = new ArrayList<>();
                                         pageAttributes.add(PageAttributes.audioUrl);
                                         pageAttributes.add(PageAttributes.content);
                                         pageAttributes.add(PageAttributes.title);
-                                        wikipedia.getWikiPage(string, pageAttributes, wikiPage,
+                                        wikipedia.getWikipage(string, pageAttributes, Wikipage,
                                                 new WorkerListener() {
                                             @Override
                                             public void onSuccess() {
                                                 WikipediaPlayer wikipediaPlayer
                                                         = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
-                                                wikipediaPlayer.playWiki(wikiPage);
+                                                wikipediaPlayer.playWiki(Wikipage);
                                             }
 
                                             @Override

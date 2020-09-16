@@ -45,7 +45,7 @@
         app:srcCompat="@drawable/three_dots" />
 
     <TextView
-        android:id="@+id/wikiPage"
+        android:id="@+id/Wikipage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"

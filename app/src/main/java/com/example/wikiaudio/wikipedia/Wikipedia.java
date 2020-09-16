@@ -42,7 +42,7 @@ public class Wikipedia {
      */
     public void searchForPage(final String pageName,
                            final List<PageAttributes> attributes,
-                           final List<WikiPage> listToFill,
+                           final List<Wikipage> listToFill,
                            final WorkerListener workerListener)
     {
         new Thread(new Runnable() {
@@ -72,19 +72,19 @@ public class Wikipedia {
     }
 
     /**
-     * gets wikiPages nearby the given coordinates. if successful,
+     * gets Wikipages nearby the given coordinates. if successful,
      * fills the 'listToFill' with found pages. And then runs workerListener.
      * @param latitude the latitude to preform the search on.
      * @param longitude the longitude to preform the search on.
      * @param radius the radius from coordinates to search in.
-     * @param listToFill the wikiPage list to be filled with results.
+     * @param listToFill the Wikipage list to be filled with results.
      * @param pageAttributes the attributes to get on each wiki page found.
      * @param workerListener what to do if task fails or is successful.
      */
     public void getPagesNearby(final double latitude,
                                final double longitude,
                                final int radius,
-                               final List<WikiPage> listToFill,
+                               final List<Wikipage> listToFill,
                                final List<PageAttributes> pageAttributes,
                                final WorkerListener workerListener)
     {
@@ -92,7 +92,7 @@ public class Wikipedia {
             @Override
             public void run() {
                 try {
-                    List<WikiPage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
+                    List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
                             longitude,
                             radius,
                             pageAttributes);
@@ -226,9 +226,9 @@ public class Wikipedia {
      * @param pageToFill the wiki page to fill with the data.
      * @param workerListener what to do if task fails or is successful.
      */
-    public void getWikiPage(final String name,
+    public void getWikipage(final String name,
                             final List<PageAttributes> pageAttributes,
-                            final WikiPage pageToFill,
+                            final Wikipage pageToFill,
                             final WorkerListener workerListener)
     {
         new Thread(new Runnable() {

@@ -1,5 +1,4 @@
 package com.example.wikiaudio.activates;
-
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -7,6 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.work.WorkManager;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.Data;
 import androidx.work.WorkManager;
 
 import android.Manifest;
@@ -19,13 +25,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.wikiaudio.R;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.work.WorkManager;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.choose_categories.
+import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
+import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
@@ -41,6 +55,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.wikiaudio.activates.search_page.SearchPageActivity;
+import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Marker;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -90,11 +112,15 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         loadPlayLists();
         initVars();
         initMap();
+
+        // testWikiRecordActivity();
+
     }
 
     private void loadPlayLists() {
@@ -125,14 +151,12 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
     private void testChooseCategoriesActivity() {
         Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
         startActivity(intent);
-    }
 
     private void testWikiRecordActivity() {
-        final WikiPage testPage = new WikiPage();
+        final Wikipage testPage = new Wikipage();
         String pageName = "Hurricane_Irene_(2005)";
         List<PageAttributes> pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
@@ -149,10 +173,8 @@ public class MainActivity extends AppCompatActivity implements
                         intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
                         startActivity(intent);
                     }
-
                     @Override
                     public void onFailure() {
-
                     }
                 }
         );
@@ -306,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                 locationHandler.markWikipagesNearby(wikipedia);
             }
-        }
+       }
     }
 
     //TODO
@@ -376,9 +398,16 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-//        WikiPage tag = (WikiPage) marker.getTag();
-//        TODO transfer to wikipage activity
-        Toast.makeText(activity, "You clicked on wikipage: " + marker.getTitle(), Toast.LENGTH_SHORT).show();
+        Wikipage tag = (Wikipage) marker.getTag();
+        if (tag != null) {
+            String title = tag.getTitle();
+            Intent WikipageIntent = new Intent(this, WikipageActivity.class);
+            WikipageIntent.putExtra("title", title);
+            startActivity(WikipageIntent);
+        } else {
+            Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
+        }
     }
+}
 
 }

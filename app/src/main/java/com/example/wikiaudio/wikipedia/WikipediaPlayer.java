@@ -30,20 +30,20 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
 
     /**
      * plays the given wiki
-     * @param wikiPage
+     * @param Wikipage
      */
-    public void playWiki(WikiPage wikiPage)
+    public void playWiki(Wikipage Wikipage)
     {
         if(playingTextToSpeach || playingUrl) {
             // already playing
             stopPlaying();
         }
-        if(wikiPage.getAudioUrl() != null && !wikiPage.getAudioUrl().equals("")) {
+        if(Wikipage.getAudioUrl() != null && !Wikipage.getAudioUrl().equals("")) {
             // has audio source;
             Log.d("start playing", "from url source");
             playingUrl = true;
             try {
-                    String audioUrl = wikiPage.getAudioUrl();
+                    String audioUrl = Wikipage.getAudioUrl();
                     mp.setDataSource(audioUrl);
                     mp.prepare();
                     mp.start();
@@ -56,7 +56,7 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
             Log.d("start playing", "from text to speech");
             playingTextToSpeach = true;
             playingTextToSpeach = true;
-            String fullText = wikiPage.getFullText();
+            String fullText = Wikipage.getFullText();
             textToSpeak = fullText;
             engine = new TextToSpeech(context, this);
         }

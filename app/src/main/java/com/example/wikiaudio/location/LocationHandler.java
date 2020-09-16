@@ -16,7 +16,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WorkerListener;
 
@@ -104,16 +104,16 @@ public class LocationHandler {
     }
 
     /**
-     * Marks the given wikipage object on the map using its title and coordinates
-     * @param wikiPage the article we would like to mark
+     * Marks the given Wikipage object on the map using its title and coordinates
+     * @param Wikipage the article we would like to mark
      */
-    public void markLocation(WikiPage wikiPage) {
-        if (wikiPage != null) {
-            LatLng latLng = new LatLng(wikiPage.getLat(), wikiPage.getLon());
+    public void markLocation(Wikipage Wikipage) {
+        if (Wikipage != null) {
+            LatLng latLng = new LatLng(Wikipage.getLat(), Wikipage.getLon());
             mMap.addMarker(new MarkerOptions()
-                                    .position(latLng).title(wikiPage.getTitle())).setTag(wikiPage);
+                                    .position(latLng).title(Wikipage.getTitle())).setTag(Wikipage);
         } else {
-            Log.d(TAG, "markLocation: got null wikipage object");
+            Log.d(TAG, "markLocation: got null Wikipage object");
         }
     }
 
@@ -131,7 +131,7 @@ public class LocationHandler {
         double lat = currentLocation.latitude;
         double lng = currentLocation.longitude;
 
-        final List<WikiPage> pagesNearby = new ArrayList<>();
+        final List<Wikipage> pagesNearby = new ArrayList<>();
         ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.coordinates);
@@ -143,7 +143,7 @@ public class LocationHandler {
                     @Override
                     public void onSuccess() {
                         Log.d(TAG,"markWikipagesNearby-WorkerListener-onSuccess: we found pages nearby!");
-                        for(WikiPage page:pagesNearby) {
+                        for(Wikipage page:pagesNearby) {
                             markLocation(page);
                         }
 
