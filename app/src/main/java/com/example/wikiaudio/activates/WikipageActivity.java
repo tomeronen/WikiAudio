@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WikipageActivity extends AppCompatActivity {
-    //For logs
     private static final String TAG = "WikipageActivity";
 
     private AppCompatActivity activity;
@@ -35,11 +34,10 @@ public class WikipageActivity extends AppCompatActivity {
     private List<PageAttributes> pageAttributes;
     private Wikipage wikipage;
 
-    private FloatingActionButton recordButton;
-    private TextView background;
-    private WebView webView;
     private TextView articleTitle;
     private ImageView articleImage;
+    private WebView webView;
+    private FloatingActionButton recordButton;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -59,22 +57,29 @@ public class WikipageActivity extends AppCompatActivity {
         setLoadingScreen();
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     */
     private void initVars() {
         activity = this;
         loadingHelper = LoadingHelper.getInstance();
-        articleTitle = (TextView) findViewById(R.id.title);
-        background = (TextView) findViewById(R.id.webBackground);
-        webView = (WebView) findViewById(R.id.webView);
-        articleImage = (ImageView) findViewById(R.id.image);
-        recordButton = (FloatingActionButton) findViewById(R.id.floatingRecordButton);
+
+        articleTitle = findViewById(R.id.title);
+        webView = findViewById(R.id.webView);
+        articleImage = findViewById(R.id.image);
+        recordButton = findViewById(R.id.floatingRecordButton);
+
+        wikipage = new Wikipage();
         wikipedia = new Wikipedia(this);
         pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.url);
-        wikipage = new Wikipage();
     }
 
+    /**
+     * Fetches the wikipage object from the wiki server
+     */
     private void fetchWikipage() {
         wikipedia.getWikipage(title, pageAttributes, wikipage, new WorkerListener() {
             @Override
@@ -89,6 +94,9 @@ public class WikipageActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Transfers to the loading screen activity while we fetch the wikipage object from the wiki server
+     */
     private void setLoadingScreen(){
         int index = loadingHelper.loadWikipage(wikipage);
         if (index == -1) {
@@ -100,18 +108,20 @@ public class WikipageActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     */
 //    Because WebView consumes web content that can include HTML and JavaScript, which may cause
 //    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
 //    which is a form of hacking and by enabling client-side script into WebView which user is
 //    accessing from application and this way you are opening up your application to such attacks.
-    //I enabled it so the user can actually view the page and not be redirected to the google
-    // chrome app. We should consider changing this.
+//    I enabled it so the user can actually view the page and not be redirected to the google
+//    chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
         if (wikipage.getTitle() == null || wikipage.getUrl() == null) {
             Log.d(TAG, "setLayout: got null title or url");
         }
-
         //Title
         articleTitle.setText(wikipage.getTitle());
 

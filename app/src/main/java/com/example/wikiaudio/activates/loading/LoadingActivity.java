@@ -12,29 +12,28 @@ import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.Wikipage;
 
 public class LoadingActivity extends Activity {
-    //Introduce a delay
-    private final int WAIT_TIME = 30;
     private static final String TAG = "LoadingActivity";
+    private final int WAIT_TIME = 30;
 
     private TextView txtProgress;
     private ProgressBar progressBar;
-    private Wikipage wikipage;
 
     private int pStatus = 0;
     private int waitTime = WAIT_TIME;
+    private int index;
 
+    private Wikipage wikipage;
     private Handler handler = new Handler();
     private LoadingHelper loadingHelper = LoadingHelper.getInstance();
 
-    private int index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
-        txtProgress = (TextView) findViewById(R.id.txtProgress);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        txtProgress = findViewById(R.id.txtProgress);
+        progressBar = findViewById(R.id.progressBar);
 
         Intent intent = getIntent();
         index = intent.getIntExtra("index", -1);
@@ -58,6 +57,9 @@ public class LoadingActivity extends Activity {
                         }
                         Thread.sleep(waitTime);
                         if (pStatus == 100) {
+                            if (wikipage.getTitle() == null) {
+                                Log.d(TAG, "onCreate-progressBar: wiki server is taking too long");
+                            }
                             finish();
                         }
                     } catch (InterruptedException e) {
@@ -70,6 +72,9 @@ public class LoadingActivity extends Activity {
 
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     */
     private void fetchWikipage(){
         if (index == -1) {
             Log.d(TAG, "onCreate: got error wikipage index");
@@ -77,7 +82,7 @@ public class LoadingActivity extends Activity {
         }
         wikipage = loadingHelper.getWikipageByIndex(index);
         if (wikipage == null){
-            Log.d(TAG, "onCreate: got error wikipage element");
+            Log.d(TAG, "onCreate: got an error while getting wikipage element");
             finish();
         }
     }
@@ -85,7 +90,8 @@ public class LoadingActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (index == -1 || !loadingHelper.removeWikipage(index)){
+        //Make sure to delete the "waiting" wikipage
+        if (!loadingHelper.removeWikipageByElement(wikipage)){
             Log.d(TAG, "onDestroy: got an error for deleting wikipage from LoadingHelper");
         }
     }
