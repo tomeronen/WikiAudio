@@ -13,7 +13,7 @@
         <activity android:name=".activates.choose_categories.ChooseCategoriesActivity" />
         <activity android:name=".activates.search_page.SearchPageActivity" />
         <activity android:name=".activates.record_page.WikiRecordActivity" />
-        <activity android:name=".activates.WikiPageActivity" />
+        <activity android:name=".activates.WikipageActivity" />
         <activity android:name=".activates.MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
@@ -23,6 +23,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activates.search_page.SearchPageActivity" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

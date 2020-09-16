@@ -5,14 +5,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.work.WorkManager;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.work.Data;
 import androidx.work.WorkManager;
 
 import android.Manifest;
@@ -21,22 +13,18 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.work.WorkManager;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.choose_categories.
-import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
+import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.file_manager.FileManager;
+import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.Wikipage;
@@ -55,31 +43,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.Marker;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.example.wikiaudio.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.viewpager.widget.ViewPager;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-
-import com.example.wikiaudio.activates.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -108,76 +79,130 @@ public class MainActivity extends AppCompatActivity implements
     LocationHandler locationHandler;
     ArrayList<PlayListFragment> playLists = new ArrayList<>();
     private List<String> chosenCategories;
-
+    ImageButton chooseCategories;
+    SearchView searchBar;
+    private TabLayout tabs;
+    private ProgressBar loadingIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         WorkManager.getInstance(this).cancelAllWork();  // todo debug
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        loadPlayLists();
         initVars();
         initMap();
+        setOnClickButtons();
+        loadPlayLists();
 
         // testWikiRecordActivity();
 
     }
 
-    private void loadPlayLists() {
-        PlayListsFragmentAdapter playListsFragmentAdapter =
-                new PlayListsFragmentAdapter(getSupportFragmentManager());
-        chosenCategories  = ((WikiAudioApp) getApplication())
-                .getAppData().getChosenCategories();
-        chosenCategories.add("pages Nearby");
-        for(String category: chosenCategories)
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        // todo change to set? what happens if we take down and add again. order changes.
+        if(chosenCategories != ((WikiAudioApp)getApplication()).getAppData().getChosenCategories())
         {
-            List<WikiPage> testingContent = new ArrayList<>();
-            WikiPage wikiPage = new WikiPage();
-            wikiPage.setTitle("test");
-            testingContent.add(wikiPage);
-            PlayListFragment playListFragment = new PlayListFragment(testingContent);
-            playListsFragmentAdapter.addFrag(playListFragment);
+            // reload playlists
+            loadPlayLists();
         }
-        ViewPager viewPager =
-                findViewById(R.id.view_pager);
-        viewPager.setAdapter(playListsFragmentAdapter);
-        TabLayout tabs = findViewById(R.id.tabs);
-        tabs.setupWithViewPager(viewPager);
-        int counter = 0;
-        for(String category: chosenCategories) // todo - not best. we do this twice.
-        {
-            tabs.getTabAt(counter).setText(category);
-            counter++;
-        }
+
     }
 
-    private void testChooseCategoriesActivity() {
-        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
-        startActivity(intent);
+    private void setOnClickButtons() {
+        chooseCategories.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent chooseCategoriesIntent =  new Intent(activity,
+                        ChooseCategoriesActivity.class);
+                startActivity(chooseCategoriesIntent);
+            }
+        });
 
-    private void testWikiRecordActivity() {
-        final Wikipage testPage = new Wikipage();
-        String pageName = "Hurricane_Irene_(2005)";
-        List<PageAttributes> pageAttributes = new ArrayList<>();
-        pageAttributes.add(PageAttributes.title);
-        pageAttributes.add(PageAttributes.content);
-        wikipedia.getWikiPage(pageName,
-                pageAttributes,
-                testPage,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        Intent intent = new Intent(activity, WikiRecordActivity.class);
-                        Gson gson = new Gson();
-                        String wiki = gson.toJson(testPage);
-                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
-                        startActivity(intent);
-                    }
-                    @Override
-                    public void onFailure() {
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Intent searchWikipageIntent =
+                        new Intent(activity, SearchPageActivity.class);
+                searchWikipageIntent.putExtra(SearchPageActivity.SEARCH_TAG,
+                        query);
+                startActivity(searchWikipageIntent);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+    }
+
+    private void loadPlayLists() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadingIcon.setVisibility(View.VISIBLE);
+                final PlayListsFragmentAdapter playListsFragmentAdapter =
+                        new PlayListsFragmentAdapter(getSupportFragmentManager());
+                chosenCategories = ((WikiAudioApp) getApplication())
+                        .getAppData().getChosenCategories();
+                final int[] threadsFinished = {0};
+                for (String category : chosenCategories) {
+                    final List<String> playListNames = new ArrayList<>();
+                    wikipedia.loadSpokenPagesNamesByCategories(category, playListNames,
+                            new WorkerListener() {
+                                @Override
+                                public void onSuccess() {
+
+                                    List<Wikipage> playListContent = new ArrayList<>();
+                                    for (String pageName : playListNames) {
+                                        Wikipage wikipage = new Wikipage();
+                                        wikipage.setTitle(pageName);
+                                        playListContent.add(wikipage);
+
+                                    }
+                                    PlayListFragment playListFragment
+                                            = new PlayListFragment(playListContent);
+                                    playListsFragmentAdapter.addFrag(playListFragment);
+                                    threadsFinished[0]++;
+                                }
+
+                                @Override
+                                public void onFailure() {
+                                    threadsFinished[0]++;
+                                }
+                            });
+                    if (category == "pages Nearby") {
+                        List<Wikipage> testingContent = new ArrayList<>();
+                        Wikipage wikiPage = new Wikipage();
+                        wikiPage.setTitle("test");
+                        testingContent.add(wikiPage);
+                        PlayListFragment playListFragment = new PlayListFragment(testingContent);
+                        playListsFragmentAdapter.addFrag(playListFragment);
                     }
                 }
-        );
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewPager viewPager =
+                                findViewById(R.id.view_pager);
+                        viewPager.setAdapter(playListsFragmentAdapter);
+                        tabs = findViewById(R.id.tabs);
+                        tabs.setupWithViewPager(viewPager);
+                        int counter = 0;
+                        for (String category : chosenCategories) // todo - not best. we do this twice.
+                        {
+                            tabs.getTabAt(counter).setText(category);
+                            counter++;
+                        }
+                        loadingIcon.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
     }
 
     /**
@@ -185,6 +210,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         //Check for location perms
+
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -193,6 +219,9 @@ public class MainActivity extends AppCompatActivity implements
                         == PackageManager.PERMISSION_GRANTED;
         activity = this;
         wikipedia = new Wikipedia(this);
+        chooseCategories = findViewById(R.id.chooseCategories);
+        searchBar = findViewById(R.id.search_bar);
+        loadingIcon = findViewById(R.id.progressBar4);
     }
 
     /**
@@ -408,6 +437,36 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
         }
     }
+
+
+    private void testChooseCategoriesActivity() {
+        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
+        startActivity(intent);
+    }
+
+    private void testWikiRecordActivity() {
+        final Wikipage testPage = new Wikipage();
+        String pageName = "Hurricane_Irene_(2005)";
+        List<PageAttributes> pageAttributes = new ArrayList<>();
+        pageAttributes.add(PageAttributes.title);
+        pageAttributes.add(PageAttributes.content);
+        wikipedia.getWikipage(pageName,
+                pageAttributes,
+                testPage,
+                new WorkerListener() {
+                    @Override
+                    public void onSuccess() {
+                        Intent intent = new Intent(activity, WikiRecordActivity.class);
+                        Gson gson = new Gson();
+                        String wiki = gson.toJson(testPage);
+                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+                        startActivity(intent);
+                    }
+                    @Override
+                    public void onFailure() {
+                    }
+                }
+        );
+    }
 }
 
-}

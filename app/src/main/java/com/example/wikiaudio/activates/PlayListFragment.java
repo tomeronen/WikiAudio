@@ -13,7 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class PlayListFragment extends Fragment{
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private List<WikiPage> contents;
+    private List<Wikipage> contents;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -34,7 +35,7 @@ public class PlayListFragment extends Fragment{
     }
 
 
-    public PlayListFragment(List<WikiPage> contents) {
+    public PlayListFragment(List<Wikipage> contents) {
         this.contents = contents;
     }
 

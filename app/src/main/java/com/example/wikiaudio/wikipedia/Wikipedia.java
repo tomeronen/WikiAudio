@@ -9,6 +9,12 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 import com.google.gson.internal.LinkedTreeMap;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,38 +190,92 @@ public class Wikipedia {
 //                });
     }
 
-    public UUID loadSpokenPagesByCategories(ComponentActivity ownerActivity,
-                                            final String category,
-                                            List<PageAttributes> p,
+    /**
+     *
+     * @param category
+     * @param result
+     * @param workerListener
+     */
+    public void loadSpokenPagesNamesByCategories(final String category,
+                                            final List<String> result,
                                             final WorkerListener workerListener)
     {
-        WorkRequest loadSpokenCategoriseWorkerReq =
-                new OneTimeWorkRequest
-                        .Builder(loadSpokenPagesByCategoriseWorker.class)
-                        .setInputData(new Data.Builder()
-                        .putString(loadSpokenPagesByCategoriseWorker.categoryTag, category).build())
-                        .build();
-        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
-        // todo is activity a life cycle owner?
-        WorkManager.getInstance(ownerActivity)
-                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
-                .observe((LifecycleOwner) activ, new Observer<WorkInfo>() {
-                    @Override
-                    public void onChanged(WorkInfo workInfo) {
-                        if(workInfo.getState() == WorkInfo.State.SUCCEEDED)
-                        {
-                            activ.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    workerListener.onSuccess();
-                                }
-                            });
-                        }
+        try {
+        List<String> pageNames = new ArrayList<>();
+        String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
+        Document doc = null;
+            doc = Jsoup.connect(url).get();
+        Elements elements = doc.select(".mw-headline, li");
+        for (int i = 1; i < elements.size(); i++) {
+            Element curElement = elements.get(i);
+            if ("mw-headline".equals(curElement.className()) && curElement.text().equals(category))
+            {
+                ++i;
+                curElement = elements.get(i);
+                while(i < elements.size() && !"mw-headline".equals(curElement.className()))
+                {
+                    result.add(curElement.text());
+                    ++i;
+                    curElement = elements.get(i);
+                }
+                break;
+            }
+        }
+        workerListener.onSuccess();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    result.addAll(WikiServerHolder.callGetSpokenPagesNamesByCategories(category));
+//                    activ.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            workerListener.onSuccess();
+//                        }
+//                    });
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    activ.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            workerListener.onFailure();
+//                        }
+//                    });
+//                }
+//            }
+//        }).start();
 
-
-                    }
-                });
-        return loadSpokenCategoriseWorkerReq.getId();
+//        option with worker:
+//        WorkRequest loadSpokenCategoriseWorkerReq =
+//                new OneTimeWorkRequest
+//                        .Builder(loadSpokenPagesByCategoriseWorker.class)
+//                        .setInputData(new Data.Builder()
+//                        .putString(loadSpokenPagesByCategoriseWorker.categoryTag, category).build())
+//                        .build();
+//        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
+//        // todo is activity a life cycle owner?
+//        WorkManager.getInstance(ownerActivity)
+//                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
+//                .observe((LifecycleOwner) activ, new Observer<WorkInfo>() {
+//                    @Override
+//                    public void onChanged(WorkInfo workInfo) {
+//                        if(workInfo.getState() == WorkInfo.State.SUCCEEDED)
+//                        {
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    workerListener.onSuccess();
+//                                }
+//                            });
+//                        }
+//
+//
+//                    }
+//                });
+//        return loadSpokenCategoriseWorkerReq.getId();
     }
 
 

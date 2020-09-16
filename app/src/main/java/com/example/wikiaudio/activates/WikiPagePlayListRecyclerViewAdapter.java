@@ -8,19 +8,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.wikipedia.WikiPage;
+import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link WikiPage}.
+ * {@link RecyclerView.Adapter} that can display a {@link Wikipage}.
  */
 public class WikiPagePlayListRecyclerViewAdapter
         extends RecyclerView.Adapter<WikiPagePlayListRecyclerViewAdapter.WikiPageViewHolder> {
 
-    private List<WikiPage> mValues = new ArrayList<>();
-    public WikiPagePlayListRecyclerViewAdapter(List<WikiPage> items) {
+    private List<Wikipage> mValues = new ArrayList<>();
+    public WikiPagePlayListRecyclerViewAdapter(List<Wikipage> items) {
         mValues = items;
     }
 
@@ -41,14 +42,21 @@ public class WikiPagePlayListRecyclerViewAdapter
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        if(mValues != null)
+        {
+            return mValues.size();
+        }
+        else
+        {
+            return 0;
+        }
     }
 
 
     public class WikiPageViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mContentView;
-        public WikiPage mItem;
+        public Wikipage mItem;
 
         public WikiPageViewHolder(View view) {
             super(view);

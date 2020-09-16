@@ -48,7 +48,6 @@ public class WikiServerHolder {
     static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
     private static final String BASE_URL = "https://en.wikipedia.org";
     private static WikiServerHolder instance = null;
-    private static FileManager fileManager;
     private final WikiServer server;
 
     public synchronized static WikiServerHolder getInstance(){
