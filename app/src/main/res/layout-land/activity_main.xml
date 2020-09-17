@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-    <fragment
-        android:id="@+id/fragmentMap"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
+    <ImageButton
+        android:id="@+id/chooseCategories"
+        android:layout_width="44dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/view_pager"
-        app:layout_constraintTop_toBottomOf="@+id/tabs"
-        tools:context="com.example.wikiaudio.activates.MainActivity" />
+        android:background="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/view_pager"
+        app:layout_constraintEnd_toStartOf="@id/fragmentMap"
+        app:layout_constraintStart_toEndOf="@+id/tabs"
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        app:srcCompat="@android:drawable/ic_menu_edit" />
 
     <SearchView
         android:id="@+id/search_bar"
@@ -30,7 +31,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
         app:layout_constraintEnd_toStartOf="@+id/fragmentMap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabs" />
@@ -40,20 +41,27 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:layout_constraintEnd_toStartOf="@+id/chooseCategories"
+        app:layout_constraintEnd_toStartOf="@id/chooseCategories"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/search_bar" />
 
-    <ImageButton
-        android:id="@+id/chooseCategories"
-        android:layout_width="44dp"
+    <fragment
+        android:id="@+id/fragmentMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@android:color/white"
-        android:backgroundTint="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/view_pager"
+        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tabs"
+        app:layout_constraintStart_toEndOf="@+id/view_pager"
         app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        tools:context="com.example.wikiaudio.activates.MainActivity" />
 
-</androidx.constraintlayout.widget.ConstraintLayout >
+    <fragment
+        android:id="@+id/audioPlayerFragment"
+        android:name="com.example.wikiaudio.activates.MediaPlayerFragment"
+        android:layout_width="1025dp"
+        android:layout_height="110dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

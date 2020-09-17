@@ -71,7 +71,7 @@ public class WikiRecordActivity extends AppCompatActivity {
         setOnRecordButton();
 
         nextButton = findViewById(R.id.nextButton);
-        previousButton = findViewById(R.id.previuos);
+        previousButton = findViewById(R.id.previousButton);
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

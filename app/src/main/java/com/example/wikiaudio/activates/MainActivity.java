@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements
     SearchView searchBar;
     private TabLayout tabs;
     private ProgressBar loadingIcon;
+    private MediaPlayerFragment mediaPlayerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,12 +101,17 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-        initMap();
         setOnClickButtons();
+        initMap();
+        initMediaPlayer();
         loadPlayLists();
 
         // testWikiRecordActivity();
 
+    }
+
+    private void initMediaPlayer() {
+         mediaPlayerFragment = new MediaPlayerFragment(); //todo add playlist.
     }
 
     @Override
@@ -164,7 +170,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void loadPlayLists() {
-        loadingIcon.setVisibility(View.VISIBLE);
+        if (loadingIcon != null) {
+            loadingIcon.setVisibility(View.VISIBLE);
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -222,7 +230,10 @@ public class MainActivity extends AppCompatActivity implements
                             tabs.getTabAt(counter).setText(category);
                             counter++;
                         }
-                        loadingIcon.setVisibility(View.GONE);
+                        if(loadingIcon != null)
+                        {
+                            loadingIcon.setVisibility(View.GONE);
+                        }
                     }
                 });
             }
