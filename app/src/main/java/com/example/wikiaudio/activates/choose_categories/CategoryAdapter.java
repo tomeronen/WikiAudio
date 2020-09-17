@@ -1,7 +1,7 @@
 package com.example.wikiaudio.activates.choose_categories;
 
-import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 
-import java.util.ArrayList;
 import java.util.List;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>{
     private CategoryClickListeners categoryClickListener;
@@ -52,7 +51,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         }
 
         public void set(String categoryName){
-            if(_categoriesChosen.contains(categoryName))
+            if(_categoriesChosen != null && _categoriesChosen.contains(categoryName))
             {
                 itemView.setBackgroundColor(Color.parseColor("#7DCDF1"));
             }
@@ -77,6 +76,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         this.categoryClickListener = categoryClickListener;
         this._categoriesChosen = ((WikiAudioApp)activity.getApplication())
                                             .getAppData().getChosenCategories();
+        Log.d("test","test");
     }
 
     @NonNull

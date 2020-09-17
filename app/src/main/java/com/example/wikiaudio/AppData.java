@@ -3,9 +3,9 @@ package com.example.wikiaudio;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.google.android.material.internal.ContextUtils;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AppData
@@ -28,6 +28,10 @@ public class AppData
         sp = PreferenceManager.getDefaultSharedPreferences(wikiAudioApp);
         String chosenCategoriesString = sp.getString(chosenCategoriesSpTag, "");
         chosenCategories = gson.fromJson(chosenCategoriesString, List.class);
+        if(chosenCategories == null)
+        {
+            chosenCategories = new ArrayList<>();
+        }
     }
 
     public void saveChosenCategories(List<String> newChosenCategories)
@@ -40,6 +44,10 @@ public class AppData
 
 
     public List<String> getChosenCategories() {
+        if(chosenCategories == null)
+        {
+            chosenCategories = new ArrayList<>();
+        }
         return chosenCategories;
     }
 }

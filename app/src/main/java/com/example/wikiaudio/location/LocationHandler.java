@@ -30,6 +30,7 @@ import java.util.List;
 public class LocationHandler {
     //For logs
     private static final String TAG = "LocationHandler";
+    private static final int RADIUS = 10000; // let user choose?
 
     private AppCompatActivity activity;
 
@@ -138,7 +139,7 @@ public class LocationHandler {
         //todo maybe add thumbnail:
         //https://developers.google.com/maps/documentation/android-sdk/infowindows#custom_info_windows
 
-        wikipedia.getPagesNearby(lat, lng, 10000, pagesNearby, pageAttributes,
+        wikipedia.getPagesNearby(lat, lng, RADIUS, pagesNearby, pageAttributes,
                 new WorkerListener() {
                     @Override
                     public void onSuccess() {
