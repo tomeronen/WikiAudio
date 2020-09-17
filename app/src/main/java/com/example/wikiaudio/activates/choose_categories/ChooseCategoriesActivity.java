@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -31,6 +32,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
     private int columnAmount;
     private ArrayList<String> chosenCategories;
     CategoryAdapter categoryAdapter;
+    ProgressBar loadingIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         categoriesView = findViewById(R.id.categoriesView);
         searchCategoriesView = findViewById(R.id.searchCategorysView);
         saveButton = findViewById(R.id.saveChoice);
-
+        loadingIcon = findViewById(R.id.progressBar5);
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
@@ -53,6 +55,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         final CategoryClickListeners categoryClickListeners = new CategoryClickListeners() {
             @Override
             public void onClick(String string) {
+                // what to do when a category is pressed.
                 Toast.makeText(app, string, Toast.LENGTH_SHORT).show();
             }
         };
@@ -69,6 +72,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
             }
         });
 
+        loadingIcon.setVisibility(View.VISIBLE);
          wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {
              @Override
              public void onSuccess() {
@@ -83,11 +87,13 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
 //                 LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(app, resId);
 //                 categoriesView.setLayoutAnimation(animation);
                  categoriesView.setAdapter(categoryAdapter);
+                 loadingIcon.setVisibility(View.GONE);
              }
 
              @Override
              public void onFailure() {
                  Log.d("load status", "loading categories failed");
+                 loadingIcon.setVisibility(View.GONE);
 
              }
          });
