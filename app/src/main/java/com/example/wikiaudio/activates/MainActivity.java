@@ -1,12 +1,4 @@
 package com.example.wikiaudio.activates;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.work.WorkManager;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -23,15 +15,16 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.location.LocationHandler;
@@ -41,25 +34,17 @@ import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.android.material.tabs.TabLayout;
-
-import androidx.viewpager.widget.ViewPager;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -102,9 +87,9 @@ public class MainActivity extends AppCompatActivity implements
         initVars();
         initMap();
         setOnClickButtons();
-        loadPlayLists();
+//        loadPlayLists();
 
-        // testWikiRecordActivity();
+         testWikiRecordActivity();
 
     }
 
@@ -173,6 +158,10 @@ public class MainActivity extends AppCompatActivity implements
                 chosenCategories = ((WikiAudioApp) getApplication())
                         .getAppData().getChosenCategories();
                 final int[] threadsFinished = {0};
+                if(chosenCategories == null || chosenCategories.size() == 0)
+                { // if no chosen categories go back
+                    return;
+                }
                 for (String category : chosenCategories) {
                     final List<String> playListNames = new ArrayList<>();
                     wikipedia.loadSpokenPagesNamesByCategories(category, playListNames,
@@ -182,6 +171,9 @@ public class MainActivity extends AppCompatActivity implements
 
                                     List<Wikipage> playListContent = new ArrayList<>();
                                     for (String pageName : playListNames) {
+                                        // if (wikipage.cooardinates == null) {
+                                        // break;
+                                        //}
                                         Wikipage wikipage = new Wikipage();
                                         wikipage.setTitle(pageName);
                                         playListContent.add(wikipage);
@@ -198,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements
                                     threadsFinished[0]++;
                                 }
                             });
-                    if (category == "pages Nearby") {
+                    if (category == "pages Nearby") { //todo finish
                         List<Wikipage> testingContent = new ArrayList<>();
                         Wikipage wikiPage = new Wikipage();
                         wikiPage.setTitle("test");

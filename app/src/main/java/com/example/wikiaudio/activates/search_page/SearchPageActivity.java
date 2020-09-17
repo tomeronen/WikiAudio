@@ -1,25 +1,23 @@
 package com.example.wikiaudio.activates.search_page;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.activates.ResultClickListeners;
-import com.example.wikiaudio.wikipedia.PageAttributes;
+import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.WikipediaPlayer;
 import com.example.wikiaudio.wikipedia.WorkerListener;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,25 +71,29 @@ public class SearchPageActivity extends AppCompatActivity {
                                 new com.example.wikiaudio.activates.search_page.ResultClickListeners() {
                                     @Override
                                     public void onClick(String string) {
-                                        final Wikipage Wikipage = new Wikipage();
-                                        List<PageAttributes> pageAttributes = new ArrayList<>();
-                                        pageAttributes.add(PageAttributes.audioUrl);
-                                        pageAttributes.add(PageAttributes.content);
-                                        pageAttributes.add(PageAttributes.title);
-                                        wikipedia.getWikipage(string, pageAttributes, Wikipage,
-                                                new WorkerListener() {
-                                                    @Override
-                                                    public void onSuccess() {
-                                                        WikipediaPlayer wikipediaPlayer
-                                                                = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
-                                                        wikipediaPlayer.playWiki(Wikipage);
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure() {
-
-                                                    }
-                                                });
+//                                        final Wikipage Wikipage = new Wikipage();
+//                                        List<PageAttributes> pageAttributes = new ArrayList<>();
+//                                        pageAttributes.add(PageAttributes.audioUrl);
+//                                        pageAttributes.add(PageAttributes.content);
+//                                        pageAttributes.add(PageAttributes.title);
+//                                        wikipedia.getWikipage(string, pageAttributes, Wikipage,
+//                                                new WorkerListener() {
+//                                                    @Override
+//                                                    public void onSuccess() {
+//                                                        WikipediaPlayer wikipediaPlayer
+//                                                                = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
+//                                                        wikipediaPlayer.playWiki(Wikipage);
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onFailure() {
+//
+//                                                    }
+//                                                });
+                                        String title = string;
+                                        Intent WikipageIntent = new Intent(app, WikipageActivity.class);
+                                        WikipageIntent.putExtra("title", title);
+                                        startActivity(WikipageIntent);
                                     }
                                 });
                         resultsView.setLayoutManager(new LinearLayoutManager(app));
@@ -107,4 +109,7 @@ public class SearchPageActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    // ADD CLICK LISTENER HERE WITH TODO
+
 }

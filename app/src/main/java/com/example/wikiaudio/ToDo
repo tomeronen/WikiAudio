@@ -1,0 +1,14 @@
+//todo:
+(1) Playlist Player Fragment. (T.R)
+(2) Finish player logic.
+(2) How to show wiki pages in search and playlist.
+(3) Connect wikipages in search and in playlists to wikipageActivity.
+(4) Record Activity. (T.R)
+(5) Playlist logic (make Nearby first playlist to appear given we have permissions; when loading playlists load also Nearby playlist). (S.M)
+(8) Upload recording file logic. (T.R)
+(9) Debug old code!
+
+
+Bugs known:
+    (1) when you go Vertical im main screen -> Crash.
+    (2) when you change categorise but stay with the same amount -> wont update.
