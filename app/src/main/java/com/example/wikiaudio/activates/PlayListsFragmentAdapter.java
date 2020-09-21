@@ -1,14 +1,13 @@
 package com.example.wikiaudio.activates;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayListsFragmentAdapter extends FragmentPagerAdapter {
+public class PlayListsFragmentAdapter extends FragmentStatePagerAdapter {
 
     private final List<PlayListFragment> mFragmentList = new ArrayList<>();
 

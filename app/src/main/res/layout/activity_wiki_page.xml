@@ -6,71 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".activates.WikipageActivity">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="1.5dp"
-        android:layout_marginTop="1.5dp"
-        android:layout_marginRight="1.5dp"
-        android:layout_marginBottom="2dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/webBackground"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="UseCompoundDrawables">
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="2dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:text=""
-            android:textColor="#1d1817"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <ImageView
-            android:id="@+id/image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:contentDescription="Title"
-            android:src="@mipmap/ic_launcher" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/webBackground"
+    <ImageView
+        android:id="@+id/thumbnailImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="77dp"
-        android:layout_marginBottom="97dp"
-        android:background="#4d4d4d"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_x="0dp"
+        android:layout_y="0dp"
+        android:background="#000"
+        tools:srcCompat="@drawable/ic_launcher_foreground" />
 
     <WebView
-        android:id="@+id/webView"
+        android:id="@+id/WikipageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="1.5dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginRight="1.5dp"
-        android:layout_marginBottom="100dp" />
+        app:layout_constraintBottom_toTopOf="@+id/media_player"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="0dp" >
+    </WebView>
+
+    <fragment
+        android:id="@+id/media_player"
+        android:name="com.example.wikiaudio.activates.MediaPlayerFragment"
+        android:layout_width="0dp"
+        android:layout_height="110dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingRecordButton"
+        android:id="@+id/recordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="10dp"
-        android:clickable="true"
-        android:focusable="true"
-        app:backgroundTint="#f38a8e"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/recording_mic" />
+        android:layout_x="321dp"
+        android:layout_y="61dp"
+        android:clickable="true"
+        app:srcCompat="@android:drawable/presence_audio_online" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
