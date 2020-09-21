@@ -15,8 +15,9 @@ public class WikiHtmlParser {
 
     String url;
 
-   static public void parseAdvanceAttr(Wikipage Wikipage) throws IOException {
-        Document doc = Jsoup.connect(Wikipage.getUrl()).get();
+   static public void parseAdvanceAttr(Wikipage wikipage) throws IOException {
+       //todo url bug. mobile/computer (this is just a patch)
+       Document doc = Jsoup.connect(wikipage.getComputerUrl()).get();
         // parse text
         List<Wikipage.Section> sections = new ArrayList<>();
         String pageTitle = doc.getElementsByClass(TITLE_CLASS).text();
@@ -37,12 +38,16 @@ public class WikiHtmlParser {
                 paragraphsInSection = new ArrayList<>();
             }
         }
-        Wikipage.setSections(sections);
+        wikipage.setSections(sections);
 
 
 //     parse indicators
        Elements indicators = doc.getElementsByClass("mw-indicator");
        List<String> indicatorsValues = new ArrayList<>();
+//       Elements audio = doc.select("audio");
+//       Element element = audio.get(0);
+//       String src = element.attr("src");
+//       String audioSource = doc.select("audio").get(0).attr("src");
        for (Element e : indicators) {
            indicatorsValues.add(e.id());
            switch (e.id()) {
@@ -56,13 +61,13 @@ public class WikiHtmlParser {
 //     todo - assumes first internal link is to audio file, not good!
 
                    String internal = d.getElementsByClass("internal").text();
-                   Wikipage.setAudioUrl
+                   wikipage.setAudioUrl
                            ("https://" + d.getElementsByClass("internal").first()
                                    .attr("href"));
                    break;
            }
        }
-       Wikipage.setIndicators(indicatorsValues);
+       wikipage.setIndicators(indicatorsValues);
     }
 
 

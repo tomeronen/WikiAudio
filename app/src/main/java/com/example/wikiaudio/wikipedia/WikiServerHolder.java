@@ -2,7 +2,6 @@ package com.example.wikiaudio.wikipedia;
 
 import android.util.Log;
 
-import com.example.wikiaudio.file_manager.FileManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -40,7 +39,6 @@ import static com.example.wikiaudio.wikipedia.PageAttributes.content;
 import static com.example.wikiaudio.wikipedia.PageAttributes.coordinates;
 import static com.example.wikiaudio.wikipedia.PageAttributes.description;
 import static com.example.wikiaudio.wikipedia.PageAttributes.thumbnail;
-import static com.example.wikiaudio.wikipedia.PageAttributes.title;
 import static com.example.wikiaudio.wikipedia.PageAttributes.url;
 import static com.example.wikiaudio.wikipedia.PageAttributes.watchers;
 
@@ -66,7 +64,8 @@ public class WikiServerHolder {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
-        // init cookie manager
+        // init cookie manager (we need to have a cookie manager for maintaining login token to
+        // upload files).
         CookieHandler cookieHandler = new CookieManager();
 
         OkHttpClient client = new OkHttpClient.Builder().addNetworkInterceptor(interceptor)
@@ -84,6 +83,13 @@ public class WikiServerHolder {
                 .create(WikiServer.class);
     }
 
+    /**
+     * search for wikipages by name.
+     * @param pageName the value to search.
+     * @return list of possible wikipages.
+     * @throws IOException if got a bad format response throws a IOException or something went wrong
+     * with the communication with wikipedia servers altogether. (can also be our fault)
+     */
     public List<Wikipage> searchPage(String pageName)
             throws IOException {
         Response<QuarryResponse> response = server.searchPage(pageName).execute();
@@ -97,6 +103,13 @@ public class WikiServerHolder {
         }
     }
 
+    /**
+     * parses a QuarryResponse to List of Wikipage.
+     * @param searchResponse the Response to parse.
+     * @return the list of wikipages which data is in the response.
+     * @throws IOException if got a bad format response throws a IOException, something went wrong
+     * with the communication with wikipedia servers. (can also be our fault)
+     */
     private List<Wikipage> parseSearchResponse(QuarryResponse searchResponse)
             throws IOException {
         if (searchResponse != null
@@ -120,10 +133,11 @@ public class WikiServerHolder {
     {
         String prop = getQueryProp(pageAttr);
         String inprop = getQueryInProp(pageAttr);
-        Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop).execute();
+        Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<Wikipage> WikipageList = parseQuarryResponse(response.body());
+//            List<Wikipage> WikipageList = new ArrayList<>();
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ||
                     pageAttr.contains(thumbnail))
@@ -179,9 +193,9 @@ public class WikiServerHolder {
                     pageAttr.contains(audioUrl) ||
                     pageAttr.contains(thumbnail))
             {
-                for(Wikipage Wikipage: WikipageList)
+                for(Wikipage wikipage: WikipageList)
                 {
-                    WikiHtmlParser.parseAdvanceAttr(Wikipage);
+                    WikiHtmlParser.parseAdvanceAttr(wikipage);
                 }
             }
             return WikipageList;
@@ -255,8 +269,7 @@ public class WikiServerHolder {
         return pageNames;
     }
     //todo implement.
-    public Call<Object> uploadFile(String fileName, String filePath)
-            throws IOException {
+    public Call<Object> uploadFile(String fileName, String filePath) throws IOException {
 
         // todo add tests if something went wrong.
         QuarryResponse tokenResponse = this.server.getToken().execute().body();
@@ -278,8 +291,7 @@ public class WikiServerHolder {
             Log.d("file upload status", "got csrf token");
             File file = new File(filePath);
             long length = file.length();
-            if(file.exists())
-            {
+            if (file.exists()) {
                 RequestBody requestFile =
                         RequestBody.create(
                                 MediaType.parse("3gp"),
@@ -297,20 +309,13 @@ public class WikiServerHolder {
                                 csrfToken,
                                 1,
                                 body).execute();
-
-//                Response<Object> execute =
-//                        server.uploadFile("upload",
-//                                "testimg.jpg",
-//                                "https://cdn.pixabay.com/photo/2018/07/26/07/45/valais-3562988_1280.jpg",
-//                                "json",
-//                                csrfToken,
-//                                1).execute();
-                Object body1  = execute.body();
+                Object body1 = execute.body();
                 Log.d("file upload status", "file uploaded");
+
+
+                return null;
             }
         }
-
-
         return null;
     }
 
@@ -318,9 +323,11 @@ public class WikiServerHolder {
     private static Wikipage parseWikiData(QuarryResponse.PageData pageData) {
         if(pageData != null)
         {
+            String mobileHtml = "https://en.wikipedia.org/api/rest_v1/page/mobile-html/";
             Wikipage curWikipage = new Wikipage();
             curWikipage.setTitle(pageData.title);
-            curWikipage.setUrl(pageData.fullurl);
+            curWikipage.setComputerUrl(pageData.fullurl);
+            curWikipage.setUrl(mobileHtml + pageData.title);
             curWikipage.setDescription(pageData.description);
             curWikipage.setWatchers(pageData.watchers);
             List<QuarryResponse.CoordinatesData> coordinates = pageData.coordinates;
@@ -329,10 +336,14 @@ public class WikiServerHolder {
                 curWikipage.setLat(pageData.coordinates.get(0).lat);
                 curWikipage.setLon(pageData.coordinates.get(0).lon);
             }
-            QuarryResponse.ThumbnailData thumbnail = pageData.thumbnail;
-            if(thumbnail != null)
+            if(pageData.original != null)
             {
-                curWikipage.setThumbnailSrc(thumbnail.source);
+                curWikipage.setThumbnailSrc(pageData.original.source);
+            }
+            else if(pageData.thumbnail != null)
+            {
+                curWikipage.setThumbnailSrc(pageData.thumbnail.source);
+
             }
             return curWikipage;
         }
@@ -343,7 +354,7 @@ public class WikiServerHolder {
         Set<String> props = new HashSet<>();
         StringBuilder prop = new StringBuilder();
 
-        if(pageAttributes.contains(title)) props.add("title");
+//        if(pageAttributes.contains(title)) props.add("title");
         if(pageAttributes.contains(url))   props.add("info");
         if(pageAttributes.contains(content)) props.add("info");
         if(pageAttributes.contains(audioUrl)) props.add("info");

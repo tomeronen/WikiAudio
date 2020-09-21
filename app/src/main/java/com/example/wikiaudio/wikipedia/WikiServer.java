@@ -1,15 +1,10 @@
 package com.example.wikiaudio.wikipedia;
 
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
-
 import okhttp3.MultipartBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -23,11 +18,12 @@ import retrofit2.http.Query;
 public interface WikiServer {
 
     @GET("/w/api.php?" +
-            "action=query&" + // get data from wikipedia
+            "action=query&" +
             "format=json") // format for queried pages (json recommended)
     public Call<QuarryResponse> callGetPageByName(@Query("titles") String pageName,
                                                   @Query("prop") String prop,
-                                                  @Query("inprop") String inprop);
+                                                  @Query("inprop") String inprop,
+                                                    @Query("piprop") String imageToBring);
 
 // Example full get request:
 //https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url|watchers&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
@@ -93,6 +89,7 @@ public interface WikiServer {
 
 
     @GET("/w/api.php?action=query" +
+            "&srlimit=30" +
             "&list=search" +
             "&format=json")
     Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);

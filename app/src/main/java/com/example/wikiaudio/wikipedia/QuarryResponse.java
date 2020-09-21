@@ -1,13 +1,10 @@
 package com.example.wikiaudio.wikipedia;
 
 
-import android.media.Image;
-
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * class of wikipedia quarry response.
@@ -40,6 +37,7 @@ public class QuarryResponse {
         String pageid;
         int watchers;
         ThumbnailData thumbnail;
+        ThumbnailData original;
         List<CoordinatesData> coordinates;
     }
 

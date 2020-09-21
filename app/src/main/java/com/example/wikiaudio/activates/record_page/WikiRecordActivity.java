@@ -188,12 +188,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                     stopBlinkingAnimation(recordButton);
                     recorder.stopRecording();
                     Wikipedia wikipedia = new Wikipedia(activity);
-                    String fp = fileManager.getFilePath(Wikipage.getTitle(),
-                            curSection,
-                            curParagraph)
-                            + "." + recorder.format;
-                    String fileName = "Hurricane Irene (2005)_0_0.3gp";
-                    wikipedia.uploadFile(fileName,fp);
+
                 }
             }
 

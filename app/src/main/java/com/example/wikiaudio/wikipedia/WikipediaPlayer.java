@@ -15,7 +15,7 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
     private Locale language;
     private final float speed;
     private boolean playingUrl = false;
-    private boolean playingTextToSpeach = false;
+    private boolean playingTextToSpeech = false;
     private MediaPlayer mp;
     private TextToSpeech engine;
     private String textToSpeak;
@@ -30,20 +30,21 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
 
     /**
      * plays the given wiki
-     * @param Wikipage
+     * @param wikipage
      */
-    public void playWiki(Wikipage Wikipage)
+    public void playWiki(Wikipage wikipage)
     {
-        if(playingTextToSpeach || playingUrl) {
+        if(playingTextToSpeech || playingUrl) {
             // already playing
             stopPlaying();
         }
-        if(Wikipage.getAudioUrl() != null && !Wikipage.getAudioUrl().equals("")) {
+        if(canPlayWikipageAudio(wikipage)) {
             // has audio source;
             Log.d("start playing", "from url source");
             playingUrl = true;
+            mp = new MediaPlayer();
             try {
-                    String audioUrl = Wikipage.getAudioUrl();
+                    String audioUrl = wikipage.getAudioUrl();
                     mp.setDataSource(audioUrl);
                     mp.prepare();
                     mp.start();
@@ -54,12 +55,15 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
         else
         {
             Log.d("start playing", "from text to speech");
-            playingTextToSpeach = true;
-            playingTextToSpeach = true;
-            String fullText = Wikipage.getFullText();
+            playingTextToSpeech = true;
+            String fullText = wikipage.getFullText();
             textToSpeak = fullText;
             engine = new TextToSpeech(context, this);
         }
+    }
+
+    private boolean canPlayWikipageAudio(Wikipage wikipage) {
+        return wikipage != null && wikipage.getAudioUrl() != null && !wikipage.getAudioUrl().equals("");
     }
 
     /**
@@ -68,9 +72,11 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
     public void stopPlaying() {
         if (playingUrl) {
             mp.stop();
+            playingUrl = false;
         }
-        if (playingTextToSpeach) {
+        if (playingTextToSpeech) {
             engine.stop();
+            playingTextToSpeech =false;
         }
     }
 
@@ -82,7 +88,7 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
             paused = true;
             mp.pause();
         }
-        if (playingTextToSpeach) {
+        if (playingTextToSpeech) {
             engine.stop();
         }
     }

@@ -1,7 +1,5 @@
 package com.example.wikiaudio;
-
 import android.app.Application;
-import android.content.IntentFilter;
 
 public class WikiAudioApp extends Application {
 

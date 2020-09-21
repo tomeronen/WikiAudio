@@ -1,13 +1,6 @@
 package com.example.wikiaudio.wikipedia;
-import androidx.activity.ComponentActivity;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.Observer;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
+
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jsoup.Jsoup;
@@ -18,7 +11,6 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Facade singleton class to all interaction with wikipedia.
@@ -156,6 +148,9 @@ public class Wikipedia {
 
             }
         }).start();
+
+        // worker option:
+
 //        WorkRequest loadSpokenCategoriseWorkerReq =
 //                new OneTimeWorkRequest
 //                        .Builder(loadSpokenCategoriseWorker.class)
@@ -201,29 +196,33 @@ public class Wikipedia {
                                             final WorkerListener workerListener)
     {
         try {
-        List<String> pageNames = new ArrayList<>();
-        String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
-        Document doc = null;
+            List<String> pageNames = new ArrayList<>();
+            String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
+            Document doc = null;
             doc = Jsoup.connect(url).get();
-        Elements elements = doc.select(".mw-headline, li");
-        for (int i = 1; i < elements.size(); i++) {
-            Element curElement = elements.get(i);
-            if ("mw-headline".equals(curElement.className()) && curElement.text().equals(category))
-            {
-                ++i;
-                curElement = elements.get(i);
-                while(i < elements.size() && !"mw-headline".equals(curElement.className()))
-                {
-                    result.add(curElement.text());
+            Elements elements = doc.select(".mw-headline, li");
+            for (int i = 1; i < elements.size(); i++) {
+                Element curElement = elements.get(i);
+                if ("mw-headline".equals(curElement.className()) && curElement.text().equals(category)) {
                     ++i;
                     curElement = elements.get(i);
+                    while (i < elements.size() && !"mw-headline".equals(curElement.className())) {
+                        result.add(curElement.text());
+                        ++i;
+                        curElement = elements.get(i);
+                    }
+                    break;
                 }
-                break;
             }
-        }
-        workerListener.onSuccess();
+            activ.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    workerListener.onSuccess();
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
+            workerListener.onFailure();
         }
 //        new Thread(new Runnable() {
 //            @Override
@@ -316,15 +315,62 @@ public class Wikipedia {
         }).start();
     }
 
+
+    /**
+     * get a list of wikipages by name.
+     * notice! onSuccess runs after all process is finished.  onFailure runs each time bringing
+     * one of the pages failed.
+     * @param names the names of the wikipages to bring.
+     * @param pageAttributes the attributes to get on each page.
+     * @param listToFill the list to fill with the results.
+     * @param workerListener callback when finished.
+     */
+    public void getWikipages(final List<String> names,
+                            final List<PageAttributes> pageAttributes,
+                            final List<Wikipage> listToFill,
+                            final WorkerListener workerListener)
+    {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (String name : names) {
+                    try {
+                        listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+                    } catch (IOException e) {
+                        // task failed with a exception.
+                        activ.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                workerListener.onFailure();
+                            }
+                        });
+                    }
+                }
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onSuccess();
+                    }
+                });
+            }
+        }).start();
+    }
+
+
+    /**
+     * upload a file to wikipedia.
+     * @param fileName name of file to be uploaded.
+     * @param filePath path to file to be uploaded.
+     */
     public void uploadFile(final String fileName, final String filePath) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
             }
         }).start();
     }

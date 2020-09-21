@@ -2,8 +2,14 @@ package com.example.wikiaudio.wikipedia;
 
 import java.util.List;
 
-public class        Wikipage {
+public class Wikipage {
 
+
+    public String getComputerUrl() {
+        return computerUrl;
+    }
+
+    private String computerUrl;
 
     public Wikipage() {}
 
@@ -24,20 +30,27 @@ public class        Wikipage {
             this.lon = page.getLon();
             this.audioUrl = page.getAudioUrl();
             this.thumbnailSrc = page.getThumbnailSrc();
+            this.computerUrl = page.getComputerUrl();
         }
 
     }
 
     public String getFullText() {
         String fullText = "";
-        for (Section s:sections) {
-            fullText += s.title + ".";
-            for (String paragraph:s.contents
-            ) {
-                fullText += paragraph;
+        if(sections != null) {
+            for (Section s : sections) {
+                fullText += s.title + ".";
+                for (String paragraph : s.contents
+                ) {
+                    fullText += paragraph;
+                }
             }
         }
         return fullText;
+    }
+
+    public void setComputerUrl(String computerUrl) {
+        this.computerUrl = computerUrl;
     }
 
 
@@ -72,6 +85,7 @@ public class        Wikipage {
     private String title;
     private String url;
     private String description;
+    private String summary;
     private List<Section> sections;
     private List<String> indicators;
     private int watchers;
