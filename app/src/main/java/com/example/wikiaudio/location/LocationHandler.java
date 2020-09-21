@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.wikiaudio.Handler;
 import com.example.wikiaudio.playlist.Playlist;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
@@ -41,6 +42,7 @@ public class LocationHandler {
     private GoogleMap mMap;
     private LocationManager locationManager;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private boolean shouldUpdateZoomAndCreateNearby = false;
 
     private LocationHandler(AppCompatActivity activity) {
         this.activity = activity;
@@ -80,11 +82,15 @@ public class LocationHandler {
                         @Override
                         public void onLocationChanged(Location location) {
                             Log.d(TAG, "locationUpdates: onLocationChanged");
-                            //Whenever the user's location changes,
-                            //we recenter the map at the user's location
+                            //Recenter the map at the user's location + create
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
-                            //todo: maybe update the Nearby playlist here
+                            if (shouldUpdateZoomAndCreateNearby) {
+                                shouldUpdateZoomAndCreateNearby = false;
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
+                                Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
+                                Handler.playlistsHandler.createLocationBasedPlaylist(
+                                        latLng.latitude, latLng.longitude, true);
+                            }
                         }
 
                         @Override
@@ -95,13 +101,7 @@ public class LocationHandler {
                             //gps went on (this may change) so
                             //we recenter the map at the user's location
                             Log.d(TAG, "locationUpdates: onProviderEnabled");
-                            LatLng latLng = getCurrentLocation();
-                            if (latLng != null && mMap != null) {
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        latLng, MAP_CAMERA_ZOOM_RADIUS));
-                                playlistsHandler.createLocationBasedPlaylist
-                                        (latLng.latitude, latLng.longitude, true);
-                            }
+                            shouldUpdateZoomAndCreateNearby = true;
                         }
 
                         @Override
@@ -110,7 +110,6 @@ public class LocationHandler {
                             Log.d(TAG, "locationUpdates: onProviderDisabled");
                             Toast.makeText(activity, "Please enable your GPS for location services",
                                     Toast.LENGTH_LONG).show();
-                            //todo: maybe center the map at the current played wikipage?
                         }
                     });
         }
@@ -191,9 +190,13 @@ public class LocationHandler {
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
         mMap.addMarker(new MarkerOptions()
                 .position(latLng).title(wikipage.getTitle())).setTag(wikipage);
-        //TODO: add thumbnail one day
+        //TODO: add thumbnail one day :)
     }
 
+    /**
+     *
+     * @param playlist the playlist to mark
+     */
     public void markPlaylist(Playlist playlist) {
         clearMap();
         if (playlist == null || playlist.getWikipages() == null) {

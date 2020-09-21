@@ -5,11 +5,13 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.location.LocationHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Here is where all the playlists are saved and monitored.
+ */
 public class PlaylistsHandler {
     private static final String TAG = "PlaylistsHandler";
 
@@ -21,7 +23,7 @@ public class PlaylistsHandler {
     private static Playlist nearby;
 
 
-    private PlaylistsHandler(AppCompatActivity activity){
+    private PlaylistsHandler(AppCompatActivity activity) {
         this.activity = activity;
     }
 
@@ -40,13 +42,15 @@ public class PlaylistsHandler {
         }
     }
 
-    public static List<Playlist> getPlaylists(){
+    public static List<Playlist> getPlaylists() {
         return playlists;
     }
 
-    public void createLocationBasedPlaylist(double lat, double lon, boolean isNearby){
+    public void createLocationBasedPlaylist(double lat, double lon, boolean isNearby) {
         Playlist playlist = new Playlist(true, lat, lon);
         if (isNearby) {
+            if (nearby != null)
+                playlists.remove(0);
             playlists.add(0, playlist);
             nearby = playlist;
         } else {
@@ -54,31 +58,15 @@ public class PlaylistsHandler {
         }
     }
 
-    public void createCategoryBasedPlaylists(AppCompatActivity activity){
+    public void createCategoryBasedPlaylists(AppCompatActivity activity) {
         //Fetch user's chosen categories
         List<String> chosenCategories = ((WikiAudioApp) activity.getApplication())
                 .getAppData().getChosenCategories();
         //Create a playlist foreach category and add it to our playlists list
-        if(chosenCategories != null && chosenCategories.size() > 0) {
-            for (String category: chosenCategories)
+        if (chosenCategories != null && chosenCategories.size() > 0) {
+            for (String category : chosenCategories)
                 PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
         }
     }
 
-    public void markPlaylistOnMapByIndex(int index, LocationHandler locationHandler) {
-        if (locationHandler == null || index < 0) {
-            Log.d(TAG, "markPlaylistOnMapByIndex: locationHandler is null OR index is invalid");
-            return;
-        }
-        Playlist playlist = playlists.get(index);
-        locationHandler.markPlaylist(playlist);
-    }
-
-    public void markNearbyPlaylistOnMap(LocationHandler locationHandler) {
-        if (nearby != null && locationHandler != null) {
-            locationHandler.markPlaylist(nearby);
-        } else {
-            Log.d(TAG, "markNearbyPlaylistOnMap: nearby playlist or locationHandler is null");
-        }
-    }
 }

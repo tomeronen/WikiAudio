@@ -6,6 +6,9 @@ import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 
+/**
+ * Here is where all of the app's facades and singletons are stored for easy init and access.
+ */
 public class Handler {
     private static Handler instance = null;
 

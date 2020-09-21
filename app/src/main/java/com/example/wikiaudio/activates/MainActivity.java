@@ -89,12 +89,11 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-        initMap();
         setOnClickButtons();
+        initMap();
         loadPlaylists();
 
 //        testWikiRecordActivity();
-
     }
 
 //    @Override
@@ -129,7 +128,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         activity = this;
-        Handler.getInstance(activity);
+        Handler.getInstance(activity); // Holds all of the app's facades/singletons
+
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
@@ -193,19 +193,9 @@ public class MainActivity extends AppCompatActivity implements
      * based on location
      */
     private void loadPlaylists() {
-        if (loadingIcon != null) {
-            loadingIcon.setVisibility(View.VISIBLE);
-        }
-
-        if(tabs == null || tabs.getTabCount() == 0) { // nothing to load.
-            if (loadingIcon != null)
-                loadingIcon.setVisibility(View.GONE);
-            return;
-        }
-
+        loadingIcon.setVisibility(View.VISIBLE);
         final PlaylistsFragmentAdapter playListsFragmentAdapter =
                 new PlaylistsFragmentAdapter(getSupportFragmentManager());
-
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -349,10 +339,9 @@ public class MainActivity extends AppCompatActivity implements
                 if (currentLatLng != null) {
                     //Zoom in to user's location
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                    //Create and display nearby playlist
+                    //Create (and display) the nearby playlist
                     Handler.playlistsHandler.createLocationBasedPlaylist(
                             currentLatLng.latitude, currentLatLng.longitude, true);
-                    Handler.playlistsHandler.markNearbyPlaylistOnMap(Handler.locationHandler);
                 }
             } else {
                 Log.d(TAG, "initUserLocationOnTheMap: no GPS");

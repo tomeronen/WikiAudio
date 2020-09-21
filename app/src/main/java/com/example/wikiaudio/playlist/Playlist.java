@@ -18,7 +18,6 @@ public class Playlist {
     private static final int MAX_WIKIPAGES = 10;
 
     private String title;
-    private boolean shouldBeMarked = false;
 
     private List<Wikipage> wikipages = new ArrayList<>();
     private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
@@ -27,8 +26,6 @@ public class Playlist {
     private boolean isLocationBased;
     private double lat;
     private double lon;
-    private String wikipageTitle;
-
 
     public Playlist() {}
 
@@ -84,7 +81,7 @@ public class Playlist {
                             }
                             wikipages = lessWikipages;
                         }
-                        // TODO this means we also mark the nearby playlist when it is created
+                        // TODO: we also mark the nearby playlist whenever it is created
                         for (Wikipage wikipage: wikipages)
                             Handler.locationHandler.markLocation(wikipage);
                     }
@@ -95,9 +92,6 @@ public class Playlist {
                 });
     }
 
-    /**
-     * Pretty self-explanatory, really.
-     */
     private void initVars(final boolean isLocationBased, double lat, double lon) {
         this.isLocationBased = isLocationBased;
         this.lat = lat;
@@ -110,10 +104,10 @@ public class Playlist {
     }
 
     /**
-     * Pretty self-explanatory, really.
+     * When we load wikipages by category we only get their title
+     * So we use this func to get the wikipage itself (with the defined attributes)
      */
     private void loadWikipageByTitle(String title) {
-        this.wikipageTitle = title;
         if (Handler.wikipedia == null) {
             Log.d(TAG, "getWikipageByTitle: error, wikipedia object is null");
         }
@@ -134,16 +128,10 @@ public class Playlist {
                 });
     }
 
-    /**
-     * Pretty self-explanatory, really.
-     */
     public List<Wikipage> getWikipages(){
         return wikipages;
     }
 
-    /**
-     * Pretty self-explanatory, really.
-     */
     public String getTitle() {
         return title;
     }
