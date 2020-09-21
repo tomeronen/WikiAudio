@@ -1,6 +1,7 @@
 package com.example.wikiaudio.wikipedia;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wikiaudio.WikiAudioApp;
 import com.google.gson.internal.LinkedTreeMap;
 
 import org.jsoup.Jsoup;
@@ -11,6 +12,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Facade singleton class to all interaction with wikipedia.
@@ -19,6 +21,7 @@ import java.util.List;
  */
 public class Wikipedia {
 
+    private final ExecutorService threadPool;
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
     LinkedTreeMap<String, List<String>> spokenCategories;
@@ -26,6 +29,7 @@ public class Wikipedia {
 
     public Wikipedia(AppCompatActivity activity) {
         activ = activity;
+        threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
     }
 
     /**
@@ -43,30 +47,27 @@ public class Wikipedia {
                            final List<Wikipage> listToFill,
                            final WorkerListener workerListener)
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    listToFill.addAll(WikiServerHolder
-                                                    .getInstance().searchPage(pageName));
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onSuccess();
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                }
-
+        threadPool.execute(() -> {
+            try {
+                listToFill.addAll(WikiServerHolder
+                                                .getInstance().searchPage(pageName));
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onSuccess();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
             }
-        }).start();
+
+        });
     }
 
     /**
@@ -86,34 +87,31 @@ public class Wikipedia {
                                final List<PageAttributes> pageAttributes,
                                final WorkerListener workerListener)
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
-                            longitude,
-                            radius,
-                            pageAttributes);
-                    // task was successful.
-                    listToFill.addAll(pagesNearby);
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onSuccess();
-                        }
-                    });
-                } catch (IOException e) {
-                    // task failed with a exception.
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                    e.printStackTrace();
-                }
+        threadPool.execute(() -> {
+            try {
+                List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
+                        longitude,
+                        radius,
+                        pageAttributes);
+                // task was successful.
+                listToFill.addAll(pagesNearby);
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onSuccess();
+                    }
+                });
+            } catch (IOException e) {
+                // task failed with a exception.
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
+                e.printStackTrace();
             }
-        }).start();
+        });
     }
 
 
@@ -123,31 +121,28 @@ public class Wikipedia {
     public void loadSpokenPagesCategories(final List<String> listToFill,
                                           final WorkerListener workerListener)
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    listToFill
-                            .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onSuccess();
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                }
-
-
+        threadPool.execute(() -> {
+            try {
+                listToFill
+                        .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onSuccess();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
             }
-        }).start();
+
+
+        });
 
         // worker option:
 
@@ -290,29 +285,26 @@ public class Wikipedia {
                             final Wikipage pageToFill,
                             final WorkerListener workerListener)
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    pageToFill.copy(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+        threadPool.execute(() -> {
+            try {
+                pageToFill.copy(WikiServerHolder.getInstance().getPage(name, pageAttributes));
 
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onSuccess();
-                        }
-                    });
- } catch (IOException e) {
-                    // task failed with a exception.
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                }
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onSuccess();
+                    }
+                });
+} catch (IOException e) {
+                // task failed with a exception.
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
             }
-        }).start();
+        });
     }
 
 
@@ -330,30 +322,27 @@ public class Wikipedia {
                             final List<Wikipage> listToFill,
                             final WorkerListener workerListener)
     {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (String name : names) {
-                    try {
-                        listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-                    } catch (IOException e) {
-                        // task failed with a exception.
-                        activ.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                workerListener.onFailure();
-                            }
-                        });
-                    }
+        threadPool.execute(() -> {
+            for (String name : names) {
+                try {
+                    listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+                } catch (IOException e) {
+                    // task failed with a exception.
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
+                        }
+                    });
                 }
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onSuccess();
-                    }
-                });
             }
-        }).start();
+            activ.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    workerListener.onSuccess();
+                }
+            });
+        });
     }
 
 
@@ -363,16 +352,13 @@ public class Wikipedia {
      * @param filePath path to file to be uploaded.
      */
     public void uploadFile(final String fileName, final String filePath) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        threadPool.execute(() -> {
 //                try {
 //                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
 //                } catch (IOException e) {
 //                    e.printStackTrace();
 //                }
-            }
-        }).start();
+        });
     }
 
 //todo finish implement.
