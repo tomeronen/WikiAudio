@@ -8,6 +8,20 @@
     android:layout_height="match_parent"
     tools:context=".activates.MediaPlayerFragment">
 
+    <com.ohoussein.playpause.PlayPauseView
+        android:id="@+id/play_pause"
+        android:layout_width="54dp"
+        android:layout_height="61dp"
+        android:clickable="true"
+        android:foreground="?android:selectableItemBackground"
+        app:fill_color="#e1e1e1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle"
+        app:pause_bg="#00a2ed"
+        app:play_bg="#001eff" />
+
     <TextView
         android:id="@+id/audioPlayingTitle"
         android:layout_width="match_parent"
@@ -20,26 +34,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:src="@android:drawable/ic_media_play"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/nextSoung"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
         android:src="@android:drawable/ic_media_next"
-        app:layout_constraintBottom_toBottomOf="@+id/playButton"
+        app:layout_constraintBottom_toBottomOf="@+id/play_pause"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/playButton"
-        app:layout_constraintTop_toTopOf="@+id/playButton" />
+        app:layout_constraintStart_toEndOf="@+id/play_pause"
+        app:layout_constraintTop_toTopOf="@+id/play_pause" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/previuosSoung"
@@ -47,10 +50,10 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:src="@android:drawable/ic_media_previous"
-        app:layout_constraintBottom_toBottomOf="@+id/playButton"
-        app:layout_constraintEnd_toStartOf="@+id/playButton"
+        app:layout_constraintBottom_toBottomOf="@+id/play_pause"
+        app:layout_constraintEnd_toStartOf="@+id/play_pause"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/playButton"
+        app:layout_constraintTop_toTopOf="@+id/play_pause"
         app:maxImageSize="24dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

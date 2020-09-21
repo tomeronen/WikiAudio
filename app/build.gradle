@@ -76,6 +76,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
-
+    // *********************************** play-pause button  **************************************
+    implementation 'com.github.ohoussein.playpauseview:playpauseview:1.0.2'
 
 }

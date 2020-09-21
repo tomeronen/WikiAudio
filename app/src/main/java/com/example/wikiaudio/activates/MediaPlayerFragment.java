@@ -10,11 +10,12 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.WikipediaPlayer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.ohoussein.playpause.PlayPauseView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,11 +31,7 @@ public class MediaPlayerFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    FloatingActionButton playButton;
+    PlayPauseView playButton;
     FloatingActionButton nextButton;
     FloatingActionButton previousButton;
     TextView title;
@@ -66,10 +63,6 @@ public class MediaPlayerFragment extends Fragment {
         this.showPlayingData = showPlayingData;
     }
 
-    public MediaPlayerFragment(List<Wikipage> playableList, boolean showPlayingData) {
-        this.showPlayingData = showPlayingData;
-        this.updatePlayList(playableList, false);
-    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -90,10 +83,6 @@ public class MediaPlayerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -103,10 +92,12 @@ public class MediaPlayerFragment extends Fragment {
         View fragmentInflated =
                 inflater.inflate(R.layout.fragment_media_player, container, false);
         previousButton = fragmentInflated.findViewById(R.id.previuosSoung);
-        playButton = fragmentInflated.findViewById(R.id.playButton);
+        playButton = fragmentInflated.findViewById(R.id.play_pause);
         nextButton = fragmentInflated.findViewById(R.id.nextSoung);
         player = new WikipediaPlayer(this.getContext(), Locale.ENGLISH,1f);
         title = fragmentInflated.findViewById(R.id.audioPlayingTitle);
+//        playableList =((WikiAudioApp) getActivity().getApplication()).getPlaylist();
+
         if(!showPlayingData)
         {
             title.setVisibility(View.GONE);
@@ -115,10 +106,7 @@ public class MediaPlayerFragment extends Fragment {
             curPlaying = playableList.get(curPosition);
             title.setText(curPlaying.getTitle());
         }
-
         setOnClickButtons();
-
-
         return fragmentInflated;
     }
 
@@ -147,11 +135,21 @@ public class MediaPlayerFragment extends Fragment {
             public void onClick(View v) {
                 if(!playingStatus) // not already playing
                 {
+                    playButton.toggle();
                     startPlaying();
+                    if(!playingStatus) // starting playing music failed.
+                    {
+                        playButton.toggle();
+                    }
                 }
                 else // already playing -> pause.
                 {
+                    playButton.toggle();
                     pausePlaying();
+                    if(playingStatus) // pausing playing music failed.
+                    {
+                        playButton.toggle();
+                    }
                 }
             }
         });
@@ -230,14 +228,16 @@ public class MediaPlayerFragment extends Fragment {
     public void updatePlayList(List<Wikipage> playableList, boolean startPlaying, int position)
     {
         curPosition = position;
-        if(playableList != null && !playableList.isEmpty()) {
+        if(playableList != null) {
             this.playableList = playableList;
-            curPlaying = playableList.get(curPosition);
-            title.setText(curPlaying.getTitle());
-            if(startPlaying)
-            {
-                player.playWiki(curPlaying);
-                playingStatus = true;
+            if (playableList.size() > position) {
+                curPlaying = playableList.get(curPosition);
+                title.setText(curPlaying.getTitle());
+                if (startPlaying) {
+                    player.playWiki(curPlaying);
+                    playingStatus = true;
+                }
+
             }
         }
     }
@@ -249,8 +249,13 @@ public class MediaPlayerFragment extends Fragment {
      */
     public void addWikiToPlayList(Wikipage wikipage, boolean skipToWiki)
     {
+        if(wikipage == null)
+        {
+            return;
+        }
 
-        if(playableList != null && wikipage!= null) {
+        if(playableList != null) {
+
             this.playableList.add(wikipage);
             if(skipToWiki)
             {
@@ -262,7 +267,7 @@ public class MediaPlayerFragment extends Fragment {
         }
         else
         {
-            this.playableList = new ArrayList<>();
+            this.playableList =((WikiAudioApp) getActivity().getApplication()).getPlaylist();
             this.playableList.add(wikipage);
             if(skipToWiki) {
                 title.setText(wikipage.getTitle());

@@ -34,4 +34,8 @@ public class WikiAudioApp extends Application {
     public ExecutorService getExecutorService() {
         return executorService;
     }
+
+    public List<Wikipage> getPlaylist() {
+        return playList;
+    }
 }
