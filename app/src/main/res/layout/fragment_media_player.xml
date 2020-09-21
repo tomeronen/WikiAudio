@@ -8,6 +8,7 @@
     android:layout_height="match_parent"
     tools:context=".activates.MediaPlayerFragment">
 
+
     <com.ohoussein.playpause.PlayPauseView
         android:id="@+id/play_pause"
         android:layout_width="54dp"
@@ -20,7 +21,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle"
         app:pause_bg="#00a2ed"
-        app:play_bg="#001eff" />
+        app:play_bg="#001eff" >
+
+    </com.ohoussein.playpause.PlayPauseView>
 
     <TextView
         android:id="@+id/audioPlayingTitle"

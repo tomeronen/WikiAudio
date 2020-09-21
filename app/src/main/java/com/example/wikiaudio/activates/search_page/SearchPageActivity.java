@@ -41,7 +41,7 @@ public class SearchPageActivity extends AppCompatActivity {
         searchView = findViewById(R.id.search_bar_view);
         loadingIcon = findViewById(R.id.progressBar2);
         wikipedia = new Wikipedia(this);
-        wikipediaPlayer = new WikipediaPlayer(getApplicationContext(), Locale.ENGLISH, 0.8f);
+        wikipediaPlayer = new WikipediaPlayer(this, Locale.ENGLISH, 0.8f);
         app = getApplicationContext();
         String valueToSearch = getIntent().getStringExtra(SEARCH_TAG);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

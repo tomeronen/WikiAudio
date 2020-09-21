@@ -26,11 +26,6 @@ import java.util.Locale;
  */
 public class MediaPlayerFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
     PlayPauseView playButton;
     FloatingActionButton nextButton;
     FloatingActionButton previousButton;
@@ -42,6 +37,7 @@ public class MediaPlayerFragment extends Fragment {
     private Wikipage curPlaying;
     private boolean playingStatus = false;
     private boolean showPlayingData;
+
 
 
     public void showTitle(boolean showPlayingData)
@@ -74,8 +70,6 @@ public class MediaPlayerFragment extends Fragment {
     public static MediaPlayerFragment newInstance(String param1, String param2) {
         MediaPlayerFragment fragment = new MediaPlayerFragment(false);
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -94,7 +88,7 @@ public class MediaPlayerFragment extends Fragment {
         previousButton = fragmentInflated.findViewById(R.id.previuosSoung);
         playButton = fragmentInflated.findViewById(R.id.play_pause);
         nextButton = fragmentInflated.findViewById(R.id.nextSoung);
-        player = new WikipediaPlayer(this.getContext(), Locale.ENGLISH,1f);
+        player = new WikipediaPlayer(this.getActivity(), Locale.ENGLISH,1f);
         title = fragmentInflated.findViewById(R.id.audioPlayingTitle);
 //        playableList =((WikiAudioApp) getActivity().getApplication()).getPlaylist();
 
@@ -124,6 +118,10 @@ public class MediaPlayerFragment extends Fragment {
                     {
                         player.stopPlaying();
                     }
+                    else
+                    {
+                        playButton.toggle();
+                    }
                     player.playWiki(curPlaying);
                     playingStatus = true;
                 }
@@ -135,8 +133,8 @@ public class MediaPlayerFragment extends Fragment {
             public void onClick(View v) {
                 if(!playingStatus) // not already playing
                 {
-                    playButton.toggle();
                     startPlaying();
+                    playButton.toggle();
                     if(!playingStatus) // starting playing music failed.
                     {
                         playButton.toggle();
@@ -144,8 +142,8 @@ public class MediaPlayerFragment extends Fragment {
                 }
                 else // already playing -> pause.
                 {
-                    playButton.toggle();
                     pausePlaying();
+                    playButton.toggle();
                     if(playingStatus) // pausing playing music failed.
                     {
                         playButton.toggle();
@@ -164,6 +162,10 @@ public class MediaPlayerFragment extends Fragment {
                     if(playingStatus)
                     {
                         player.stopPlaying();
+                    }
+                    else
+                    {
+                        playButton.toggle();
                     }
                     player.playWiki(curPlaying);
                     playingStatus = true;

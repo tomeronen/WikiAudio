@@ -1,17 +1,22 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.example.wikiaudio.WikiAudioApp;
+
 import java.io.IOException;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 public class WikipediaPlayer implements TextToSpeech.OnInitListener{
 
 
     private final Context context;
+    private final ExecutorService threadPool;
     private Locale language;
     private final float speed;
     private boolean playingUrl = false;
@@ -21,11 +26,13 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
     private String textToSpeak;
     private boolean paused = false;
 
-    public WikipediaPlayer(Context context, Locale language, float speed) {
-        this.context = context;
+    public WikipediaPlayer(Activity activity, Locale language, float speed) {
+        this.context = activity.getApplicationContext();
         this.language = language;
         this.speed = speed;
         mp = new MediaPlayer();
+        threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
+
     }
 
     /**
@@ -40,25 +47,30 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
         }
         if(canPlayWikipageAudio(wikipage)) {
             // has audio source;
-            Log.d("start playing", "from url source");
-            playingUrl = true;
-            mp = new MediaPlayer();
-            try {
+            threadPool.execute(() -> { // preparing media player + loading url = long time -> thread
+                Log.d("start playing", "from url source");
+                playingUrl = true;
+                mp = new MediaPlayer();
+                try {
                     String audioUrl = wikipage.getAudioUrl();
                     mp.setDataSource(audioUrl);
                     mp.prepare();
                     mp.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
         }
         else
         {
-            Log.d("start playing", "from text to speech");
-            playingTextToSpeech = true;
-            String fullText = wikipage.getFullText();
-            textToSpeak = fullText;
-            engine = new TextToSpeech(context, this);
+            threadPool.execute(() -> {
+                Log.d("start playing", "from text to speech");
+                playingTextToSpeech = true;
+                String fullText = wikipage.getFullText();
+                textToSpeak = fullText;
+                engine = new TextToSpeech(context, this);
+            });
+
         }
     }
 
