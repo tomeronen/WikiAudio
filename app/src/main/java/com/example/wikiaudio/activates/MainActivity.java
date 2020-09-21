@@ -1,4 +1,5 @@
 package com.example.wikiaudio.activates;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -22,16 +23,15 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
+import com.example.wikiaudio.Handler;
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
-import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.location.LocationHandler;
-import com.example.wikiaudio.wikipedia.PageAttributes;
+import com.example.wikiaudio.playlist.Playlist;
+import com.example.wikiaudio.playlist.PlaylistFragment;
+import com.example.wikiaudio.playlist.PlaylistsFragmentAdapter;
+import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WorkerListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,10 +41,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -57,10 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     //For logs
     private static final String TAG = "MainActivity";
 
-    AppCompatActivity activity;
-
-    //Wikipedia facade object
-    Wikipedia wikipedia;
+    private AppCompatActivity activity;
 
     //Google services related (error for handling when the google service version is incorrect)
     private static final int ERROR_DIALOG_REQUEST = 9002;
@@ -71,11 +68,18 @@ public class MainActivity extends AppCompatActivity implements
     private Boolean isGPSEnabled = false;
     private Boolean mapWasInit= false;
     private GoogleMap mMap;
-    LocationHandler locationHandler;
-    ArrayList<PlayListFragment> playLists = new ArrayList<>();
+
+
+    //Playlist related
+    private PlaylistsFragmentAdapter playlistsFragmentAdapter;
+
+    // idk
+    private ArrayList<PlaylistFragment> playLists = new ArrayList<>();
     private List<String> chosenCategories;
-    ImageButton chooseCategories;
-    SearchView searchBar;
+
+    //Views
+    private ImageButton chooseCategories;
+    private SearchView searchBar;
     private TabLayout tabs;
     private ProgressBar loadingIcon;
 
@@ -87,26 +91,26 @@ public class MainActivity extends AppCompatActivity implements
         initVars();
         initMap();
         setOnClickButtons();
-//        loadPlayLists();
+        loadPlaylists();
 
-         testWikiRecordActivity();
+//        testWikiRecordActivity();
 
     }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-        // todo change to set? what happens if we take down and add again. order changes.
-        boolean diff = false;
-        if(tabs != null)
-        {
-            int tabCount = tabs.getTabCount();
-            if(tabCount != chosenCategories.size())
-            {
-                loadPlayLists();
-                return;
-            }
-        }
+//    @Override
+//    public void onResume(){
+//        super.onResume();
+//        // todo change to set? what happens if we take down and add again. order changes.
+//        boolean diff = false;
+//        if(tabs != null)
+//        {
+//            int tabCount = tabs.getTabCount();
+//            if(tabCount != chosenCategories.size())
+//            {
+//                loadPlaylists();
+//                return;
+//            }
+//        }
 
 //        for (int i =0; i < tabCount; i++)
 //        {
@@ -118,7 +122,43 @@ public class MainActivity extends AppCompatActivity implements
 //            loadPlayLists();
 //        }
 
+//        }
+
+    /**
+     * Pretty self-explanatory, really.
+     */
+    private void initVars() {
+        activity = this;
+        Handler.getInstance(activity);
+        //Check for location perms
+        mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        chooseCategories = findViewById(R.id.chooseCategories);
+        searchBar = findViewById(R.id.search_bar);
+        loadingIcon = findViewById(R.id.progressBar4);
+    }
+
+    /**
+     * For initializing the GoogleMaps fragment
+     */
+    private void initMap() {
+        if (isGoogleServicesOK()) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.fragmentMap);
+            if (mapFragment == null) {
+                Log.d(TAG, "initMap: mapFragment is null");
+            } else {
+                mapFragment.getMapAsync(this);
+            }
+        } else {
+            Log.d(TAG, "initMap: google services is not ok :(");
         }
+    }
 
     private void setOnClickButtons() {
         chooseCategories.setOnClickListener(new View.OnClickListener() {
@@ -148,70 +188,43 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
-    private void loadPlayLists() {
-        loadingIcon.setVisibility(View.VISIBLE);
+    /**
+     * Loads the playlists fragment based on favorite categories and, if enabled, also
+     * based on location
+     */
+    private void loadPlaylists() {
+        if (loadingIcon != null) {
+            loadingIcon.setVisibility(View.VISIBLE);
+        }
+
+        if(tabs == null || tabs.getTabCount() == 0) { // nothing to load.
+            if (loadingIcon != null)
+                loadingIcon.setVisibility(View.GONE);
+            return;
+        }
+
+        final PlaylistsFragmentAdapter playListsFragmentAdapter =
+                new PlaylistsFragmentAdapter(getSupportFragmentManager());
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final PlayListsFragmentAdapter playListsFragmentAdapter =
-                        new PlayListsFragmentAdapter(getSupportFragmentManager());
-                chosenCategories = ((WikiAudioApp) getApplication())
-                        .getAppData().getChosenCategories();
-                final int[] threadsFinished = {0};
-                if(chosenCategories == null || chosenCategories.size() == 0)
-                { // if no chosen categories go back
-                    return;
-                }
-                for (String category : chosenCategories) {
-                    final List<String> playListNames = new ArrayList<>();
-                    wikipedia.loadSpokenPagesNamesByCategories(category, playListNames,
-                            new WorkerListener() {
-                                @Override
-                                public void onSuccess() {
+                Handler.playlistsHandler.createCategoryBasedPlaylists(activity);
 
-                                    List<Wikipage> playListContent = new ArrayList<>();
-                                    for (String pageName : playListNames) {
-                                        // if (wikipage.cooardinates == null) {
-                                        // break;
-                                        //}
-                                        Wikipage wikipage = new Wikipage();
-                                        wikipage.setTitle(pageName);
-                                        playListContent.add(wikipage);
-
-                                    }
-                                    PlayListFragment playListFragment
-                                            = new PlayListFragment(playListContent);
-                                    playListsFragmentAdapter.addFrag(playListFragment);
-                                    threadsFinished[0]++;
-                                }
-
-                                @Override
-                                public void onFailure() {
-                                    threadsFinished[0]++;
-                                }
-                            });
-                    if (category == "pages Nearby") { //todo finish
-                        List<Wikipage> testingContent = new ArrayList<>();
-                        Wikipage wikiPage = new Wikipage();
-                        wikiPage.setTitle("test");
-                        testingContent.add(wikiPage);
-                        PlayListFragment playListFragment = new PlayListFragment(testingContent);
-                        playListsFragmentAdapter.addFrag(playListFragment);
-                    }
-                }
+                //Add all playlists as fragments to the adapter
+                for (Playlist playlist: PlaylistsHandler.getPlaylists())
+                    playListsFragmentAdapter.addPlaylistFragment(new PlaylistFragment(playlist));
 
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ViewPager viewPager =
-                                findViewById(R.id.view_pager);
+                        ViewPager viewPager = findViewById(R.id.view_pager);
                         viewPager.setAdapter(playListsFragmentAdapter);
                         tabs = findViewById(R.id.tabs);
                         tabs.setupWithViewPager(viewPager);
                         int counter = 0;
-                        for (String category : chosenCategories) // todo - not best. we do this twice.
-                        {
-                            tabs.getTabAt(counter).setText(category);
+                        for (Playlist playlist: PlaylistsHandler.getPlaylists()) {
+                            Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
                             counter++;
                         }
                         loadingIcon.setVisibility(View.GONE);
@@ -221,41 +234,6 @@ public class MainActivity extends AppCompatActivity implements
         }).start();
     }
 
-    /**
-     * Pretty self-explanatory, really.
-     */
-    private void initVars() {
-        //Check for location perms
-
-        mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-                        == PackageManager.PERMISSION_GRANTED;
-        activity = this;
-        wikipedia = new Wikipedia(this);
-        chooseCategories = findViewById(R.id.chooseCategories);
-        searchBar = findViewById(R.id.search_bar);
-        loadingIcon = findViewById(R.id.progressBar4);
-    }
-
-    /**
-     * For initializing the GoogleMaps fragment
-     */
-    private void initMap() {
-        if (isGoogleServicesOK()) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.fragmentMap);
-            if (mapFragment == null) {
-                Log.d(TAG, "initMap: mapFragment is null");
-            } else {
-                mapFragment.getMapAsync(this);
-            }
-        } else {
-            Log.d(TAG, "initMap: google services is not ok :(");
-        }
-    }
 
     /**
      * Pretty self-explanatory, really.
@@ -279,6 +257,17 @@ public class MainActivity extends AppCompatActivity implements
             Toast.makeText(activity, "Oops, can't make any map requests", Toast.LENGTH_SHORT).show();
         }
         return false;
+    }
+
+    /**
+     * A simple location permission request for FINE, COARSE and INTERNET
+     */
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(activity,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET},
+                LOCATION_PERMISSION_REQUEST_CODE);
     }
 
     /**
@@ -331,53 +320,45 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "onMapReady: google map is null; map related actions will not work");
         } else {
             if (mLocationPermissionGranted && !mapWasInit) {
-//                Log.d(TAG, "onMapReady: google map is NOT null & we have perm");
                 mMap.setOnMyLocationButtonClickListener(this);
                 mMap.setOnMyLocationClickListener(this);
                 mMap.setOnInfoWindowClickListener(this);
-
-                locationHandler = new LocationHandler(activity, mMap);
-                isLocationEnabled();
-                initUserLocationAndMap();
+                Handler.locationHandler.setGoogleMap(mMap);
+                initUserLocationOnTheMap();
             } else {
-                //request permissions
-                Log.d(TAG, "onMapReady: google map is NOT null & we DON'T have perm");
-                requestLocationPermission();
+                if (!mLocationPermissionGranted){
+                    Log.d(TAG, "onMapReady: google map is NOT null & we DON'T have perm");
+                    requestLocationPermission();
+                }
                 mapWasInit = false;
             }
         }
     }
 
     /**
-     * A simple location permission request for FINE, COARSE and INTERNET
-     */
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(activity,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET},
-                LOCATION_PERMISSION_REQUEST_CODE);
-    }
-
-    /**
-     * Enables GoogleMaps location tracking, focuses the camera on the user's location and
-     * presents nearby wikipages as markers
+     * Enables GoogleMaps location tracking & focuses the camera on the user's location
+     * (Add here any action that you would like to appear as soon as the map opens)
      */
     @SuppressLint("MissingPermission")
-    private void initUserLocationAndMap() {
+    private void initUserLocationOnTheMap() {
         if (mMap != null && mLocationPermissionGranted) {
-            //Add here any action that you would like to appear as soon as the map opens
-//            Log.d(TAG, "enableMyLocation: google map is NOT null & we have perm");
             mMap.setMyLocationEnabled(true);
-
-            //Zoom to user's location + show nearby Wikipages
+            isLocationEnabled();
             if (isGPSEnabled) {
-                LatLng currentLatLng = locationHandler.getCurrentLocation();
+                LatLng currentLatLng = Handler.locationHandler.getCurrentLocation();
                 if (currentLatLng != null) {
+                    //Zoom in to user's location
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                    locationHandler.markWikipagesNearby(wikipedia);
+                    //Create and display nearby playlist
+                    Handler.playlistsHandler.createLocationBasedPlaylist(
+                            currentLatLng.latitude, currentLatLng.longitude, true);
+                    Handler.playlistsHandler.markNearbyPlaylistOnMap(Handler.locationHandler);
                 }
+            } else {
+                Log.d(TAG, "initUserLocationOnTheMap: no GPS");
             }
+        } else {
+            Log.d(TAG, "initUserLocationOnTheMap: either google map is null or we have no perm");
         }
     }
 
@@ -451,35 +432,35 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void testChooseCategoriesActivity() {
-        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
-        startActivity(intent);
-    }
+//    private void testChooseCategoriesActivity() {
+//        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
+//        startActivity(intent);
+//    }
 
-    private void testWikiRecordActivity() {
-        final Wikipage testPage = new Wikipage();
-        String pageName = "Hurricane_Irene_(2005)";
-        List<PageAttributes> pageAttributes = new ArrayList<>();
-        pageAttributes.add(PageAttributes.title);
-        pageAttributes.add(PageAttributes.content);
-        wikipedia.getWikipage(pageName,
-                pageAttributes,
-                testPage,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        Intent intent = new Intent(activity, WikiRecordActivity.class);
-                        Gson gson = new Gson();
-                        String wiki = gson.toJson(testPage);
-                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
-                        startActivity(intent);
-                    }
-                    @Override
-                    public void onFailure() {
-                    }
-                }
-        );
-    }
+//    private void testWikiRecordActivity() {
+//        final Wikipage testPage = new Wikipage();
+//        String pageName = "Hurricane_Irene_(2005)";
+//        List<PageAttributes> pageAttributes = new ArrayList<>();
+//        pageAttributes.add(PageAttributes.title);
+//        pageAttributes.add(PageAttributes.content);
+//        wikipedia.getWikipage(pageName,
+//                pageAttributes,
+//                testPage,
+//                new WorkerListener() {
+//                    @Override
+//                    public void onSuccess() {
+//                        Intent intent = new Intent(activity, WikiRecordActivity.class);
+//                        Gson gson = new Gson();
+//                        String wiki = gson.toJson(testPage);
+//                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+//                        startActivity(intent);
+//                    }
+//                    @Override
+//                    public void onFailure() {
+//                    }
+//                }
+//        );
+//    }
 }
 
 

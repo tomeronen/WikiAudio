@@ -1,28 +1,27 @@
-package com.example.wikiaudio.activates;
-
-import androidx.recyclerview.widget.RecyclerView;
+package com.example.wikiaudio.playlist;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.Wikipage;
-import com.example.wikiaudio.wikipedia.Wikipage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Wikipage}.
  */
-public class WikiPagePlayListRecyclerViewAdapter
-        extends RecyclerView.Adapter<WikiPagePlayListRecyclerViewAdapter.WikiPageViewHolder> {
+public class PlaylistRecyclerViewAdapter
+        extends RecyclerView.Adapter<PlaylistRecyclerViewAdapter.WikiPageViewHolder> {
 
-    private List<Wikipage> mValues = new ArrayList<>();
-    public WikiPagePlayListRecyclerViewAdapter(List<Wikipage> items) {
-        mValues = items;
+    private List<Wikipage> mWikipages;
+
+    public PlaylistRecyclerViewAdapter(Playlist playlist) {
+        mWikipages = playlist.getWikipages();
     }
 
     @Override
@@ -34,24 +33,18 @@ public class WikiPagePlayListRecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
-
         // update wiki page view holder: todo add what else we want to do.
-        holder.mItem = mValues.get(position);
-        holder.mContentView.setText(mValues.get(position).getTitle());
+        holder.mItem = mWikipages.get(position);
+        holder.mContentView.setText(mWikipages.get(position).getTitle());
     }
 
     @Override
     public int getItemCount() {
-        if(mValues != null)
-        {
-            return mValues.size();
+        if(mWikipages != null) {
+            return mWikipages.size();
         }
-        else
-        {
-            return 0;
-        }
+        return 0;
     }
-
 
     public class WikiPageViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
