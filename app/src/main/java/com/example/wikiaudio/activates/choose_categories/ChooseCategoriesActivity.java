@@ -1,10 +1,5 @@
 package com.example.wikiaudio.activates.choose_categories;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +8,11 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseCategoriesActivity extends AppCompatActivity {
-    private Wikipedia wikipedia= new Wikipedia(this);
+    private Wikipedia wikipedia;
     private List<String> categories = new ArrayList<>();
     private RecyclerView categoriesView;
     private SearchView searchCategoriesView;
@@ -43,6 +43,8 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         searchCategoriesView = findViewById(R.id.searchCategorysView);
         saveButton = findViewById(R.id.saveChoice);
         loadingIcon = findViewById(R.id.progressBar5);
+        wikipedia = new Wikipedia(this);
+
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
