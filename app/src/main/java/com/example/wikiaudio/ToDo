@@ -9,6 +9,33 @@
 (9) Debug old code!
 
 
+
+// TODO BY CATEGORY:
+RecordActivity:
+    (1) TIPS dialog appear on first instance.
+    (2) option for uploading when finished.
+    (3)
+
+MainActivity:
+    (1) Navigation View:
+        (a) LogIn
+        (b) Old recordings
+        (c) give Feedback
+        (d)
+        (e)
+        (f)
+
+    (2) Make a Fragment for showing WikiPages that is shared between MainActivity and search page
+        activity.
+
+
+Wikipedia Logic:
+    (1) relative - function that lets you see next wiki page based on the page you are in now.
+    (2) get wiki pages from list of wiki titles.
+    (3) make url returned be one for mobile.
+    (4)
+
+
 Bugs known:
     (1) when you go Vertical im main screen -> Crash.
     (2) when you change categorise but stay with the same amount -> wont update.
