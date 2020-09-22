@@ -3,6 +3,7 @@ package com.example.wikiaudio;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.example.wikiaudio.playlist.Playlist;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -16,11 +17,26 @@ public class AppData
     private static final String categoriesSpTag = "categories";
 
 
+
     private final Gson gson;
 
     private WikiAudioApp wikiAudioApp;
+    private boolean playingStatus = false;
+    private int curPositionInPlaylist = 0;
+    private Playlist getPlaylist;
     SharedPreferences sp;
     static List<String> chosenCategories;
+
+
+    public Playlist getPlaylist() {
+        return getPlaylist;
+    }
+
+
+
+    public void setPlaylist(Playlist currentlyPlaying) {
+        this.getPlaylist = currentlyPlaying;
+    }
 
 
     public AppData(WikiAudioApp wikiAudioApp) {
@@ -88,6 +104,23 @@ public class AppData
         {
             String categoriesString = gson.toJson(categories);
             sp.edit().putString(categoriesSpTag, categoriesString).apply();
+        }
+    }
+
+    public boolean getPlayingStatus() {
+        return playingStatus;
+    }
+    public void setPlayingStatus(boolean playingStatus) {
+        this.playingStatus = playingStatus;
+    }
+
+    public int getCurPosition() {
+        return curPositionInPlaylist;
+    }
+
+    public void setCurPositionInPlaylist(int curPositionInPlaylist) {
+        if(curPositionInPlaylist >= 0) {
+            this.curPositionInPlaylist = curPositionInPlaylist;
         }
     }
 }

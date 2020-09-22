@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
+import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.Handler;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
@@ -31,7 +32,6 @@ import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.playlist.Playlist;
-import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -49,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -91,8 +90,9 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayerFragment mediaPlayerFragment;
     private ViewPager viewPager;
     private PlaylistsFragmentAdapter playListsFragmentAdapter;
+    private AppData appData;
 
-     //
+    //
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 //        cleanData(); //todo if wanted for debugging.
@@ -107,11 +107,9 @@ public class MainActivity extends AppCompatActivity implements
             setUpTabs();
             loadPlaylists();
             // load mediaPlayer with the play list of first fragment.
-
             Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
-            mediaPlayerFragment.updatePlayList(
-                    playListsFragmentAdapter.getItem(0).getPlaylist(), false);
-            mediaPlayerFragment.updatePlayList();
+            new Thread(() -> appData.setPlaylist(new Playlist("Biology",
+                    false, 0, 0))).start();
         }
 
 //         testWikiRecordActivity();
@@ -179,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         activity = this;
+        appData =((WikiAudioApp) getApplication()).getAppData();
         Handler.getInstance(activity); // Holds all of the app's facades/singletons
 
         //Check for location perms
@@ -259,32 +258,32 @@ public class MainActivity extends AppCompatActivity implements
         loadingIcon.setVisibility(View.VISIBLE);
         final PlaylistsFragmentAdapter playListsFragmentAdapter =
                 new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Handler.playlistsHandler.createCategoryBasedPlaylists(activity);
-
-                //Add all playlists as fragments to the adapter
-                for (Playlist playlist: PlaylistsHandler.getPlaylists())
-                    playListsFragmentAdapter.addPlaylistFragment(new PlaylistFragment(playlist));
-
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ViewPager viewPager = findViewById(R.id.view_pager);
-                        viewPager.setAdapter(playListsFragmentAdapter);
-                        tabs = findViewById(R.id.tabs);
-                        tabs.setupWithViewPager(viewPager);
-                        int counter = 0;
-                        for (Playlist playlist: PlaylistsHandler.getPlaylists()) {
-                            Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
-                            counter++;
-                        }
-                        loadingIcon.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                Handler.playlistsHandler.createCategoryBasedPlaylists(activity);
+//
+//                //Add all playlists as fragments to the adapter
+//                for (Playlist playlist: PlaylistsHandler.getPlaylists())
+//                    playListsFragmentAdapter.addPlaylistFragment(new PlaylistFragment(playlist));
+//
+//                activity.runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        ViewPager viewPager = findViewById(R.id.view_pager);
+//                        viewPager.setAdapter(playListsFragmentAdapter);
+//                        tabs = findViewById(R.id.tabs);
+//                        tabs.setupWithViewPager(viewPager);
+//                        int counter = 0;
+//                        for (Playlist playlist: PlaylistsHandler.getPlaylists()) {
+//                            Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
+//                            counter++;
+//                        }
+//                        loadingIcon.setVisibility(View.GONE);
+//                    }
+//                });
+//            }
+//        }).start();
     }
 
     private void setUpTabs() {

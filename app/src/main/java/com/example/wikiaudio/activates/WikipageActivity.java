@@ -81,26 +81,6 @@ public class WikipageActivity extends AppCompatActivity {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.media_player);
         mediaPlayerFragment.showTitle(false);
-
-        mediaPlayerFragment.playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(firstPress &&
-                        wikipage.getSections() != null) {
-                    firstPress = false;
-                    playing = true;
-                    mediaPlayerFragment.addWikiToPlayList(wikipage, true);
-                }
-                if(!firstPress && !playing)
-                {
-                    mediaPlayerFragment.startPlaying();
-                }
-                if(playing)
-                {
-                    mediaPlayerFragment.pausePlaying();
-                }
-            }
-        });
     }
 
 
