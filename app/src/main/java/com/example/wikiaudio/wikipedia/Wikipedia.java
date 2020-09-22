@@ -1,6 +1,8 @@
 package com.example.wikiaudio.wikipedia;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.WikiAudioApp;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -11,8 +13,11 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Facade singleton class to all interaction with wikipedia.
@@ -21,15 +26,18 @@ import java.util.concurrent.ExecutorService;
  */
 public class Wikipedia {
 
+    private static final int DAYS_BETWEEN_LOADING_CATEGORIES = 7;
     private final ExecutorService threadPool;
     public ArrayList<String> spokenPagesCategories;
     private static Wikipedia instance = null;
     LinkedTreeMap<String, List<String>> spokenCategories;
     private AppCompatActivity activ;
+    AppData appData;
 
     public Wikipedia(AppCompatActivity activity) {
         activ = activity;
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
+        appData = ((WikiAudioApp) this.activ.getApplication()).getAppData();
     }
 
     /**
@@ -119,30 +127,45 @@ public class Wikipedia {
      * loads the current spoken pages categories from wikipedia.
      */
     public void loadSpokenPagesCategories(final List<String> listToFill,
-                                          final WorkerListener workerListener)
-    {
-        threadPool.execute(() -> {
-            try {
-                listToFill
-                        .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onSuccess();
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onFailure();
-                    }
-                });
+                                          final WorkerListener workerListener) {
+        if (needToLoadCategories()) { // need to reload Categories -> load from wiki.
+            threadPool.execute(() -> {
+                try {
+                    listToFill
+                            .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
+                    Date currentTime = Calendar.getInstance().getTime();
+                    appData.setCategories(listToFill);
+                    appData.setLastLoadedCategories(currentTime);
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onSuccess();
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    activ.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            workerListener.onFailure();
+                        }
+                    });
+                }
+            });
+        }
+        else { // do not need to load Categories -> load from saved.
+            List<String> categories = appData.getCategories();
+            if(categories != null) {
+                listToFill.addAll(appData.getCategories());
+                workerListener.onSuccess();
+            }
+            else {
+                workerListener.onFailure();
             }
 
+        }
 
-        });
+
 
         // worker option:
 
@@ -179,6 +202,23 @@ public class Wikipedia {
 //                    }
 //                });
     }
+
+
+
+
+    private boolean needToLoadCategories() {
+        Date currentTime = Calendar.getInstance().getTime();
+        Date lastLoadedCategories = appData.getLastLoadedCategories();
+        if(lastLoadedCategories != null) {
+            long diffInMillies = Math.abs(currentTime.getTime() - lastLoadedCategories.getTime());
+            long diffInDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            return  diffInDays > DAYS_BETWEEN_LOADING_CATEGORIES;
+        }
+        else {
+            return true;
+        }
+    }
+
 
     /**
      *

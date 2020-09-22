@@ -44,8 +44,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -109,8 +113,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void cleanData() {
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
+        WorkManager.getInstance(this).cancelAllWork();
         ((WikiAudioApp) getApplication()).getAppData().saveChosenCategories(new ArrayList<>());
+        ((WikiAudioApp) getApplication()).getAppData().setCategories(new ArrayList<>());
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
+        try {
+            Date date = sdf.parse("01/01/2000"); // just a very far date.
+            ((WikiAudioApp) getApplication()).getAppData().setLastLoadedCategories(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 
