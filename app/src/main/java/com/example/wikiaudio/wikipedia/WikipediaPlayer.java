@@ -56,9 +56,11 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
                     mp.setDataSource(audioUrl);
                     mp.prepare();
                     mp.start();
-                } catch (IOException e) {
+                } catch (IOException | IllegalStateException e) {
+                    // IllegalStateException happens when play button is pressed fast.
                     e.printStackTrace();
                 }
+
             });
         }
         else
