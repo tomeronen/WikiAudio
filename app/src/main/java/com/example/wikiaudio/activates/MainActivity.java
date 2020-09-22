@@ -100,23 +100,12 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         initVars();
         setOnClickButtons();
-        initMediaPlayer();
         initMap();
-        if(!chosenCategories.isEmpty())
-        {
-            setUpTabs();
-            loadPlaylists();
-            // load mediaPlayer with the play list of first fragment.
+        loadPlaylists();
+//        initMediaPlayer();
 
-            Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
-            mediaPlayerFragment.updatePlayList(
-                    playListsFragmentAdapter.getItem(0).getPlaylist(), false);
-            mediaPlayerFragment.updatePlayList();
-        }
-
-//         testWikiRecordActivity();
-//        testMediaPlayerFragment();
-//        testUploadFile();
+//        mediaPlayerFragment.updatePlayList(playListsFragmentAdapter.getItem(0).getPlaylist(), false);
+//        mediaPlayerFragment.updatePlayList();
 
     }
 
@@ -145,22 +134,22 @@ public class MainActivity extends AppCompatActivity implements
 //    }
 
 
-    private void initMediaPlayer() {
-        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.audioPlayerFragment);
-        mediaPlayerFragment.showTitle(true);
-    }
+//    private void initMediaPlayer() {
+//        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+//                .findFragmentById(R.id.audioPlayerFragment);
+//        mediaPlayerFragment.showTitle(true);
+//    }
 
-    //  todo option B check if crasches app.
-    @Override
-    public void onResume(){
-        super.onResume();
-        if(tabs != null)
-        {
-                setUpTabs();
-                loadPlaylists();
-                return;
-        }
+//    //  todo option B check if crasches app.
+//    @Override
+//    public void onResume(){
+//        super.onResume();
+//        if(tabs != null)
+//        {
+//                setUpTabs();
+//                loadPlaylists();
+//                return;
+//        }
 
 //        for (int i =0; i < tabCount; i++)
 //        {
@@ -172,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements
 //            loadPlayLists();
 //        }
 
-        }
+//        }
 
     /**
      * Pretty self-explanatory, really.
@@ -182,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements
         Handler.getInstance(activity); // Holds all of the app's facades/singletons
 
         //Check for location perms
-
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -197,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements
         tabs = findViewById(R.id.tabs);
         chosenCategories = ((WikiAudioApp) getApplication())
                 .getAppData().getChosenCategories();
+        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
     }
 
 
@@ -259,56 +248,28 @@ public class MainActivity extends AppCompatActivity implements
         loadingIcon.setVisibility(View.VISIBLE);
         final PlaylistsFragmentAdapter playListsFragmentAdapter =
                 new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Handler.playlistsHandler.createCategoryBasedPlaylists(activity);
+        new Thread(() -> {
+            Handler.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
 
-                //Add all playlists as fragments to the adapter
-                for (Playlist playlist: PlaylistsHandler.getPlaylists())
-                    playListsFragmentAdapter.addPlaylistFragment(new PlaylistFragment(playlist));
+            //Add all playlists as fragments to the adapter
+            for (Playlist playlist: PlaylistsHandler.getPlaylists())
+                playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
 
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ViewPager viewPager = findViewById(R.id.view_pager);
-                        viewPager.setAdapter(playListsFragmentAdapter);
-                        tabs = findViewById(R.id.tabs);
-                        tabs.setupWithViewPager(viewPager);
-                        int counter = 0;
-                        for (Playlist playlist: PlaylistsHandler.getPlaylists()) {
-                            Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
-                            counter++;
-                        }
-                        loadingIcon.setVisibility(View.GONE);
-                    }
-                });
-            }
+            activity.runOnUiThread(() -> {
+                ViewPager viewPager = findViewById(R.id.view_pager);
+                viewPager.setAdapter(playListsFragmentAdapter);
+                tabs = findViewById(R.id.tabs);
+                tabs.setupWithViewPager(viewPager);
+                int counter = 0;
+                for (Playlist playlist: PlaylistsHandler.getPlaylists()) {
+                    Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
+                    counter++;
+                }
+                loadingIcon.setVisibility(View.GONE);
+            });
         }).start();
     }
 
-    private void setUpTabs() {
-        // get total future playlists count and create that amount of fragemnets tabs
-        playListsFragmentAdapter =
-                new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        for (String category : chosenCategories) {
-            PlaylistFragment playListFragment = new PlaylistFragment(new Playlist());
-            playListsFragmentAdapter.addPlaylistFragment(playListFragment);
-
-        }
-        viewPager.setAdapter(playListsFragmentAdapter);
-        tabs.setupWithViewPager(viewPager);
-        int counter = 0;
-        for (String category : chosenCategories)
-        {
-            TabLayout.Tab tab = tabs.getTabAt(counter);
-            if(tab != null)
-            {
-                tab.setText(category);
-            }
-            counter++;
-        }
-    }
 
     /**
      * Pretty self-explanatory, really.
@@ -474,6 +435,7 @@ public class MainActivity extends AppCompatActivity implements
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         isLocationEnabled();
+        PlaylistsHandler.displayNearbyPlaylistOnTheMap();
         return false;
     }
     /**

@@ -1,30 +1,51 @@
-//todo:
-(1) Playlist Player Fragment. (T.R)
-(2) Finish playlist player logic.
-(3) Playlist logic: (S.M)
-    1. Create the Playlist class.
-    2. Make Nearby the first playlist to appear given we have permissions.
-    3. Load playlists and not categories.
-(4) Connect wikipages in search and in playlists to wikipageActivity.
-(5) How to display wikipages in search and the playlist recycler.
-(6) Record Activity. (T.R)
-(7) Upload recording file logic. (T.R)
-(8) Debug old code
+TODO:
+(1) Regarding the wikipages that appear on the playlist fragment:
+    (a) Add a play button that will play that playlist starting from that wikipage index.
+    (b) Add a location button which appears ONLY if that wikipage has coordinates, that will
+        center the map there.
+    (c) Long click opens its wikipageActivity.
+(2) Displaying category based playlists now occurs as soon we get their titles.
+(3) While listening to a playlist, make sure it continues even if the user enters another activity.
+(4) Add a play button on the wikipageActivity for when the user would like to listen to that
+    specific wikipage. Then:
+        (a) It'll play the playlist that wikipage is at starting from its index.
+        (b) It'll only play that wikipage and that's it.
+(5) When fetching articles from the wiki server by category, set maximum of 20 pages.
+(6) When the user's original location changes in fixed radius distance, update the Nearby playlist
+    unless it is being played.
 
 
-Known Bugs:
-    (1) when you go Vertical im main screen -> Crash.
-    (2) when you change categorise but stay with the same amount -> wont update.
+MainActivity:
+    (1) Navigation View:
+        (a) LogIn
+        (b) Old recordings
+        (c) give Feedback
+        (d)
+        (e)
+        (f)
 
-Optional Amendments:
-    (1) When fetching articles from the wiki server by category: can we set a maximum amount to
-        receive? we don't want to display hundreds of articles.
+    (2) Make a Fragment for showing WikiPages that is shared between MainActivity and search page
+        activity.
 
-Considerations:
-    (1) When the user's location changes, should we update the Nearby playlist? maybe we should
-        update it every x meters and not for each location change? once the user decided to
-        play the nearby playlist, we should "lock" its wikipages.
 
+Wikipedia Logic:
+    (1) relative - function that lets you see next wiki page based on the page you are in now.
+    S.M ^ I don't think we should
+    (2) get wiki pages from list of wiki titles.
+    S.M ^ already done in Playlist, I agree it should be a Wikipedia function.
+    (3) make url returned be one for mobile.
+    S.M ^ why does it matter now
+
+
+TODO s that should be done last (after the rest of the app works):
+(1) Make sure the app is working in all landscapes.
+(2) Anything record related:
+    (a) TIPS dialog appear on first instance.
+    (b) option for uploading when finished.
+
+
+
+Changing Fetching Mechanism?:
     (2) When creating playlists out of selected categories, we:
          (a) GET a list of ALL (around 18k) of the spoken articles.
          (b) We loop (through ALL 18k) to search which are in the wanted category.
@@ -55,34 +76,3 @@ Considerations:
 
 Questions:
     (1) Are we suggesting only spoken based categories at the categories activity?
-
-
-// TODO BY CATEGORY:
-RecordActivity:
-    (1) TIPS dialog appear on first instance.
-    (2) option for uploading when finished.
-    (3)
-
-MainActivity:
-    (1) Navigation View:
-        (a) LogIn
-        (b) Old recordings
-        (c) give Feedback
-        (d)
-        (e)
-        (f)
-
-    (2) Make a Fragment for showing WikiPages that is shared between MainActivity and search page
-        activity.
-
-
-Wikipedia Logic:
-    (1) relative - function that lets you see next wiki page based on the page you are in now.
-    (2) get wiki pages from list of wiki titles.
-    (3) make url returned be one for mobile.
-    (4)
-
-
-Bugs known:
-    (1) when you go Vertical im main screen -> Crash.
-    (2) when you change categorise but stay with the same amount -> wont update.

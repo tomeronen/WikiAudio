@@ -183,7 +183,7 @@ public class LocationHandler {
      */
     public void markLocation(Wikipage wikipage) {
         if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
-                || wikipage.getTitle() == null || wikipage.getThumbnailSrc() == null) {
+                || wikipage.getTitle() == null) {
             Log.d(TAG, "markLocation: got some null ref regarding the Wikipedia object");
             return;
         }
@@ -219,5 +219,18 @@ public class LocationHandler {
      */
     public void clearMap() {
         mMap.clear();
+    }
+
+    public void markAndZoom(Wikipage wikipage) {
+        if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
+                || wikipage.getTitle() == null) {
+            Log.d(TAG, "markAndZoom: got some null ref regarding the Wikipedia object");
+            return;
+        }
+        clearMap();
+        markLocation(wikipage);
+        LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
+
     }
 }

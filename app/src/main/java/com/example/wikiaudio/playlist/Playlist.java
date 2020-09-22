@@ -3,6 +3,7 @@ package com.example.wikiaudio.playlist;
 import android.util.Log;
 
 import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.PageAttributes;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.WorkerListener;
@@ -21,6 +22,7 @@ public class Playlist {
 
     private List<Wikipage> wikipages = new ArrayList<>();
     private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+    PlaylistFragment playlistFragment;
 
     // Location related
     private boolean isLocationBased;
@@ -29,12 +31,18 @@ public class Playlist {
 
     public Playlist() {}
 
+    public Playlist(String title) {
+        this.title = title;
+    }
+
+
     /**
      * Creates a playlist of wikipages that belong to the given category and if the playlist is
      * location based then the wikipages are also nearby the given location
      */
     public Playlist(String category, final boolean isLocationBased, double lat, double lon) {
         this.title = category;
+        this.playlistFragment = new PlaylistFragment(this);
         initVars(isLocationBased, lat, lon);
         final List<String> titles = new ArrayList<>();
         // todo preferably replace this with a func that returns wikipages, not strings, if possible
@@ -46,6 +54,7 @@ public class Playlist {
                         for (String title : titles) {
                             loadWikipageByTitle(title);
                         }
+                        playlistFragment.notifyAdapter();
                     }
                     @Override
                     public void onFailure() {
@@ -68,6 +77,7 @@ public class Playlist {
      */
     public Playlist(final boolean isLocationBased, double lat, double lon) {
         this.title = NEARBY_PLAYLIST_TITLE;
+        this.playlistFragment = new PlaylistFragment(this);
         initVars(isLocationBased, lat, lon);
         Handler.wikipedia.getPagesNearby(lat, lon, RADIUS, wikipages, pageAttributes,
                 new WorkerListener() {
@@ -84,6 +94,7 @@ public class Playlist {
                         // TODO: we also mark the nearby playlist whenever it is created
                         for (Wikipage wikipage: wikipages)
                             Handler.locationHandler.markLocation(wikipage);
+                        playlistFragment.notifyAdapter();
                     }
                     @Override
                     public void onFailure() {
@@ -101,6 +112,7 @@ public class Playlist {
         pageAttributes.add(PageAttributes.coordinates);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.audioUrl);
+        pageAttributes.add(PageAttributes.description);
     }
 
     /**
@@ -134,6 +146,10 @@ public class Playlist {
 
     public String getTitle() {
         return title;
+    }
+
+    public PlaylistFragment getPlaylistFragment() {
+        return playlistFragment;
     }
 
 
