@@ -13,7 +13,7 @@ import retrofit2.http.Query;
 //  important wiki documentation:
 //    (1)  main decimation - https://www.mediawiki.org/wiki/API:Main_page
 //    (2)  query decimation - https://www.mediawiki.org/w/api.php?action=help&modules=query
-//    (3) REST api - https://en.wikipedia.org/api/rest_v1/#/
+    //    (3) REST api - https://en.wikipedia.org/api/rest_v1/#/
 
 public interface WikiServer {
 

@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.playlist.Playlist;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.WikipediaPlayer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -32,7 +33,7 @@ public class MediaPlayerFragment extends Fragment {
     TextView title;
     WikipediaPlayer player;
 
-    private List<Wikipage> playableList;
+    private Playlist playableList;
     private int curPosition = 0;
     private Wikipage curPlaying;
     private boolean playingStatus = false;
@@ -52,6 +53,7 @@ public class MediaPlayerFragment extends Fragment {
             title.setVisibility(View.GONE);
         }
     }
+
     public MediaPlayerFragment() {
     }
 
@@ -203,7 +205,7 @@ public class MediaPlayerFragment extends Fragment {
      * resets the playlist to a new content, and starts playing from the first value.
      * @param playableList the new value of the playlist.
      */
-    public void updatePlayList(List<Wikipage> playableList, boolean startPlaying)
+    public void updatePlayList(Playlist playableList, boolean startPlaying)
     {
         curPosition = 0;
         if(playableList != null) {

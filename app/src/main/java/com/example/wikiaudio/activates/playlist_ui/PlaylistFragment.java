@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.activates.playlist_ui;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,38 +12,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.wikipedia.Wikipage;
-
-import java.util.List;
+import com.example.wikiaudio.playlist.Playlist;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment for displaying the wikipages playlist
  */
-public class PlayListFragment extends Fragment{
+public class PlaylistFragment extends Fragment {
+    private static final String TAG = "PlaylistFragment";
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    private List<Wikipage> contents;
-    private WikiPagePlayListRecyclerViewAdapter playListRecyclerViewAdapter;
+    private Playlist playlist;
+    private WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public PlayListFragment() {
+    public PlaylistFragment() {}
+
+    public PlaylistFragment(Playlist playlist) {
+        this.playlist = playlist;
+        wikipagePlayListRecyclerViewAdapter =
+                new WikipagePlaylistRecyclerViewAdapter(playlist.getWikipages());
     }
 
-
-    public PlayListFragment(List<Wikipage> contents) {
-        this.contents = contents;
-        playListRecyclerViewAdapter
-                = new WikiPagePlayListRecyclerViewAdapter(contents);
-    }
-
-    // TODO: Customize parameter initialization
+//    // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static PlayListFragment newInstance() {
-        PlayListFragment fragment = new PlayListFragment();
+    public static PlaylistFragment newInstance() {
+        PlaylistFragment fragment = new PlaylistFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -54,13 +49,13 @@ public class PlayListFragment extends Fragment{
         super.onCreate(savedInstanceState);
     }
 
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_wikipage_item_list,
-                                                        container,
-                                                    false);
-        // Set the adapter
+        View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
+
+        //Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
@@ -68,22 +63,23 @@ public class PlayListFragment extends Fragment{
             recyclerView.setLayoutManager(linearLayoutManager);
             DividerItemDecoration dividerItemDecoration
                     = new DividerItemDecoration(recyclerView.getContext(),
-                                                    linearLayoutManager.getOrientation());
+                    linearLayoutManager.getOrientation());
             recyclerView.addItemDecoration(dividerItemDecoration);
-            recyclerView.setAdapter(playListRecyclerViewAdapter);
+            recyclerView.setAdapter(wikipagePlayListRecyclerViewAdapter);
         }
         return view;
     }
 
-    public List<Wikipage> getPlayList() {
-        return contents;
+    public Playlist getPlaylist() {
+        return playlist;
     }
 
     public void notifyAdapter() {
-        playListRecyclerViewAdapter.notifyDataSetChanged();
+        wikipagePlayListRecyclerViewAdapter.notifyDataSetChanged();
     }
 
     public void update(){
         this.notifyAdapter();
     }
+
 }

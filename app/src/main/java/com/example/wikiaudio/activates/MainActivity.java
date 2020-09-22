@@ -25,11 +25,12 @@ import androidx.work.WorkManager;
 
 import com.example.wikiaudio.Handler;
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
+import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.activates.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.playlist.Playlist;
-import com.example.wikiaudio.playlist.PlaylistFragment;
-import com.example.wikiaudio.playlist.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.google.android.gms.common.ConnectionResult;
@@ -42,8 +43,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements
@@ -80,36 +85,82 @@ public class MainActivity extends AppCompatActivity implements
     //Views
     private ImageButton chooseCategories;
     private SearchView searchBar;
+
     private TabLayout tabs;
     private ProgressBar loadingIcon;
+    private MediaPlayerFragment mediaPlayerFragment;
+    private ViewPager viewPager;
+    private PlaylistsFragmentAdapter playListsFragmentAdapter;
 
+     //
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        WorkManager.getInstance(this).cancelAllWork();  // todo debug
+//        cleanData(); //todo if wanted for debugging.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
         setOnClickButtons();
+        initMediaPlayer();
         initMap();
-        loadPlaylists();
+        if(!chosenCategories.isEmpty())
+        {
+            setUpTabs();
+            loadPlaylists();
+            // load mediaPlayer with the play list of first fragment.
 
-//        testWikiRecordActivity();
+            Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
+            mediaPlayerFragment.updatePlayList(
+                    playListsFragmentAdapter.getItem(0).getPlaylist(), false);
+            mediaPlayerFragment.updatePlayList();
+        }
+
+//         testWikiRecordActivity();
+//        testMediaPlayerFragment();
+//        testUploadFile();
+
     }
 
-//    @Override
-//    public void onResume(){
-//        super.onResume();
-//        // todo change to set? what happens if we take down and add again. order changes.
-//        boolean diff = false;
-//        if(tabs != null)
-//        {
-//            int tabCount = tabs.getTabCount();
-//            if(tabCount != chosenCategories.size())
-//            {
-//                loadPlaylists();
-//                return;
-//            }
-//        }
+    private void cleanData() {
+        WorkManager.getInstance(this).cancelAllWork();
+        ((WikiAudioApp) getApplication()).getAppData().saveChosenCategories(new ArrayList<>());
+        ((WikiAudioApp) getApplication()).getAppData().setCategories(new ArrayList<>());
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
+        try {
+            Date date = sdf.parse("01/01/2000"); // just a very far date.
+            ((WikiAudioApp) getApplication()).getAppData().setLastLoadedCategories(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+//    private void testUploadFile() {
+//        FileManager fileManager = new FileManager(this);
+//        String fp = fileManager.getFilePath("BenDeLaCreme",
+//                1,
+//                3)
+//                + "." + "3gp";
+//        String fileName = "BenDeLaCreme.3gp";
+//        wikipedia.uploadFile(fileName,fp);
+//    }
+
+
+    private void initMediaPlayer() {
+        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.audioPlayerFragment);
+        mediaPlayerFragment.showTitle(true);
+    }
+
+    //  todo option B check if crasches app.
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(tabs != null)
+        {
+                setUpTabs();
+                loadPlaylists();
+                return;
+        }
 
 //        for (int i =0; i < tabCount; i++)
 //        {
@@ -121,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements
 //            loadPlayLists();
 //        }
 
-//        }
+        }
 
     /**
      * Pretty self-explanatory, really.
@@ -131,17 +182,23 @@ public class MainActivity extends AppCompatActivity implements
         Handler.getInstance(activity); // Holds all of the app's facades/singletons
 
         //Check for location perms
+
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED;
-
+        activity = this;
         chooseCategories = findViewById(R.id.chooseCategories);
         searchBar = findViewById(R.id.search_bar);
         loadingIcon = findViewById(R.id.progressBar4);
+        viewPager = findViewById(R.id.view_pager);
+        tabs = findViewById(R.id.tabs);
+        chosenCategories = ((WikiAudioApp) getApplication())
+                .getAppData().getChosenCategories();
     }
+
 
     /**
      * For initializing the GoogleMaps fragment
@@ -158,6 +215,12 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             Log.d(TAG, "initMap: google services is not ok :(");
         }
+    }
+
+    private boolean needToReloadTabs() {
+        // todo change to set? what happens if we take down and add again. order changes.
+        int tabCount = tabs.getTabCount();
+        return tabCount != chosenCategories.size();
     }
 
     private void setOnClickButtons() {
@@ -224,6 +287,28 @@ public class MainActivity extends AppCompatActivity implements
         }).start();
     }
 
+    private void setUpTabs() {
+        // get total future playlists count and create that amount of fragemnets tabs
+        playListsFragmentAdapter =
+                new PlaylistsFragmentAdapter(getSupportFragmentManager());
+        for (String category : chosenCategories) {
+            PlaylistFragment playListFragment = new PlaylistFragment(new Playlist());
+            playListsFragmentAdapter.addPlaylistFragment(playListFragment);
+
+        }
+        viewPager.setAdapter(playListsFragmentAdapter);
+        tabs.setupWithViewPager(viewPager);
+        int counter = 0;
+        for (String category : chosenCategories)
+        {
+            TabLayout.Tab tab = tabs.getTabAt(counter);
+            if(tab != null)
+            {
+                tab.setText(category);
+            }
+            counter++;
+        }
+    }
 
     /**
      * Pretty self-explanatory, really.
@@ -449,6 +534,74 @@ public class MainActivity extends AppCompatActivity implements
 //                    }
 //                }
 //        );
+//    }
+
+//    private void testMediaPlayerFragment() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String category = "Biology";
+//                final List<String> results = new ArrayList<>();
+//                wikipedia.loadSpokenPagesNamesByCategories(category,
+//                        results,
+//                        new WorkerListener() {
+//                            @Override
+//                            public void onSuccess() {
+//                                final List<Wikipage> playableList = new ArrayList<>();
+//                                int numberOfPagesTryLoading = 0;
+//                                for(final String pageName: results) {
+//                                    numberOfPagesTryLoading++;
+//                                    final Wikipage wikipage = new Wikipage();
+//                                    ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
+//                                    pageAttributes.add(PageAttributes.audioUrl);
+//                                    pageAttributes.add(PageAttributes.content);
+//                                    final int finalNumberOfPagesTryLoading = numberOfPagesTryLoading;
+//                                    wikipedia.getWikipage(pageName,
+//                                            pageAttributes,
+//                                            wikipage,
+//                                            new WorkerListener() {
+//                                                @Override
+//                                                public void onSuccess() {
+//                                                    Toast
+//                                                            .makeText(activity,
+//                                                                    "loaded" + playableList.size(),
+//                                                                    Toast.LENGTH_SHORT);
+//                                                    wikipage.setTitle(pageName);
+//                                                    playableList.add(wikipage);
+//                                                    if(finalNumberOfPagesTryLoading == results.size()) {
+//                                                        Toast
+//                                                                .makeText(activity,
+//                                                                        "all results began loading" + pageName,
+//                                                                        Toast.LENGTH_SHORT);
+//                                                        // all result were fully loaded.
+//                                                        mediaPlayerFragment.updatePlayList(playableList, false);
+//                                                    }
+//                                                }
+//
+//                                                @Override
+//                                                public void onFailure() {
+//                                                    Toast
+//                                                            .makeText(activity,
+//                                                                    "something went wrong with loading" + pageName,
+//                                                                    Toast.LENGTH_SHORT)
+//                                                            .show();
+//
+//                                                }
+//                                            });
+//
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onFailure() {
+//
+//                            }
+//                        }
+//                );
+//            }
+//        }).start();
+//
+//
 //    }
 }
 
