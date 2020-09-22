@@ -1,30 +1,28 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.playlist;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.Wikipage;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link Wikipage}.
- */
-public class WikiPagePlayListRecyclerViewAdapter
-        extends RecyclerView.Adapter<WikiPagePlayListRecyclerViewAdapter.WikiPageViewHolder> {
+public class WikipagePlaylistRecyclerViewAdapter extends
+        RecyclerView.Adapter<WikipagePlaylistRecyclerViewAdapter.WikiPageViewHolder> {
 
-    private List<Wikipage> mValues = new ArrayList<>();
+    private List<Wikipage> mValues;
 
-    public WikiPagePlayListRecyclerViewAdapter(List<Wikipage> items) {
-        mValues = items;
+    public WikipagePlaylistRecyclerViewAdapter(List<Wikipage> wikipages) {
+        mValues = wikipages;
     }
 
+    @NonNull
     @Override
     public WikiPageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -45,13 +43,8 @@ public class WikiPagePlayListRecyclerViewAdapter
     @Override
     public int getItemCount() {
         if(mValues != null)
-        {
             return mValues.size();
-        }
-        else
-        {
-            return 0;
-        }
+        return 0;
     }
 
 
@@ -65,25 +58,20 @@ public class WikiPagePlayListRecyclerViewAdapter
         public WikiPageViewHolder(View view) {
             super(view);
             mView = view;
-            titleView = (TextView) view.findViewById(R.id.title_view);
-            descriptionView = (TextView) view.findViewById(R.id.description_view);
+            titleView = view.findViewById(R.id.title_view);
+            descriptionView = view.findViewById(R.id.description_view);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     expanded = !expanded;
-                    if(expanded && mItem.getDescription() != null)
-                    {
+                    if(expanded && mItem.getDescription() != null) {
                         descriptionView.setText(mItem.getDescription());
                         descriptionView.setVisibility(View.VISIBLE);
-                    }
-                    else
-                    {
+                    } else {
                         descriptionView.setVisibility(View.GONE);
                     }
                 }
             });
         }
-
-
     }
 }

@@ -1,23 +1,24 @@
-package com.example.wikiaudio.activates;
+package com.example.wikiaudio.playlist;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayListsFragmentAdapter extends FragmentStatePagerAdapter {
+public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
 
-    private final List<PlayListFragment> mFragmentList = new ArrayList<>();
+    private final List<PlaylistFragment> mFragmentList = new ArrayList<>();
 
-    public PlayListsFragmentAdapter(FragmentManager manager) {
+    public PlaylistsFragmentAdapter(FragmentManager manager) {
         super(manager);
     }
 
     @NonNull
     @Override
-    public PlayListFragment getItem(int position) {
+    public PlaylistFragment getItem(int position) {
         return mFragmentList.get(position);
     }
 
@@ -26,8 +27,7 @@ public class PlayListsFragmentAdapter extends FragmentStatePagerAdapter {
         return mFragmentList.size();
     }
 
-
-    public void addFrag(PlayListFragment fragment) {
+    public void addPlaylistFragment(PlaylistFragment fragment) {
         mFragmentList.add(fragment);
     }
 }

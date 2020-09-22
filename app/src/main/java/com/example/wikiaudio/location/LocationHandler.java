@@ -1,47 +1,118 @@
 package com.example.wikiaudio.location;
 
 import android.Manifest;
-import android.util.Log;
 import android.annotation.SuppressLint;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
-
 import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.wikiaudio.wikipedia.PageAttributes;
+import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.playlist.Playlist;
+import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WorkerListener;
-
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LocationHandler {
     //For logs
     private static final String TAG = "LocationHandler";
     private static final int RADIUS = 10000; // let user choose?
+    private static final int MAP_CAMERA_ZOOM_RADIUS = 15;
+
+    private static LocationHandler instance = null;
 
     private AppCompatActivity activity;
+    private PlaylistsHandler playlistsHandler;
+    private Wikipedia wikipedia;
 
     //Location related
     private GoogleMap mMap;
+    private LocationManager locationManager;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private boolean shouldUpdateZoomAndCreateNearby = false;
 
+    private LocationHandler(AppCompatActivity activity) {
+        this.activity = activity;
+        locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        locationUpdates();
+    }
 
-    public LocationHandler(AppCompatActivity activityCompat, GoogleMap mMap) {
-        this.activity = activityCompat;
-        this.mMap = mMap;
+    public static LocationHandler getInstance(AppCompatActivity activity) {
+        if (instance == null) {
+            instance = new LocationHandler(activity);
+        }
+        return instance;
+    }
+
+    public void setGoogleMap(GoogleMap map) {
+        mMap = map;
+    }
+//
+//    public LocationHandler(AppCompatActivity activityCompat, PlaylistsHandler playlistsHandler,
+//                           Wikipedia wikipedia, final GoogleMap mMap) {
+//        this.activity = activityCompat;
+//        this.playlistsHandler = playlistsHandler;
+//        this.wikipedia = wikipedia;
+//        this.mMap = mMap;
+//        locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+//        locationUpdates();
+//    }
+
+    /**
+     * What to do for when the location updates or the GPS provider goes on/off
+     */
+    @SuppressLint("MissingPermission")
+    private void locationUpdates(){
+        if (isLocationPermissionGranted()){
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    5000, MAP_CAMERA_ZOOM_RADIUS, new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            Log.d(TAG, "locationUpdates: onLocationChanged");
+                            //Recenter the map at the user's location + create
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            if (shouldUpdateZoomAndCreateNearby) {
+                                shouldUpdateZoomAndCreateNearby = false;
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
+                                Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
+                                Handler.playlistsHandler.createLocationBasedPlaylist(
+                                        latLng.latitude, latLng.longitude, true);
+                            }
+                        }
+
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+                        @Override
+                        public void onProviderEnabled(String provider) {
+                            //gps went on (this may change) so
+                            //we recenter the map at the user's location
+                            Log.d(TAG, "locationUpdates: onProviderEnabled");
+                            shouldUpdateZoomAndCreateNearby = true;
+                        }
+
+                        @Override
+                        public void onProviderDisabled(String provider) {
+                            //gps went off
+                            Log.d(TAG, "locationUpdates: onProviderDisabled");
+                            Toast.makeText(activity, "Please enable your GPS for location services",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+        }
     }
 
     /**
@@ -50,8 +121,6 @@ public class LocationHandler {
      */
     public LatLng getCurrentLocation() {
         if (isLocationPermissionGranted()) {
-            // Getting LocationManager object from System Service LOCATION_SERVICE
-            LocationManager locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
             if (locationManager == null) {
                 return null;
             }
@@ -85,6 +154,10 @@ public class LocationHandler {
      * @return true if are granted, false ow.
      */
     private boolean isLocationPermissionGranted(){
+        if (activity == null) {
+            Log.d(TAG, "isLocationPermissionGranted: null activity");
+            return false;
+        }
         return ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -106,54 +179,33 @@ public class LocationHandler {
 
     /**
      * Marks the given Wikipage object on the map using its title and coordinates
-     * @param Wikipage the article we would like to mark
+     * @param wikipage the article we would like to mark
      */
-    public void markLocation(Wikipage Wikipage) {
-        if (Wikipage != null) {
-            LatLng latLng = new LatLng(Wikipage.getLat(), Wikipage.getLon());
-            mMap.addMarker(new MarkerOptions()
-                                    .position(latLng).title(Wikipage.getTitle())).setTag(Wikipage);
-        } else {
-            Log.d(TAG, "markLocation: got null Wikipage object");
+    public void markLocation(Wikipage wikipage) {
+        if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
+                || wikipage.getTitle() == null || wikipage.getThumbnailSrc() == null) {
+            Log.d(TAG, "markLocation: got some null ref regarding the Wikipedia object");
+            return;
         }
+        LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
+        mMap.addMarker(new MarkerOptions()
+                .position(latLng).title(wikipage.getTitle())).setTag(wikipage);
+        //TODO: add thumbnail one day :)
     }
 
     /**
-     * Create marks on the map of the nearby wikipedia articles based on current location
-     * @param wikipedia: the wiki facade for getting the nearby articles
+     *
+     * @param playlist the playlist to mark
      */
-    public void markWikipagesNearby(final Wikipedia wikipedia) {
-        LatLng currentLocation = getCurrentLocation();
-        if (currentLocation == null) {
-            Log.d(TAG,"markWikipagesNearby: currentLocation == null");
+    public void markPlaylist(Playlist playlist) {
+        clearMap();
+        if (playlist == null || playlist.getWikipages() == null) {
+            Log.d(TAG,"markPlaylist: got null playlist or playlist's wikipages array is null");
             return;
         }
-
-        double lat = currentLocation.latitude;
-        double lng = currentLocation.longitude;
-
-        final List<Wikipage> pagesNearby = new ArrayList<>();
-        ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
-        pageAttributes.add(PageAttributes.title);
-        pageAttributes.add(PageAttributes.coordinates);
-        //todo maybe add thumbnail:
-        //https://developers.google.com/maps/documentation/android-sdk/infowindows#custom_info_windows
-
-        wikipedia.getPagesNearby(lat, lng, RADIUS, pagesNearby, pageAttributes,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG,"markWikipagesNearby-WorkerListener-onSuccess: we found pages nearby!");
-                        for(Wikipage page:pagesNearby) {
-                            markLocation(page);
-                        }
-
-                    }
-                    @Override
-                    public void onFailure() {
-                        Log.d(TAG,"markWikipagesNearby-WorkerListener-onFailure: couldn't find pages nearby");
-                    }
-                });
+        for (Wikipage wikipage: playlist.getWikipages()) {
+            markLocation(wikipage);
+        }
     }
 
     // TODO

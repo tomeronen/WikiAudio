@@ -1,13 +1,60 @@
 //todo:
 (1) Playlist Player Fragment. (T.R)
-(2) Finish player logic.
-(2) How to show wiki pages in search and playlist.
-(3) Connect wikipages in search and in playlists to wikipageActivity.
-(4) Record Activity. (T.R)
-(5) Playlist logic (make Nearby first playlist to appear given we have permissions; when loading playlists load also Nearby playlist). (S.M)
-(8) Upload recording file logic. (T.R)
-(9) Debug old code!
+(2) Finish playlist player logic.
+(3) Playlist logic: (S.M)
+    1. Create the Playlist class.
+    2. Make Nearby the first playlist to appear given we have permissions.
+    3. Load playlists and not categories.
+(4) Connect wikipages in search and in playlists to wikipageActivity.
+(5) How to display wikipages in search and the playlist recycler.
+(6) Record Activity. (T.R)
+(7) Upload recording file logic. (T.R)
+(8) Debug old code
 
+
+Known Bugs:
+    (1) when you go Vertical im main screen -> Crash.
+    (2) when you change categorise but stay with the same amount -> wont update.
+
+Optional Amendments:
+    (1) When fetching articles from the wiki server by category: can we set a maximum amount to
+        receive? we don't want to display hundreds of articles.
+
+Considerations:
+    (1) When the user's location changes, should we update the Nearby playlist? maybe we should
+        update it every x meters and not for each location change? once the user decided to
+        play the nearby playlist, we should "lock" its wikipages.
+
+    (2) When creating playlists out of selected categories, we:
+         (a) GET a list of ALL (around 18k) of the spoken articles.
+         (b) We loop (through ALL 18k) to search which are in the wanted category.
+         (c) We only return their title, so afterwards we must post another GET request to fetch
+             their data.
+        This takes A LOT of time. We also don't actually need that many, a playlist shouldn't
+        contain that many wikipages.
+
+        I suggest 2 alternatives:
+            (1) Location based: (generator=geosearch )
+                (a) GET all wikipages nearby (if no location services, fixed place) within a fixed
+                    radius.
+                (b) Loop through all to search which are in the wanted category, the moment we
+                    have around 10-12 pages, we break.
+                (c) GET their data.
+                (*) Use the text reading engine if necessary.
+
+            (2) Category based: (generator=categorymembers)
+                (a) GET all wikipages within that category (may get A LOT).
+                (b) If location based:
+                        Loop through all to search which are nearby, the moment we
+                        have around 10-12 pages, we break.
+                    ow:
+                        Choose random 10-12 pages.
+                (c) GET their data.
+                (*) Use the text reading engine if necessary.
+
+
+Questions:
+    (1) Are we suggesting only spoken based categories at the categories activity?
 
 
 // TODO BY CATEGORY:
