@@ -107,9 +107,7 @@ public class MainActivity extends AppCompatActivity implements
             setUpTabs();
             loadPlaylists();
             // load mediaPlayer with the play list of first fragment.
-            Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
-            new Thread(() -> appData.setPlaylist(new Playlist("Biology",
-                    false, 0, 0))).start();
+            // appData.setPlaylist();
         }
 
 //         testWikiRecordActivity();
