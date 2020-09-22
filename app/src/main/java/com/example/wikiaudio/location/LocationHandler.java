@@ -24,6 +24,7 @@ import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class LocationHandler {
@@ -228,9 +229,14 @@ public class LocationHandler {
             return;
         }
         clearMap();
-        markLocation(wikipage);
+
+
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
+        Marker marker = mMap.addMarker( new MarkerOptions().position(latLng).title(wikipage.getTitle()));
+        marker.setTag(wikipage);
+        marker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
+
 
     }
 }
