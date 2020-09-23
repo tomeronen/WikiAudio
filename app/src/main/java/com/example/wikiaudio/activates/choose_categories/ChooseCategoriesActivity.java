@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -58,7 +57,6 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
             @Override
             public void onClick(String string) {
                 // what to do when a category is pressed.
-                Toast.makeText(app, string, Toast.LENGTH_SHORT).show();
             }
         };
         saveButton.setOnClickListener(new View.OnClickListener() {

@@ -6,7 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-
+    <SearchView
+        android:id="@+id/search_bar"
+        android:layout_width="409dp"
+        android:layout_height="58dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
         android:id="@+id/progressBar4"
@@ -18,30 +24,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/view_pager" />
 
-    <fragment
+    <TextView
+        android:id="@+id/mapBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="314dp"
+        android:layout_marginBottom="98dp"
+        android:background="#4d4d4d"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
-        app:layout_constraintEnd_toEndOf="@id/view_pager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_pager"
+        android:layout_height="match_parent"
+        android:layout_marginTop="316dp"
+        android:layout_marginBottom="100dp"
         tools:context="com.example.wikiaudio.activates.MainActivity" />
-
-    <SearchView
-        android:id="@+id/search_bar"
-        android:layout_width="409dp"
-        android:layout_height="58dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="14dp"
+        android:layout_marginTop="1.5dp"
+        android:layout_marginLeft="1.5dp"
+        android:layout_marginRight="1.5dp"
+        android:layout_marginBottom="1.5dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toTopOf="@+id/fragmentMap"
         app:layout_constraintEnd_toEndOf="parent"

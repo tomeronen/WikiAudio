@@ -29,4 +29,9 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
     public void addPlaylistFragment(PlaylistFragment fragment) {
         mFragmentList.add(fragment);
     }
+
+    public void refreshAllFragments() {
+        for (PlaylistFragment playlistFragment: mFragmentList)
+            playlistFragment.notifyAdapter();
+    }
 }

@@ -11,7 +11,6 @@ import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +20,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
 import com.example.wikiaudio.activates.loading.LoadingHelper;
@@ -38,21 +38,22 @@ import java.util.List;
 public class WikipageActivity extends AppCompatActivity {
 
     private static final String TAG = "WikipageActivity";
-    private TextView articleTitle;
-    private ImageView articleImage;
-    private WebView webView;
-    private FloatingActionButton recordButton;
 
     private AppCompatActivity activity;
     private LoadingHelper loadingHelper;
 
-    private String title;
-    private Wikipedia wikipedia;
-    private List<PageAttributes> pageAttributes;
+    private String wikipageTitle;
+    private String playlistTitle;
+    private int wikipageIndexInPlaylist;
+
     private Wikipage wikipage;
+    private List<PageAttributes> pageAttributes;
+
     private MediaPlayerFragment mediaPlayerFragment;
-    private boolean firstPress = true;
-    private boolean playing = false;
+
+    private ImageView articleImage;
+    private WebView webView;
+    private FloatingActionButton recordButton;
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -60,45 +61,37 @@ public class WikipageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wiki_page);
+        getIntentExtras();
+        initVars();
+        initMediaPlayer();
 
-        Intent intent = getIntent();
-        title = intent.getStringExtra("title");
-        if (title == null) {
-            Log.d(TAG, "onCreate: null title from intent extra");
-            finish();
+        if (wikipageTitle != null) {
+            setLayoutForTitleBased();
+            setLoadingScreen();
+        } else {
+            setLayoutForWikipageBased();
         }
 
-        initVars();
-        fetchWikipage();
-        initMediaPlayer();
         initOnClickButtons();
-        setLoadingScreen();
-
-
     }
 
-    private void initMediaPlayer() {
-        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.media_player);
-        mediaPlayerFragment.showTitle(false);
+    /**
+     * Pretty self-explanatory, really. Will finish the activity if bad intents were given.
+     */
+    private void getIntentExtras() {
+        Intent intent = getIntent();
+
+        playlistTitle = intent.getStringExtra("playlistTitle");
+        wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
+        wikipageTitle = intent.getStringExtra("title");
+
+        if (!((wikipageTitle == null && playlistTitle != null && wikipageIndexInPlaylist > -1)
+            || (wikipageTitle != null && playlistTitle == null)
+            ||  (wikipageTitle != null && wikipageIndexInPlaylist < 0))) {
+            Log.d(TAG, "onCreate: null extras in previous intent");
+            finish();
+        }
     }
-
-
-    private void initOnClickButtons() {
-        recordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, WikiRecordActivity.class);
-                Gson gson = new Gson();
-                String wiki = gson.toJson(wikipage);
-                intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
-                startActivity(intent);
-            }
-        });
-
-
-    }
-
 
     /**
      * Pretty self-explanatory, really.
@@ -106,36 +99,45 @@ public class WikipageActivity extends AppCompatActivity {
     private void initVars() {
         activity = this;
         loadingHelper = LoadingHelper.getInstance();
-
-//        articleTitle = findViewById(R.id.title);
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
         recordButton = findViewById(R.id.recordButton);
+    }
 
-        wikipage = new Wikipage();
-        wikipedia = new Wikipedia(this);
+    private void initMediaPlayer() {
+        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.media_player);
+        if (mediaPlayerFragment != null) {
+            mediaPlayerFragment.showTitle(false);
+        } else {
+            Log.d(TAG, "initMediaPlayer: got null mediaPlayerFragment");
+        }
+    }
+
+    /**
+     * If this activity was invoked with a title of a wikipage, we must get it from the wikiserver.
+     */
+    private void setLayoutForTitleBased() {
         pageAttributes = new ArrayList<>();
         pageAttributes.add(PageAttributes.title);
         pageAttributes.add(PageAttributes.thumbnail);
         pageAttributes.add(PageAttributes.content);
         pageAttributes.add(PageAttributes.url);
+        wikipage = new Wikipage();
+        fetchWikipage();
     }
 
     /**
-     * Fetches the wikipage object from the wiki server
+     * If we already got the wikipage, then we only need to get its data by its playlist and index.
      */
-    private void fetchWikipage() {
-        wikipedia.getWikipage(title, pageAttributes, wikipage, new WorkerListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "onSuccess, getWikipage");
-                setLayout();
-            }
-            @Override
-            public void onFailure() {
-                Log.d(TAG, "fetchWikipage-getWikipage-onFailure: couldn't get the Wikipage");
-            }
-        });
+    private void setLayoutForWikipageBased() {
+        wikipage = Holder.playlistsHandler
+                .getWikipageByPlaylistTitleAndIndex(playlistTitle, wikipageIndexInPlaylist);
+        if (wikipage == null) {
+            Log.d(TAG, "initVars: got null wikipages from getWikipageByPlaylistTitleAndIndex");
+            finish();
+        }
+        setLayout();
     }
 
     /**
@@ -150,6 +152,40 @@ public class WikipageActivity extends AppCompatActivity {
             loadingScreen.putExtra("index", index);
             startActivity(loadingScreen);
         }
+    }
+
+    private void initOnClickButtons() {
+        recordButton.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, WikiRecordActivity.class);
+            Gson gson = new Gson();
+            String wiki = gson.toJson(wikipage);
+            intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+            startActivity(intent);
+        });
+    }
+
+    /**
+     * Fetches the wikipage object from the wiki server
+     */
+    private void fetchWikipage() {
+        Wikipedia wikipedia = Holder.wikipedia;
+        if (wikipedia == null) {
+            Log.d(TAG, "fetchWikipage, Handler.wikipedia == null");
+            wikipedia = new Wikipedia(activity);
+
+        }
+        wikipedia.getWikipage(wikipageTitle, pageAttributes, wikipage, new WorkerListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "onSuccess, fetchWikipage");
+                setLayout();
+            }
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "fetchWikipage-getWikipage-onFailure: couldn't get the Wikipage");
+                finish();
+            }
+        });
     }
 
     /**
@@ -167,6 +203,7 @@ public class WikipageActivity extends AppCompatActivity {
             Log.d(TAG, "setLayout: got null title or url");
         }
         articleImage.bringToFront();
+
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
@@ -176,6 +213,7 @@ public class WikipageActivity extends AppCompatActivity {
             articleImage.setVisibility(View.GONE);
             return;
         }
+
         // load Image
         Glide.with(this)
                 .asDrawable()

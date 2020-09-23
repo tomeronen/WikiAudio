@@ -42,7 +42,7 @@ public class LoadingActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (pStatus <= 100) {
+                while (pStatus < 100) {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
