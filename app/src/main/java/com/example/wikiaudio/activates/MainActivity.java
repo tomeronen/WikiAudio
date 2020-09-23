@@ -20,6 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
@@ -102,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements
         setOnClickButtons();
         initMediaPlayer();
         initMap();
+        NavController navController = Navigation.findNavController(this, R.id.main_screen);
+
         if(!chosenCategories.isEmpty())
         {
             setUpTabs();
