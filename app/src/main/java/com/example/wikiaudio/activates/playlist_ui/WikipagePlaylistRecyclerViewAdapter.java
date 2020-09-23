@@ -9,7 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.wikipedia.Wikipage;
 
@@ -35,7 +35,6 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
-        // update wiki page view holder: todo add what else we want to do.
         holder.mItem = mValues.get(position);
         holder.titleView.setText(mValues.get(position).getTitle());
         holder.descriptionView.setText(mValues.get(position).getDescription());
@@ -46,7 +45,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             holder.locationButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Handler.locationHandler.markAndZoom(mValues.get(position));
+                    Holder.locationHandler.markAndZoom(mValues.get(position));
                 }
             });
         }

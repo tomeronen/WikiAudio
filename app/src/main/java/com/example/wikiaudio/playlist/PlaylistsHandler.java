@@ -4,8 +4,9 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,20 @@ public class PlaylistsHandler {
             // todo create it?
             return;
         }
-        Handler.locationHandler.markPlaylist(nearby);
+        Holder.locationHandler.markPlaylist(nearby);
+    }
+
+    public Playlist getPlaylistByTitle(String playlistTitle) {
+        for (Playlist playlist: playlists) {
+            if (playlist.getTitle().equals(playlistTitle))
+                return playlist;
+        }
+        return null;
+    }
+
+    public Wikipage getWikipageByPlaylistTitleAndIndex(String playlistTitle, int index) {
+        Playlist playlist = getPlaylistByTitle(playlistTitle);
+        return playlist.getWikipageByIndex(index);
     }
 
 }

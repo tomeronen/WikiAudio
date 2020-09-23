@@ -23,7 +23,8 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
-import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.AppData;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
@@ -91,8 +92,10 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayerFragment mediaPlayerFragment;
     private ViewPager viewPager;
     private PlaylistsFragmentAdapter playListsFragmentAdapter;
+    private AppData appData;
 
-     //
+
+    //
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 //        cleanData(); //todo if wanted for debugging.
@@ -102,11 +105,14 @@ public class MainActivity extends AppCompatActivity implements
         setOnClickButtons();
         initMap();
         loadPlaylists();
-//        initMediaPlayer();
+        initMediaPlayer();
 
-//        mediaPlayerFragment.updatePlayList(playListsFragmentAdapter.getItem(0).getPlaylist(), false);
-//        mediaPlayerFragment.updatePlayList();
+//        testMediaPlayer();
+    }
 
+    private void testMediaPlayer() {
+        Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
+        new Thread(() -> appData.setPlaylist(new Playlist("Biology", false, 0, 0))).start();
     }
 
     private void cleanData() {
@@ -134,11 +140,15 @@ public class MainActivity extends AppCompatActivity implements
 //    }
 
 
-//    private void initMediaPlayer() {
-//        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-//                .findFragmentById(R.id.audioPlayerFragment);
-//        mediaPlayerFragment.showTitle(true);
-//    }
+    private void initMediaPlayer() {
+        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.audioPlayerFragment);
+        if (mediaPlayerFragment != null) {
+            mediaPlayerFragment.showTitle(true);
+        } else {
+            Log.d(TAG, "initMediaPlayer: we got null mediaPlayerFragment");
+        }
+    }
 
 //    //  todo option B check if crasches app.
 //    @Override
@@ -168,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         activity = this;
-        Handler.getInstance(activity); // Holds all of the app's facades/singletons
+        Holder.getInstance(activity); // Holds all of the app's facades/singletons
 
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -186,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements
         chosenCategories = ((WikiAudioApp) getApplication())
                 .getAppData().getChosenCategories();
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
+        appData =((WikiAudioApp) getApplication()).getAppData();
+
     }
 
 
@@ -249,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements
         final PlaylistsFragmentAdapter playListsFragmentAdapter =
                 new PlaylistsFragmentAdapter(getSupportFragmentManager());
         new Thread(() -> {
-            Handler.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
+            Holder.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
 
             //Add all playlists as fragments to the adapter
             for (Playlist playlist: PlaylistsHandler.getPlaylists())
@@ -359,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements
                 mMap.setOnMyLocationButtonClickListener(this);
                 mMap.setOnMyLocationClickListener(this);
                 mMap.setOnInfoWindowClickListener(this);
-                Handler.locationHandler.setGoogleMap(mMap);
+                Holder.locationHandler.setGoogleMap(mMap);
                 initUserLocationOnTheMap();
             } else {
                 if (!mLocationPermissionGranted){
@@ -381,12 +393,12 @@ public class MainActivity extends AppCompatActivity implements
             mMap.setMyLocationEnabled(true);
             isLocationEnabled();
             if (isGPSEnabled) {
-                LatLng currentLatLng = Handler.locationHandler.getCurrentLocation();
+                LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
                 if (currentLatLng != null) {
                     //Zoom in to user's location
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
                     //Create (and display) the nearby playlist
-                    Handler.playlistsHandler.createLocationBasedPlaylist(
+                    Holder.playlistsHandler.createLocationBasedPlaylist(
                             currentLatLng.latitude, currentLatLng.longitude, true);
                 }
             } else {
@@ -451,20 +463,30 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * When the user clicks on the info box of the marker
+     * When the user clicks on the info box of the marker we redirect to its wikipage activity
      * @param marker GoogleMaps marker that contains the Wikipage tag
      */
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Wikipage tag = (Wikipage) marker.getTag();
-        if (tag != null) {
-            String title = tag.getTitle();
-            Intent WikipageIntent = new Intent(this, WikipageActivity.class);
-            WikipageIntent.putExtra("title", title);
-            startActivity(WikipageIntent);
-        } else {
-            Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
+        Wikipage wikipage = (Wikipage) marker.getTag();
+        if (wikipage != null) {
+            Playlist playlist = wikipage.getPlaylist();
+            if (playlist != null) {
+                int index = playlist.getIndexByWikipage(wikipage);
+                if (index > -1) {
+                    Intent WikipageIntent = new Intent(this, WikipageActivity.class);
+                    WikipageIntent.putExtra("playlistTitle", playlist.getTitle());
+                    WikipageIntent.putExtra("index", index);
+                    startActivity(WikipageIntent);
+                    return;
+                } else {
+                    Log.d(TAG, "onInfoWindowClick: index is bad");
+                }
+            } else {
+                Log.d(TAG, "onInfoWindowClick: playlist is null :(");
+            }
         }
+        Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
     }
 
 

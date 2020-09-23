@@ -9,22 +9,22 @@ import com.example.wikiaudio.wikipedia.Wikipedia;
 /**
  * Here is where all of the app's facades and singletons are stored for easy init and access.
  */
-public class Handler {
-    private static Handler instance = null;
+public class Holder {
+    private static Holder instance = null;
 
     public static Wikipedia wikipedia;
     public static PlaylistsHandler playlistsHandler;
     public static LocationHandler locationHandler;
 
-    private Handler(AppCompatActivity activity){
+    private Holder(AppCompatActivity activity){
         wikipedia = new Wikipedia(activity);
         locationHandler = LocationHandler.getInstance(activity);
         playlistsHandler = PlaylistsHandler.getInstance(activity);
     }
 
-    public static Handler getInstance(AppCompatActivity activity) {
+    public static Holder getInstance(AppCompatActivity activity) {
         if (instance == null) {
-            instance = new Handler(activity);
+            instance = new Holder(activity);
         }
         return instance;
     }

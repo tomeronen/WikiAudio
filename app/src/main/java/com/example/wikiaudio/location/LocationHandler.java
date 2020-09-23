@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.playlist.Playlist;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
@@ -89,7 +89,7 @@ public class LocationHandler {
                                 shouldUpdateZoomAndCreateNearby = false;
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
                                 Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
-                                Handler.playlistsHandler.createLocationBasedPlaylist(
+                                Holder.playlistsHandler.createLocationBasedPlaylist(
                                         latLng.latitude, latLng.longitude, true);
                             }
                         }
@@ -131,7 +131,7 @@ public class LocationHandler {
             // Getting the name of the best provider
             String provider = locationManager.getBestProvider(criteria, true);
             if (provider == null) {
-                //                    Log.d(TAG, "enableMyLocation: null provider");
+                Log.d(TAG, "enableMyLocation: null provider");
                 return null;
             }
             // Getting Current Location
