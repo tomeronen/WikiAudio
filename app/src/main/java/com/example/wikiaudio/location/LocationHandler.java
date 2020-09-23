@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.wikiaudio.Handler;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.playlist.Playlist;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
@@ -24,6 +24,7 @@ import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class LocationHandler {
@@ -88,7 +89,7 @@ public class LocationHandler {
                                 shouldUpdateZoomAndCreateNearby = false;
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
                                 Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
-                                Handler.playlistsHandler.createLocationBasedPlaylist(
+                                Holder.playlistsHandler.createLocationBasedPlaylist(
                                         latLng.latitude, latLng.longitude, true);
                             }
                         }
@@ -130,7 +131,7 @@ public class LocationHandler {
             // Getting the name of the best provider
             String provider = locationManager.getBestProvider(criteria, true);
             if (provider == null) {
-                //                    Log.d(TAG, "enableMyLocation: null provider");
+                Log.d(TAG, "enableMyLocation: null provider");
                 return null;
             }
             // Getting Current Location
@@ -183,7 +184,7 @@ public class LocationHandler {
      */
     public void markLocation(Wikipage wikipage) {
         if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
-                || wikipage.getTitle() == null || wikipage.getThumbnailSrc() == null) {
+                || wikipage.getTitle() == null) {
             Log.d(TAG, "markLocation: got some null ref regarding the Wikipedia object");
             return;
         }
@@ -219,5 +220,23 @@ public class LocationHandler {
      */
     public void clearMap() {
         mMap.clear();
+    }
+
+    public void markAndZoom(Wikipage wikipage) {
+        if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
+                || wikipage.getTitle() == null) {
+            Log.d(TAG, "markAndZoom: got some null ref regarding the Wikipedia object");
+            return;
+        }
+        clearMap();
+
+
+        LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
+        Marker marker = mMap.addMarker( new MarkerOptions().position(latLng).title(wikipage.getTitle()));
+        marker.setTag(wikipage);
+        marker.showInfoWindow();
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
+
+
     }
 }

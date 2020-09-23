@@ -1,5 +1,7 @@
 package com.example.wikiaudio.wikipedia;
 
+import com.example.wikiaudio.playlist.Playlist;
+
 import java.util.List;
 
 public class Wikipage {
@@ -93,6 +95,7 @@ public class Wikipage {
     private Double lon;
     private String audioUrl;
     private String thumbnailSrc;
+    private Playlist playlist;
 
     // ************************* Getters and setters ***********************************************
 
@@ -180,4 +183,11 @@ public class Wikipage {
         return this.sections.get(section); // todo make return title and then content.
     }
 
+    public void setPlaylist(Playlist playlist) {
+        this.playlist = playlist;
+    }
+
+    public Playlist getPlaylist() {
+        return playlist;
+    }
 }

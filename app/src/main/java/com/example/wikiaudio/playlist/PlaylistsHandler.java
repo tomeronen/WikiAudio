@@ -4,7 +4,9 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ public class PlaylistsHandler {
     private AppCompatActivity activity;
 
     private static List<Playlist> playlists = new ArrayList<>();
+    private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
 
 
@@ -42,6 +45,14 @@ public class PlaylistsHandler {
         }
     }
 
+    public static void addPlaylistFragment(PlaylistFragment playlistFragment) {
+        if (playlistFragment != null) {
+            playlistFragments.add(playlistFragment);
+        } else {
+            Log.d(TAG, "add: got null playlistFragment");
+        }
+    }
+
     public static List<Playlist> getPlaylists() {
         return playlists;
     }
@@ -58,15 +69,32 @@ public class PlaylistsHandler {
         }
     }
 
-    public void createCategoryBasedPlaylists(AppCompatActivity activity) {
-        //Fetch user's chosen categories
-        List<String> chosenCategories = ((WikiAudioApp) activity.getApplication())
-                .getAppData().getChosenCategories();
-        //Create a playlist foreach category and add it to our playlists list
-        if (chosenCategories != null && chosenCategories.size() > 0) {
-            for (String category : chosenCategories)
+    public void createCategoryBasedPlaylists(List<String> categories) {
+        if (categories != null && categories.size() > 0) {
+            for (String category : categories)
                 PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
         }
+    }
+
+    public static void displayNearbyPlaylistOnTheMap() {
+        if (nearby == null) {
+            // todo create it?
+            return;
+        }
+        Holder.locationHandler.markPlaylist(nearby);
+    }
+
+    public Playlist getPlaylistByTitle(String playlistTitle) {
+        for (Playlist playlist: playlists) {
+            if (playlist.getTitle().equals(playlistTitle))
+                return playlist;
+        }
+        return null;
+    }
+
+    public Wikipage getWikipageByPlaylistTitleAndIndex(String playlistTitle, int index) {
+        Playlist playlist = getPlaylistByTitle(playlistTitle);
+        return playlist.getWikipageByIndex(index);
     }
 
 }
