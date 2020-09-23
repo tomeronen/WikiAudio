@@ -19,6 +19,8 @@
         android:id="@+id/WikipageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
         app:layout_constraintBottom_toTopOf="@+id/media_player"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp" >
