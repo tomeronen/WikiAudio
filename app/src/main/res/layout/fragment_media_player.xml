@@ -6,25 +6,9 @@
     android:id="@+id/audioPlayedTitle"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".activates.MediaPlayerFragment">
 
-
-    <com.ohoussein.playpause.PlayPauseView
-        android:id="@+id/play_pause"
-        android:layout_width="54dp"
-        android:layout_height="61dp"
-        android:clickable="true"
-        android:foreground="?android:selectableItemBackground"
-        app:fill_color="#e1e1e1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle"
-        app:pause_bg="#00a2ed"
-        app:play_bg="#001eff"
-        android:focusable="true">
-
-    </com.ohoussein.playpause.PlayPauseView>
 
     <TextView
         android:id="@+id/audioPlayingTitle"
@@ -58,6 +42,24 @@
         app:layout_constraintEnd_toStartOf="@+id/play_pause"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/play_pause"
-        app:maxImageSize="24dp" />
+        app:maxImageSize="24dp"
+        app:rippleColor="#FFFFFF" />
+
+    <com.ohoussein.playpause.PlayPauseView
+        android:id="@+id/play_pause"
+        android:layout_width="54dp"
+        android:layout_height="61dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:selectableItemBackground"
+        app:fill_color="#e1e1e1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle"
+        app:pause_bg="#00a2ed"
+        app:play_bg="#001eff">
+
+    </com.ohoussein.playpause.PlayPauseView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

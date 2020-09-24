@@ -22,6 +22,7 @@ public class PlaylistFragment extends Fragment {
 
     private Playlist playlist;
     public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
+    private boolean setBorder = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -54,6 +55,10 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
+        if(setBorder)
+        {
+        view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
+        }
 
         //Set the adapter
         if (view instanceof RecyclerView) {
@@ -82,5 +87,9 @@ public class PlaylistFragment extends Fragment {
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;
         playlist.setPlaylistFragment(this);
+    }
+
+    public void showBorder(boolean b) {
+        this.setBorder = b;
     }
 }

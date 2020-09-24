@@ -92,7 +92,9 @@ public interface WikiServer {
             "&srlimit=30" +
             "&list=search" +
             "&format=json")
-    Call<QuarryResponse> searchPage(@Query("srsearch") String pageName);
+    Call<QuarryResponse> searchPage(@Query("srsearch") String pageName,
+                                    @Query("prop") String prop,
+                                    @Query("inprop") String inprop );
 
 
 //    @POST("/w/api.php")

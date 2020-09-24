@@ -58,7 +58,7 @@ public class Wikipedia {
         threadPool.execute(() -> {
             try {
                 listToFill.addAll(WikiServerHolder
-                                                .getInstance().searchPage(pageName));
+                                                .getInstance().searchPage(pageName, attributes));
                 activ.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

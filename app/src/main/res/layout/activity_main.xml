@@ -74,6 +74,7 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="0dp"
+        app:tabMode="scrollable"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         app:layout_constraintEnd_toStartOf="@+id/chooseCategories"

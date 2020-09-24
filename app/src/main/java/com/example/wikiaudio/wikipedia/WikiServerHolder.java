@@ -90,9 +90,11 @@ public class WikiServerHolder {
      * @throws IOException if got a bad format response throws a IOException or something went wrong
      * with the communication with wikipedia servers altogether. (can also be our fault)
      */
-    public List<Wikipage> searchPage(String pageName)
+    public List<Wikipage> searchPage(String pageName,  List<PageAttributes> pageAttr )
             throws IOException {
-        Response<QuarryResponse> response = server.searchPage(pageName).execute();
+        String prop = getQueryProp(pageAttr);
+        String inprop = getQueryInProp(pageAttr);
+        Response<QuarryResponse> response = server.searchPage(pageName, prop, inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<Wikipage> WikipageList = parseSearchResponse(response.body());

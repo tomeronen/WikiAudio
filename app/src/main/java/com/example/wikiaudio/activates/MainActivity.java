@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements
             public boolean onQueryTextSubmit(String query) {
                 Playlist playlist = Holder.playlistsHandler.createSearchBasedPlaylist(query);
                 searchResultFragment = playlist.getPlaylistFragment();
+                searchResultFragment.showBorder(true);
                 searchResultVisibility(true, searchResultFragment);
                 searchBar.onActionViewCollapsed();
                 return false;
@@ -302,8 +303,6 @@ public class MainActivity extends AppCompatActivity implements
             loadingIcon = findViewById(R.id.progressBar4);
         }
         loadingIcon.setVisibility(VISIBLE);
-//        final PlaylistsFragmentAdapter playListsFragmentAdapter =
-//                new PlaylistsFragmentAdapter(getSupportFragmentManager());
         new Thread(() -> {
             Holder.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
             playlistsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());

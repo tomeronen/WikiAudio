@@ -148,16 +148,17 @@ public class Playlist {
         if (Holder.wikipedia == null) {
             Log.d(TAG, "getWikipageByTitle: error, wikipedia object is null");
         }
-        final List<Wikipage> results = new ArrayList<>();
-        Holder.wikipedia.searchForPage(title, pageAttributes, results,
+        final Wikipage result = new Wikipage();
+        Holder.wikipedia.getWikipage(title, pageAttributes, result,
                 new WorkerListener() {
                     @Override
                     public void onSuccess() {
                         Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onSuccess");
                         // TODO Add location related condition - now it adds regardless
                         if (wikipages.size() < MAX_WIKIPAGES)
-                            wikipages.add(results.get(0));
-                            results.get(0).setPlaylist(currentPlaylist);
+                            wikipages.add(result);
+                            result.setPlaylist(currentPlaylist);
+                        playlistFragment.notifyAdapter();
                     }
                     @Override
                     public void onFailure() {

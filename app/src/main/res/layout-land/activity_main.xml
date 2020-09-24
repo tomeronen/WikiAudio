@@ -64,6 +64,7 @@
         android:id="@+id/tabs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:tabMode="scrollable"
         android:background="@android:color/white"
         app:layout_constraintEnd_toStartOf="@id/chooseCategories"
         app:layout_constraintStart_toStartOf="parent"
