@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates.playlist_ui;
+package com.example.wikiaudio.activates.playlist.playlist_ui;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;

@@ -1,4 +1,4 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.wikipage;
 
 /**
  *      a list of page attributes you בan ask to get on a page when querying.

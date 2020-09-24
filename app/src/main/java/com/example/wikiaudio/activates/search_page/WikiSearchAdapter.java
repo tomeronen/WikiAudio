@@ -7,7 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.List;
 

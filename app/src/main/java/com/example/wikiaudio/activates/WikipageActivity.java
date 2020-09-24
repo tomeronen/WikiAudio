@@ -10,6 +10,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -20,15 +21,21 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
 import com.example.wikiaudio.activates.loading.LoadingHelper;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
@@ -40,6 +47,7 @@ public class WikipageActivity extends AppCompatActivity {
     private static final String TAG = "WikipageActivity";
 
     private AppCompatActivity activity;
+    private AppData appData;
     private LoadingHelper loadingHelper;
 
     private String wikipageTitle;
@@ -50,10 +58,14 @@ public class WikipageActivity extends AppCompatActivity {
     private List<PageAttributes> pageAttributes;
 
     private MediaPlayerFragment mediaPlayerFragment;
+    private MediaPlayer mediaPlayer;
 
+    //Views
     private ImageView articleImage;
     private WebView webView;
     private FloatingActionButton recordButton;
+    private FloatingActionButton playButton;
+    private ImageButton addButton;
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -98,20 +110,23 @@ public class WikipageActivity extends AppCompatActivity {
      */
     private void initVars() {
         activity = this;
+        appData =((WikiAudioApp) getApplication()).getAppData();
         loadingHelper = LoadingHelper.getInstance();
+
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
         recordButton = findViewById(R.id.recordButton);
+        playButton = findViewById(R.id.playButton);
+        addButton = findViewById(R.id.addButton);
     }
 
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.media_player);
-        if (mediaPlayerFragment != null) {
-            mediaPlayerFragment.showTitle(false);
-        } else {
-            Log.d(TAG, "initMediaPlayer: got null mediaPlayerFragment");
-        }
+                .findFragmentById(R.id.mediaPlayerFragment);
+        mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
+        mediaPlayerFragment.setAudioPlayer(mediaPlayer);
+        Holder.playlistsManager.setMediaPlayer(mediaPlayer);
+        // TODO get lastplaylist and play it if not null
     }
 
     /**
@@ -131,7 +146,7 @@ public class WikipageActivity extends AppCompatActivity {
      * If we already got the wikipage, then we only need to get its data by its playlist and index.
      */
     private void setLayoutForWikipageBased() {
-        wikipage = Holder.playlistsHandler
+        wikipage = Holder.playlistsManager
                 .getWikipageByPlaylistTitleAndIndex(playlistTitle, wikipageIndexInPlaylist);
         if (wikipage == null) {
             Log.d(TAG, "initVars: got null wikipages from getWikipageByPlaylistTitleAndIndex");
@@ -161,6 +176,25 @@ public class WikipageActivity extends AppCompatActivity {
             String wiki = gson.toJson(wikipage);
             intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
             startActivity(intent);
+        });
+
+        playButton.setOnClickListener(v -> {
+            // if the user wants to only play this article, we create a playlist based on it solely
+            // and play that playlist (the user might add wikipages to this playlist)
+            Playlist playlist = new Playlist(wikipage);
+            PlaylistsManager.addPlaylist(playlist);
+            mediaPlayer.play(playlist, 0);
+        });
+
+        addButton.setOnClickListener(v -> {
+            Playlist playlist = mediaPlayer.getCurrentPlaylist();
+            if (playlist != null) {
+                // we add the current wikipage to the end of the current playlist
+                playlist.addWikipage(wikipage);
+            } else {
+                // it is just like clicking play
+                playButton.performClick();
+            }
         });
     }
 

@@ -1,4 +1,4 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.activates.mediaplayer;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,12 +7,13 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
-public class WikipediaPlayer implements TextToSpeech.OnInitListener{
+public class WikipagePlayer implements TextToSpeech.OnInitListener{
 
 
     private final Context context;
@@ -26,7 +27,7 @@ public class WikipediaPlayer implements TextToSpeech.OnInitListener{
     private String textToSpeak;
     private boolean paused = false;
 
-    public WikipediaPlayer(Activity activity, Locale language, float speed) {
+    public WikipagePlayer(Activity activity, Locale language, float speed) {
         this.context = activity.getApplicationContext();
         this.language = language;
         this.speed = speed;

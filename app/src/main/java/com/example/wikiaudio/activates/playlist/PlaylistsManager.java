@@ -1,12 +1,13 @@
-package com.example.wikiaudio.playlist;
+package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,25 +15,28 @@ import java.util.List;
 /**
  * Here is where all the playlists are saved and monitored.
  */
-public class PlaylistsHandler {
+public class PlaylistsManager {
     private static final String TAG = "PlaylistsHandler";
 
-    private static PlaylistsHandler instance = null;
+    private static AppCompatActivity activity;
 
-    private AppCompatActivity activity;
+    private static PlaylistsManager instance = null;
+    private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
 
+    private static boolean categoryBasedPlaylistsWereCreated = false;
 
-    private PlaylistsHandler(AppCompatActivity activity) {
+
+    private PlaylistsManager(AppCompatActivity activity) {
         this.activity = activity;
     }
 
-    public static PlaylistsHandler getInstance(AppCompatActivity activity) {
+    public static PlaylistsManager getInstance(AppCompatActivity activity) {
         if (instance == null) {
-            instance = new PlaylistsHandler(activity);
+            instance = new PlaylistsManager(activity);
         }
         return instance;
     }
@@ -43,6 +47,14 @@ public class PlaylistsHandler {
         } else {
             Log.d(TAG, "add: got null playlist");
         }
+    }
+
+    public void setMediaPlayer(MediaPlayer mPlayer) {
+        mediaPlayer = mPlayer;
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
     }
 
     public static void addPlaylistFragment(PlaylistFragment playlistFragment) {
@@ -70,16 +82,14 @@ public class PlaylistsHandler {
     }
 
     public void createCategoryBasedPlaylists(List<String> categories) {
-        if (categories != null && categories.size() > 0) {
-            for (String category : categories)
-                // todo advise with S.M
-                if(getPlaylistByTitle(category) == null)  // the playlist is new.
-                {
-                    PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
-                }
+        if (!categoryBasedPlaylistsWereCreated) {
+            categoryBasedPlaylistsWereCreated = true;
+            if (categories != null && categories.size() > 0) {
+                for (String category : categories)
+                    PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
+            }
         }
     }
-
 
     public static void displayNearbyPlaylistOnTheMap() {
         if (nearby == null) {
@@ -102,8 +112,8 @@ public class PlaylistsHandler {
         return playlist.getWikipageByIndex(index);
     }
 
-    public Playlist createSearchBasedPlaylist(String query) {
-        return new Playlist(query, "search");
+    public static AppCompatActivity getActivity() {
+        return activity;
     }
 
 }

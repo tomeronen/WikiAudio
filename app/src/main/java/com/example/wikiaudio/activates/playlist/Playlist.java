@@ -1,12 +1,12 @@
-package com.example.wikiaudio.playlist;
+package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
 import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
-import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.Wikipage;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,15 @@ public class Playlist {
 
     public Playlist(String title) {
         this.title = title;
+    }
+
+    public Playlist(Wikipage wikipage) {
+        if (wikipage == null) {
+            Log.d(TAG, "Playlist: got null wikipage");
+            return;
+        }
+        this.title = "";
+        wikipages.add(wikipage);
     }
 
 
@@ -205,5 +214,9 @@ public class Playlist {
 
     public void setPlaylistFragment(PlaylistFragment playlistFragment) {
         this.playlistFragment = playlistFragment;
+    }
+
+    public void addWikipage(Wikipage wikipage) {
+        wikipages.add(wikipage);
     }
 }

@@ -89,13 +89,13 @@
         android:backgroundTint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/view_pager"
         app:layout_constraintStart_toEndOf="@+id/tabs"
-        app:layout_constraintEnd_toEndOf="@id/audioPlayerFragment"
+        app:layout_constraintEnd_toEndOf="@id/mediaPlayerFragment"
         app:layout_constraintTop_toBottomOf="@+id/search_bar"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 
     <fragment
-        android:id="@+id/audioPlayerFragment"
-        android:name="com.example.wikiaudio.activates.MediaPlayerFragment"
+        android:id="@+id/mediaPlayerFragment"
+        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="match_parent"
         android:layout_height="110dp"
         app:layout_constraintBottom_toBottomOf="parent"
