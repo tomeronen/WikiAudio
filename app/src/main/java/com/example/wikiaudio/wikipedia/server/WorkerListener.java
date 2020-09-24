@@ -1,4 +1,4 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.server;
 
 /**
  * a interface of a worker listener.

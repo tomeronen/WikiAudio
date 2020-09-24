@@ -17,9 +17,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.playlist.Playlist;
-import com.example.wikiaudio.playlist.PlaylistsHandler;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.PlaylistsManager;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,7 +36,7 @@ public class LocationHandler {
     private static LocationHandler instance = null;
 
     private AppCompatActivity activity;
-    private PlaylistsHandler playlistsHandler;
+    private PlaylistsManager playlistsManager;
     private Wikipedia wikipedia;
 
     //Location related
@@ -89,7 +89,7 @@ public class LocationHandler {
                                 shouldUpdateZoomAndCreateNearby = false;
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
                                 Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
-                                Holder.playlistsHandler.createLocationBasedPlaylist(
+                                Holder.playlistsManager.createLocationBasedPlaylist(
                                         latLng.latitude, latLng.longitude, true);
                             }
                         }

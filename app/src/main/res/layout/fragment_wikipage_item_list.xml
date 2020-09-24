@@ -11,5 +11,5 @@
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".activates.playlist_ui.PlaylistFragment"
+    tools:context=".activates.playlist.playlist_ui.PlaylistFragment"
     tools:listitem="@layout/wikipage_item" />

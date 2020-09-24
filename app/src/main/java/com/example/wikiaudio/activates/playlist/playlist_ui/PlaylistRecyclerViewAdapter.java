@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates.playlist_ui;
+package com.example.wikiaudio.activates.playlist.playlist_ui;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.playlist.Playlist;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates.playlist_ui;
+package com.example.wikiaudio.activates.playlist.playlist_ui;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.Playlist;
 
 /**
  * A fragment for displaying the wikipages playlist
@@ -32,7 +32,7 @@ public class PlaylistFragment extends Fragment {
     public PlaylistFragment(Playlist playlist) {
         this.playlist = playlist;
         wikipagePlayListRecyclerViewAdapter =
-                new WikipagePlaylistRecyclerViewAdapter(playlist.getWikipages());
+                new WikipagePlaylistRecyclerViewAdapter(playlist);
     }
 
 //    // TODO: Customize parameter initialization

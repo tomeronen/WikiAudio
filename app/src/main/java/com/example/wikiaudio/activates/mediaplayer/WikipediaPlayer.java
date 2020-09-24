@@ -1,4 +1,4 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.activates.mediaplayer;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,6 +7,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.io.IOException;
 import java.util.Locale;

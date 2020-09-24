@@ -1,6 +1,6 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.wikipage;
 
-import com.example.wikiaudio.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.Playlist;
 
 import java.util.List;
 

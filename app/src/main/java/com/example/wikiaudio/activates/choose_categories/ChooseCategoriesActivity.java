@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.WikipageActivity;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WikipediaPlayer;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.activates.mediaplayer.WikipediaPlayer;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
 import java.util.List;

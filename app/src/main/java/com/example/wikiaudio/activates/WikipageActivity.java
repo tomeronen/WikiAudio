@@ -24,11 +24,12 @@ import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
 import com.example.wikiaudio.activates.loading.LoadingHelper;
+import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
@@ -107,11 +108,6 @@ public class WikipageActivity extends AppCompatActivity {
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.media_player);
-        if (mediaPlayerFragment != null) {
-            mediaPlayerFragment.showTitle(false);
-        } else {
-            Log.d(TAG, "initMediaPlayer: got null mediaPlayerFragment");
-        }
     }
 
     /**
@@ -131,7 +127,7 @@ public class WikipageActivity extends AppCompatActivity {
      * If we already got the wikipage, then we only need to get its data by its playlist and index.
      */
     private void setLayoutForWikipageBased() {
-        wikipage = Holder.playlistsHandler
+        wikipage = Holder.playlistsManager
                 .getWikipageByPlaylistTitleAndIndex(playlistTitle, wikipageIndexInPlaylist);
         if (wikipage == null) {
             Log.d(TAG, "initVars: got null wikipages from getWikipageByPlaylistTitleAndIndex");

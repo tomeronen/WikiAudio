@@ -1,4 +1,4 @@
-package com.example.wikiaudio.activates.playlist_ui;
+package com.example.wikiaudio.activates.playlist.playlist_ui;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +11,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.List;
 
 public class WikipagePlaylistRecyclerViewAdapter extends
         RecyclerView.Adapter<WikipagePlaylistRecyclerViewAdapter.WikiPageViewHolder> {
 
+    private Playlist playlist;
     private List<Wikipage> mValues;
 
-    public WikipagePlaylistRecyclerViewAdapter(List<Wikipage> wikipages) {
-        mValues = wikipages;
+    public WikipagePlaylistRecyclerViewAdapter(Playlist playlist) {
+        this.playlist = playlist;
+        if (playlist != null) {
+            mValues = playlist.getWikipages();
+        }
     }
 
     @NonNull
@@ -35,24 +40,25 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.titleView.setText(mValues.get(position).getTitle());
-        holder.descriptionView.setText(mValues.get(position).getDescription());
+        Wikipage wikipage = mValues.get(position);
+        holder.mItem = wikipage;
+        holder.titleView.setText(wikipage.getTitle());
+        holder.descriptionView.setText(wikipage.getDescription());
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
-        if (mValues.get(position).getLat() == null || mValues.get(position).getLon() == null) {
+        if (wikipage.getLat() == null || wikipage.getLon() == null) {
             holder.locationButton.setVisibility(View.GONE);
         } else {
             holder.locationButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Holder.locationHandler.markAndZoom(mValues.get(position));
+                    Holder.locationHandler.markAndZoom(wikipage);
                 }
             });
         }
         holder.playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo add playing this wikipage
+                Holder.mediaPlayer.play(playlist, position);
             }
         });
     }

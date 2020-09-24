@@ -1,6 +1,6 @@
 package com.example.wikiaudio.activates.loading;
 
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;

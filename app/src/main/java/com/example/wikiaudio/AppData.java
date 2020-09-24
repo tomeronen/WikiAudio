@@ -3,45 +3,38 @@ package com.example.wikiaudio;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.example.wikiaudio.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class AppData
-{
+/**
+ * Cross application data
+ */
+public class AppData {
     private static final String chosenCategoriesSpTag = "chosenCategories";
     private static final String lastLoadedCategoriesSpTag = "lastLoadedCategories";
     private static final String categoriesSpTag = "categories";
 
-
-
-    private final Gson gson;
-
     private WikiAudioApp wikiAudioApp;
+    private final Gson gson = new Gson();
+    private SharedPreferences sp;
+
+    //category related
+    private static List<String> chosenCategories;
+
+
+    //playlist related
     private boolean playingStatus = false;
     private int curPositionInPlaylist = 0;
     private Playlist getPlaylist;
-    SharedPreferences sp;
-    static List<String> chosenCategories;
-
-
-    public Playlist getPlaylist() {
-        return getPlaylist;
-    }
-
-
-
-    public void setPlaylist(Playlist currentlyPlaying) {
-        this.getPlaylist = currentlyPlaying;
-    }
 
 
     public AppData(WikiAudioApp wikiAudioApp) {
         this.wikiAudioApp = wikiAudioApp;
-        gson  = new Gson();
     }
 
     public void loadData() {
@@ -54,6 +47,8 @@ public class AppData
         }
     }
 
+    //Category related: we want to save user's favorite categories
+    //TODO why are there 3 different set/get categories func? please add some documentation
     public void saveChosenCategories(List<String> newChosenCategories)
     {
         if(newChosenCategories != null)
@@ -63,7 +58,6 @@ public class AppData
             sp.edit().putString(chosenCategoriesSpTag, chosenCategoriesString).apply();
         }
     }
-
 
     public List<String> getChosenCategories() {
         if(chosenCategories == null)
@@ -107,9 +101,18 @@ public class AppData
         }
     }
 
+
+
+    //Playlist related: we want to save user's last played playlist
+
+    public void setLatestPlayed(Playlist playlist, Wikipage wikipage, int index) {
+        // update
+    }
+
     public boolean getPlayingStatus() {
         return playingStatus;
     }
+
     public void setPlayingStatus(boolean playingStatus) {
         this.playingStatus = playingStatus;
     }
@@ -122,5 +125,13 @@ public class AppData
         if(curPositionInPlaylist >= 0) {
             this.curPositionInPlaylist = curPositionInPlaylist;
         }
+    }
+
+    public Playlist getPlaylist() {
+        return getPlaylist;
+    }
+
+    public void setPlaylist(Playlist currentlyPlaying) {
+        this.getPlaylist = currentlyPlaying;
     }
 }

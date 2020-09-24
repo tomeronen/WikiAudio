@@ -22,7 +22,7 @@ import androidx.core.view.GestureDetectorCompat;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.audio_recoder.VoiceRecorderOptionB;
 import com.example.wikiaudio.file_manager.FileManager;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;

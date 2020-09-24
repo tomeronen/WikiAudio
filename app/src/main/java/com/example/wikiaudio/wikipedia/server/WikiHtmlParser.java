@@ -1,4 +1,6 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.server;
+
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

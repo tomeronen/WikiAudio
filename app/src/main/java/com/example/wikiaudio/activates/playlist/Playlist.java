@@ -1,12 +1,12 @@
-package com.example.wikiaudio.playlist;
+package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
 import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
-import com.example.wikiaudio.wikipedia.PageAttributes;
-import com.example.wikiaudio.wikipedia.Wikipage;
-import com.example.wikiaudio.wikipedia.WorkerListener;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,5 +179,9 @@ public class Playlist {
 
     public Wikipage getWikipageByIndex(int index) {
         return wikipages.get(index);
+    }
+
+    public void play(Wikipage wikipage) {
+
     }
 }

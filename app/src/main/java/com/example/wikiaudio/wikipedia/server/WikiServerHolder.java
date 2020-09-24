@@ -1,7 +1,9 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.server;
 
 import android.util.Log;
 
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
@@ -33,14 +35,14 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.example.wikiaudio.wikipedia.PageAttributes.audioUrl;
-import static com.example.wikiaudio.wikipedia.PageAttributes.categories;
-import static com.example.wikiaudio.wikipedia.PageAttributes.content;
-import static com.example.wikiaudio.wikipedia.PageAttributes.coordinates;
-import static com.example.wikiaudio.wikipedia.PageAttributes.description;
-import static com.example.wikiaudio.wikipedia.PageAttributes.thumbnail;
-import static com.example.wikiaudio.wikipedia.PageAttributes.url;
-import static com.example.wikiaudio.wikipedia.PageAttributes.watchers;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.audioUrl;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.categories;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.content;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.coordinates;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.description;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.thumbnail;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.url;
+import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.watchers;
 
 public class WikiServerHolder {
     static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
@@ -172,10 +174,10 @@ public class WikiServerHolder {
         }
     }
 
-    static List<Wikipage> getPagesNearby(Double latitude,
-                                         Double longitude,
-                                         int radius,
-                                         List<PageAttributes> pageAttr)
+    public static List<Wikipage> getPagesNearby(Double latitude,
+                                                Double longitude,
+                                                int radius,
+                                                List<PageAttributes> pageAttr)
             throws IOException
     {
         // todo add implantation for content audioUrl and identifiers.
@@ -225,7 +227,7 @@ public class WikiServerHolder {
     }
 
 
-    List<String> callGetSpokenPagesCategories() throws IOException {
+    public List<String> callGetSpokenPagesCategories() throws IOException {
         ArrayList<String> allCategories = new ArrayList<>();
         Response<Object> response = this.server.callGetSpokenPagesCategories().execute();
         if (response.code() != 200 || !response.isSuccessful()) {

@@ -9,7 +9,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 public class LoadingActivity extends Activity {
     private static final String TAG = "LoadingActivity";

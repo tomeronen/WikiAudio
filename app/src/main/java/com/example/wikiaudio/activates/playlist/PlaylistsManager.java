@@ -1,12 +1,12 @@
-package com.example.wikiaudio.playlist;
+package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
-import com.example.wikiaudio.wikipedia.Wikipage;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
 /**
  * Here is where all the playlists are saved and monitored.
  */
-public class PlaylistsHandler {
+public class PlaylistsManager {
     private static final String TAG = "PlaylistsHandler";
 
-    private static PlaylistsHandler instance = null;
+    private static PlaylistsManager instance = null;
 
     private AppCompatActivity activity;
 
@@ -26,13 +26,13 @@ public class PlaylistsHandler {
     private static Playlist nearby;
 
 
-    private PlaylistsHandler(AppCompatActivity activity) {
+    private PlaylistsManager(AppCompatActivity activity) {
         this.activity = activity;
     }
 
-    public static PlaylistsHandler getInstance(AppCompatActivity activity) {
+    public static PlaylistsManager getInstance(AppCompatActivity activity) {
         if (instance == null) {
-            instance = new PlaylistsHandler(activity);
+            instance = new PlaylistsManager(activity);
         }
         return instance;
     }
@@ -72,7 +72,7 @@ public class PlaylistsHandler {
     public void createCategoryBasedPlaylists(List<String> categories) {
         if (categories != null && categories.size() > 0) {
             for (String category : categories)
-                PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
+                PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
         }
     }
 

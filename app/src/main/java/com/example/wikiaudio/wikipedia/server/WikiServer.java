@@ -1,4 +1,4 @@
-package com.example.wikiaudio.wikipedia;
+package com.example.wikiaudio.wikipedia.server;
 
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -23,7 +23,7 @@ public interface WikiServer {
     public Call<QuarryResponse> callGetPageByName(@Query("titles") String pageName,
                                                   @Query("prop") String prop,
                                                   @Query("inprop") String inprop,
-                                                    @Query("piprop") String imageToBring);
+                                                  @Query("piprop") String imageToBring);
 
 // Example full get request:
 //https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url|watchers&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
