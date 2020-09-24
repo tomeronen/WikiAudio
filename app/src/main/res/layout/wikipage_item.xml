@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="40dp"
+    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <TextView
@@ -14,6 +15,7 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:textSize="18sp"
+        android:background="#FFFFFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toLeftOf="@id/locationButton" />
@@ -31,30 +33,34 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageButton
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/locationButton"
-        android:layout_width="33dp"
+        android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginEnd="8dp"
-        android:background="#FFFFFF"
         app:layout_constraintEnd_toStartOf="@+id/playButton"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:borderWidth="0dp"
+        app:fabCustomSize="30dp"
+        android:backgroundTint="#FFFFFF"
         app:srcCompat="@android:drawable/ic_menu_mylocation" />
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playButton"
-        android:layout_width="32dp"
-        android:layout_height="28dp"
-        android:layout_marginEnd="8dp"
-        android:background="#FFFFFF"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_media_play" />
+        app:fabCustomSize="30dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="#FFFFFF"
+        app:srcCompat="@drawable/ic_menu_play_clip" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

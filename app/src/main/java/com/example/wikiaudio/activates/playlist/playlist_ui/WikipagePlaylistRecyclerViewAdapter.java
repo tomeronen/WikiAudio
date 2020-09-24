@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +16,7 @@ import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
@@ -72,8 +72,8 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         public final View mView;
         public final TextView titleView;
         public final TextView descriptionView;
-        private ImageButton locationButton;
-        private ImageButton playButton;
+        private FloatingActionButton locationButton;
+        private FloatingActionButton playButton;
         public Wikipage wikipage;
         private boolean expanded = false;
 

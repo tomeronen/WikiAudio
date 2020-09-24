@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_x="0dp"
         android:layout_y="0dp"
-        android:background="#000"
+        android:background="#000000"
         tools:srcCompat="@drawable/ic_launcher_foreground" />
 
     <WebView
