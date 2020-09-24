@@ -1,17 +1,13 @@
 TODO:
 (1) Regarding the wikipages that appear on the playlist fragment:
-    (a) Make the play button on the playlist fragment to start playing from that wikipage index.
-    (b) Long click opens its wikipageActivity.
-(2) Displaying category based playlists now occurs as soon we get their titles.
-(3) While listening to a playlist, make sure it continues even if the user enters another activity.
-(4) Add a play button on the wikipageActivity for when the user would like to listen to that
-    specific wikipage. Then:
-        (a) It'll play the playlist that wikipage is at starting from its index.
-        (b) It'll only play that wikipage and that's it.
+    (a) Long click opens its wikipageActivity.
+    (b) Highlight the wikipage that is being played on the playlist fragment.
+(2) While listening to a playlist, make sure it continues even if the user enters another activity.
+(3)
+(4)
 (5) When fetching articles from the wiki server by category, set maximum of 20 pages.
 (6) When the user's original location changes in fixed radius distance, update the Nearby playlist
     unless it is being played.
-
 
 MainActivity:
     (1) Navigation View:
@@ -38,10 +34,10 @@ Wikipedia Logic:
 TODO s that should be done last (after the rest of the app works):
 (1) Make sure the app is working in all landscapes.
 (2) Upload titles without wikipages on MainActivity to make it look faster.
-(3) Anything record related:
+(3) Displaying category based playlists now occurs as soon we get their titles.
+(4) Anything record related:
     (a) TIPS dialog appear on first instance.
     (b) option for uploading when finished.
-
 
 
 Changing Fetching Mechanism?:
@@ -71,7 +67,6 @@ Changing Fetching Mechanism?:
                         Choose random 10-12 pages.
                 (c) GET their data.
                 (*) Use the text reading engine if necessary.
-
 
 Questions:
     (1) Are we suggesting ONLY spoken based categories at the categories activity?

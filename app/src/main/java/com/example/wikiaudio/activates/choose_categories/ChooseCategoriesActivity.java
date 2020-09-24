@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseCategoriesActivity extends AppCompatActivity {
-    private AppCompatActivity app;
     private AppCompatActivity activity;
     private AppData appData;
 
@@ -51,7 +50,6 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_categories);
-        app = this;
         activity = this;
         appData =((WikiAudioApp) getApplication()).getAppData();
         categoriesView = findViewById(R.id.categoriesView);
@@ -94,10 +92,10 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
              public void onSuccess() {
                  Log.d("load status", "loaded categories");
                  categoryAdapter =
-                         new CategoryAdapter(app, categories, categoryClickListeners);
-                 categoriesView.setLayoutManager(new GridLayoutManager(app, columnAmount));
+                         new CategoryAdapter(activity, categories, categoryClickListeners);
+                 categoriesView.setLayoutManager(new GridLayoutManager(activity, columnAmount));
                  RecyclerView.ItemDecoration itemDecoration = new
-                         DividerItemDecoration(app, DividerItemDecoration.HORIZONTAL);
+                         DividerItemDecoration(activity, DividerItemDecoration.HORIZONTAL);
                  categoriesView.addItemDecoration(new SpacesItemDecoration(10));
 //                 int resId = R.anim.grid_layout_animation_from_bottom;
 //                 LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(app, resId);
