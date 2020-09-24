@@ -141,12 +141,6 @@ public class MainActivity extends AppCompatActivity implements
 
     //        }
 
-    private void testMediaPlayer() {
-        Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
-        new Thread(() -> appData.setPlaylist(new Playlist("Biology", false, 0, 0))).start();
-    }
-
-
     /**
      * Pretty self-explanatory, really.
      */
@@ -252,9 +246,9 @@ public class MainActivity extends AppCompatActivity implements
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.audioPlayerFragment);
-        mediaPlayer = new MediaPlayer(activity, mediaPlayerFragment);
+        mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
-        Holder.setMediaPlayer(mediaPlayer); // this might be problematic
+        Holder.playlistsManager.setMediaPlayer(mediaPlayer);
     }
 
     /**

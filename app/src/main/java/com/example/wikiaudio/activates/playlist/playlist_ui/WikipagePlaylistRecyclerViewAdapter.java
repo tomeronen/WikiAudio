@@ -48,19 +48,11 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
             holder.locationButton.setVisibility(View.GONE);
         } else {
-            holder.locationButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Holder.locationHandler.markAndZoom(wikipage);
-                }
-            });
+            holder.locationButton.setOnClickListener(v ->
+                    Holder.locationHandler.markAndZoom(wikipage));
         }
-        holder.playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Holder.mediaPlayer.play(playlist, position);
-            }
-        });
+        holder.playButton.setOnClickListener(v ->
+                Holder.playlistsManager.getMediaPlayer().play(playlist, position));
     }
 
     @Override

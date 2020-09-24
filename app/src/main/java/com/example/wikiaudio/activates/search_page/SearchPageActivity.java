@@ -16,7 +16,7 @@ import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.activates.mediaplayer.WikipediaPlayer;
+import com.example.wikiaudio.activates.mediaplayer.WikipagePlayer;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class SearchPageActivity extends AppCompatActivity {
     public static final String SEARCH_TAG = "searchValue";
     RecyclerView resultsView;
     Wikipedia wikipedia;
-    WikipediaPlayer wikipediaPlayer;
+    WikipagePlayer wikipagePlayer;
     Context app;
     SearchView searchView;
     ProgressBar loadingIcon;
@@ -41,7 +41,7 @@ public class SearchPageActivity extends AppCompatActivity {
         searchView = findViewById(R.id.search_bar_view);
         loadingIcon = findViewById(R.id.progressBar2);
         wikipedia = new Wikipedia(this);
-        wikipediaPlayer = new WikipediaPlayer(this, Locale.ENGLISH, 0.8f);
+        wikipagePlayer = new WikipagePlayer(this, Locale.ENGLISH, 0.8f);
         app = getApplicationContext();
         String valueToSearch = getIntent().getStringExtra(SEARCH_TAG);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

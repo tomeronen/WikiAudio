@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.example.wikiaudio.activates.playlist.Playlist;
-import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -26,11 +25,8 @@ public class AppData {
     //category related
     private static List<String> chosenCategories;
 
-
     //playlist related
-    private boolean playingStatus = false;
-    private int curPositionInPlaylist = 0;
-    private Playlist getPlaylist;
+    private Playlist lastPlayedPlaylist;
 
 
     public AppData(WikiAudioApp wikiAudioApp) {
@@ -102,36 +98,18 @@ public class AppData {
     }
 
 
-
     //Playlist related: we want to save user's last played playlist
-
-    public void setLatestPlayed(Playlist playlist, Wikipage wikipage, int index) {
-        // update
+    public void setLastPlayedPlaylist(Playlist currentlyPlaying) {
+        this.lastPlayedPlaylist = currentlyPlaying;
     }
 
-    public boolean getPlayingStatus() {
-        return playingStatus;
+    public Playlist lastPlayedPlaylist() {
+        return lastPlayedPlaylist;
     }
 
-    public void setPlayingStatus(boolean playingStatus) {
-        this.playingStatus = playingStatus;
+    //
+    public WikiAudioApp getWikiAudioApp() {
+        return wikiAudioApp;
     }
 
-    public int getCurPosition() {
-        return curPositionInPlaylist;
-    }
-
-    public void setCurPositionInPlaylist(int curPositionInPlaylist) {
-        if(curPositionInPlaylist >= 0) {
-            this.curPositionInPlaylist = curPositionInPlaylist;
-        }
-    }
-
-    public Playlist getPlaylist() {
-        return getPlaylist;
-    }
-
-    public void setPlaylist(Playlist currentlyPlaying) {
-        this.getPlaylist = currentlyPlaying;
-    }
 }

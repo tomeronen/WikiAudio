@@ -1,5 +1,7 @@
 package com.example.wikiaudio.activates.mediaplayer.ui;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,7 +14,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.MainActivity;
+import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.ohoussein.playpause.PlayPauseView;
 
 /**
@@ -24,7 +29,7 @@ public class MediaPlayerFragment extends Fragment {
 
     //Vars
     private View fragmentInflated;
-    private FragmentActivity activity;
+    private FragmentActivity fragmentActivity;
     private MediaPlayer player;
 
     //Views
@@ -60,8 +65,8 @@ public class MediaPlayerFragment extends Fragment {
         searchButton = fragmentInflated.findViewById(R.id.searchButton);
         categoriesButton = fragmentInflated.findViewById(R.id.categoriesButton);
 
-        activity = this.getActivity();
-        if (activity == null) {
+        fragmentActivity = this.getActivity();
+        if (fragmentActivity == null) {
             Log.d(TAG, "initVars: null activity error");
         }
     }
@@ -119,16 +124,64 @@ public class MediaPlayerFragment extends Fragment {
 
     private void setOnClickButtonsForNavigationBar() {
         homeButton.setOnClickListener(v -> {
-            // redirect to MainActivity
+            Activity activeActivity = getActiveActivity();
+            if (activeActivity == null) {
+                Log.d(TAG, "homeButton.setOnClickListener: got null activeActivity");
+                return;
+            }
+            //if we're in MainActivity, we change nothing
+            if (activeActivity.getLocalClassName().equals("activates.MainActivity")) {
+                Log.d(TAG, "homeButton.setOnClickListener: we're on MainActivity");
+            } else {
+                // ow, redirects to the main activity AND clears all running intents
+                Intent i = new Intent(player.getActivity(), MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+            }
         });
 
         searchButton.setOnClickListener(v -> {
             // redirect to SearchActivity
+            Activity activeActivity = getActiveActivity();
+            if (activeActivity == null) {
+                Log.d(TAG, "homeButton.setOnClickListener: got null activeActivity");
+                return;
+            }
+            //if we're in SearchPageActivity, we change nothing
+            if (activeActivity.getLocalClassName().equals("activates.search_page.SearchPageActivity")) {
+                Log.d(TAG, "homeButton.setOnClickListener: we're on SearchPageActivity");
+            } else {
+                // ow, redirects to the SearchPageActivity
+                Intent i = new Intent(player.getActivity(), SearchPageActivity.class);
+                startActivity(i);
+            }
         });
 
         categoriesButton.setOnClickListener(v -> {
             // redirect to ChooseCategoriesActivity
+            Activity activeActivity = getActiveActivity();
+            if (activeActivity == null) {
+                Log.d(TAG, "homeButton.setOnClickListener: got null activeActivity");
+                return;
+            }
+            //if we're in ChooseCategoriesActivity, we change nothing
+            if (activeActivity.getLocalClassName().equals("activates.choose_categories.ChooseCategoriesActivity")) {
+                Log.d(TAG, "homeButton.setOnClickListener: we're on ChooseCategoriesActivity");
+            } else {
+                // ow, redirects to the ChooseCategoriesActivity
+                Intent i = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
+                startActivity(i);
+            }
         });
+    }
+
+    private Activity getActiveActivity() {
+        if (player == null || player.getAppData() == null ||
+                player.getAppData().getWikiAudioApp() == null) {
+            Log.d(TAG, "getActiveActivity: got null player/appdata/wikisudioapp");
+            return null;
+        }
+        return player.getAppData().getWikiAudioApp().getActiveActivity();
     }
 
 }

@@ -1,6 +1,10 @@
 package com.example.wikiaudio;
 
+import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +22,7 @@ import java.util.concurrent.Executors;
 public class WikiAudioApp extends Application {
 
     private AppData appData;
+    private Activity activeActivity;
     private ExecutorService executorService; // the thread pool of the app.
     private static final int TOTAL_THREADS = 14; //todo test what is best amount of threads.
 
@@ -26,12 +31,45 @@ public class WikiAudioApp extends Application {
         super.onCreate();
         appData = new AppData(this);
         appData.loadData();
+        setupActivityListener();
         executorService = Executors.newFixedThreadPool(TOTAL_THREADS);
     }
 
     public AppData getAppData()
     {
         return appData;
+    }
+
+    private void setupActivityListener() {
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+            }
+            @Override
+            public void onActivityStarted(@NonNull Activity activity) {
+            }
+            @Override
+            public void onActivityResumed(@NonNull Activity activity) {
+                activeActivity = activity;
+            }
+            @Override
+            public void onActivityPaused(@NonNull Activity activity) {
+                activeActivity = null;
+            }
+            @Override
+            public void onActivityStopped(@NonNull Activity activity) {
+            }
+            @Override
+            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+            }
+            @Override
+            public void onActivityDestroyed(@NonNull Activity activity) {
+            }
+        });
+    }
+
+    public Activity getActiveActivity() {
+        return activeActivity;
     }
 
     public ExecutorService getExecutorService() {

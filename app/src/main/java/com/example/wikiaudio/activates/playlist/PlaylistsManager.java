@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
@@ -20,6 +21,7 @@ public class PlaylistsManager {
     private static PlaylistsManager instance = null;
 
     private AppCompatActivity activity;
+    private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
@@ -43,6 +45,14 @@ public class PlaylistsManager {
         } else {
             Log.d(TAG, "add: got null playlist");
         }
+    }
+
+    public void setMediaPlayer(MediaPlayer mPlayer) {
+        mediaPlayer = mPlayer;
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
     }
 
     public static void addPlaylistFragment(PlaylistFragment playlistFragment) {
