@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -30,7 +31,6 @@ import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist_ui.PlaylistsFragmentAdapter;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
 import com.example.wikiaudio.playlist.Playlist;
 import com.example.wikiaudio.playlist.PlaylistsHandler;
 import com.example.wikiaudio.wikipedia.Wikipage;
@@ -51,6 +51,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -90,9 +93,12 @@ public class MainActivity extends AppCompatActivity implements
     private TabLayout tabs;
     private ProgressBar loadingIcon;
     private MediaPlayerFragment mediaPlayerFragment;
+    private PlaylistFragment searchResultFragment;
     private ViewPager viewPager;
     private PlaylistsFragmentAdapter playListsFragmentAdapter;
     private AppData appData;
+    private SupportMapFragment mapFragment;
+    private FrameLayout searchResultPlaceHolder;
 
 
     //
@@ -106,9 +112,9 @@ public class MainActivity extends AppCompatActivity implements
         initMap();
         loadPlaylists();
         initMediaPlayer();
-
 //        testMediaPlayer();
     }
+
 
     private void testMediaPlayer() {
         Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
@@ -190,12 +196,15 @@ public class MainActivity extends AppCompatActivity implements
         activity = this;
         chooseCategories = findViewById(R.id.chooseCategories);
         searchBar = findViewById(R.id.search_bar);
+        searchBar.setIconified(true);
+        searchBar.onActionViewCollapsed();
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
         chosenCategories = ((WikiAudioApp) getApplication())
                 .getAppData().getChosenCategories();
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
+        searchResultPlaceHolder = findViewById(R.id.search_result_placeholder);
         appData =((WikiAudioApp) getApplication()).getAppData();
 
     }
@@ -206,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initMap() {
         if (isGoogleServicesOK()) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.fragmentMap);
             if (mapFragment == null) {
                 Log.d(TAG, "initMap: mapFragment is null");
@@ -237,11 +246,10 @@ public class MainActivity extends AppCompatActivity implements
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Intent searchWikipageIntent =
-                        new Intent(activity, SearchPageActivity.class);
-                searchWikipageIntent.putExtra(SearchPageActivity.SEARCH_TAG,
-                        query);
-                startActivity(searchWikipageIntent);
+                Playlist playlist = Holder.playlistsHandler.createSearchBasedPlaylist(query);
+                searchResultFragment = playlist.getPlaylistFragment();
+                searchResultVisibility(true, searchResultFragment);
+                searchBar.onActionViewCollapsed();
                 return false;
             }
 
@@ -252,17 +260,42 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    private void searchResultVisibility(boolean bool, PlaylistFragment searchResultFragment) {
+        if(searchResultFragment == null)
+        {
+            return;
+        }
+        int othersAreVisible;
+        if (bool) {
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .addToBackStack(null)
+                    .replace(R.id.search_result_placeholder, searchResultFragment)
+                    .commit();
+            othersAreVisible = GONE;
+        } else {
+            searchResultFragment.getView().setVisibility(GONE);
+            othersAreVisible = VISIBLE;
+        }
+        viewPager.setVisibility(othersAreVisible);
+        tabs.setVisibility(othersAreVisible);
+        chooseCategories.setVisibility(othersAreVisible);
+        mapFragment.getView().setVisibility(othersAreVisible);
+        findViewById(R.id.mapBackground).setVisibility(othersAreVisible);
+    }
+
     /**
      * Loads the playlists fragment based on favorite categories and, if enabled, also
      * based on location
      */
     private void loadPlaylists() {
-        loadingIcon.setVisibility(View.VISIBLE);
+        if(loadingIcon != null) {
+            loadingIcon.setVisibility(VISIBLE);
+        }
         final PlaylistsFragmentAdapter playListsFragmentAdapter =
                 new PlaylistsFragmentAdapter(getSupportFragmentManager());
         new Thread(() -> {
             Holder.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
-
             //Add all playlists as fragments to the adapter
             for (Playlist playlist: PlaylistsHandler.getPlaylists())
                 playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
@@ -277,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements
                     Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
                     counter++;
                 }
-                loadingIcon.setVisibility(View.GONE);
+                loadingIcon.setVisibility(GONE);
             });
         }).start();
     }
@@ -587,4 +620,18 @@ public class MainActivity extends AppCompatActivity implements
 //
 //
 //    }
+    @Override
+    public void onBackPressed() {
+
+        if(searchResultFragment != null &&
+                searchResultFragment.getView() != null &&
+                    searchResultFragment.getView().getVisibility() == VISIBLE)
+        {
+            searchResultVisibility(false, searchResultFragment);
+        }
+        else
+        {
+            super.onBackPressed();
+        }
+    }
 }

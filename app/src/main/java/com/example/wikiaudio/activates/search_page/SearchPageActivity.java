@@ -71,25 +71,6 @@ public class SearchPageActivity extends AppCompatActivity {
                                 new com.example.wikiaudio.activates.search_page.ResultClickListeners() {
                                     @Override
                                     public void onClick(String string) {
-//                                        final Wikipage Wikipage = new Wikipage();
-//                                        List<PageAttributes> pageAttributes = new ArrayList<>();
-//                                        pageAttributes.add(PageAttributes.audioUrl);
-//                                        pageAttributes.add(PageAttributes.content);
-//                                        pageAttributes.add(PageAttributes.title);
-//                                        wikipedia.getWikipage(string, pageAttributes, Wikipage,
-//                                                new WorkerListener() {
-//                                                    @Override
-//                                                    public void onSuccess() {
-//                                                        WikipediaPlayer wikipediaPlayer
-//                                                                = new WikipediaPlayer(app, Locale.ENGLISH, 0.8f);
-//                                                        wikipediaPlayer.playWiki(Wikipage);
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onFailure() {
-//
-//                                                    }
-//                                                });
                                         String title = string;
                                         Intent WikipageIntent = new Intent(app, WikipageActivity.class);
                                         WikipageIntent.putExtra("title", title);

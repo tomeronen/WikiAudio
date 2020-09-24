@@ -21,7 +21,7 @@ public class PlaylistFragment extends Fragment {
     private static final String TAG = "PlaylistFragment";
 
     private Playlist playlist;
-    private WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
+    public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -78,8 +78,9 @@ public class PlaylistFragment extends Fragment {
         wikipagePlayListRecyclerViewAdapter.notifyDataSetChanged();
     }
 
-    public void update(){
-        this.notifyAdapter();
-    }
 
+    public void setPlaylist(Playlist playlist) {
+        this.playlist = playlist;
+        playlist.setPlaylistFragment(this);
+    }
 }

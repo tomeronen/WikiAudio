@@ -6,12 +6,26 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
+    <FrameLayout
+        android:id="@+id/search_result_placeholder"
+        android:name="com.example.wikiaudio.activates.playlist_ui.PlaylistFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clickable="true"
+        app:layout_constraintBottom_toTopOf="@id/audioPlayerFragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        android:focusable="true">
+    </FrameLayout>
+
+
     <SearchView
         android:id="@+id/search_bar"
         android:layout_width="409dp"
         android:layout_height="58dp"
+        android:iconifiedByDefault="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
@@ -34,7 +48,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+    <fragment
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
@@ -87,5 +101,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragmentMap" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout >

@@ -64,6 +64,27 @@ public class Playlist {
                 });
     }
 
+    public Playlist(String query, String action) {
+        if(action.equals("search")) {
+            this.title = query;
+            this.playlistFragment = new PlaylistFragment(this);
+            Holder.wikipedia.searchForPage(query, pageAttributes, this.getWikipages(),
+                    new WorkerListener() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "");
+                            playlistFragment.notifyAdapter();
+                        }
+
+                        @Override
+                        public void onFailure() {
+                            Log.d(TAG, "");
+
+                        }
+                    });
+        }
+    }
+
 //    /**
 //     * Create a playlist of wikipages that belong to the given categories and if nearby is true,
 //     * then are also nearby the user's current location
@@ -179,5 +200,9 @@ public class Playlist {
 
     public Wikipage getWikipageByIndex(int index) {
         return wikipages.get(index);
+    }
+
+    public void setPlaylistFragment(PlaylistFragment playlistFragment) {
+        this.playlistFragment = playlistFragment;
     }
 }

@@ -97,4 +97,8 @@ public class PlaylistsHandler {
         return playlist.getWikipageByIndex(index);
     }
 
+    public Playlist createSearchBasedPlaylist(String query) {
+        return new Playlist(query, "search");
+    }
+
 }
