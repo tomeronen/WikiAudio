@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class AppData
 {
@@ -25,7 +27,7 @@ public class AppData
     private int curPositionInPlaylist = 0;
     private Playlist getPlaylist;
     SharedPreferences sp;
-    static List<String> chosenCategories;
+    static SortedSet<String> chosenCategories;
 
 
     public Playlist getPlaylist() {
@@ -47,10 +49,10 @@ public class AppData
     public void loadData() {
         sp = PreferenceManager.getDefaultSharedPreferences(wikiAudioApp);
         String chosenCategoriesString = sp.getString(chosenCategoriesSpTag, "");
-        chosenCategories = gson.fromJson(chosenCategoriesString, List.class);
+        chosenCategories = gson.fromJson(chosenCategoriesString, SortedSet.class);
         if(chosenCategories == null)
         {
-            chosenCategories = new ArrayList<>();
+            chosenCategories = new TreeSet<>();
         }
     }
 
@@ -58,7 +60,7 @@ public class AppData
     {
         if(newChosenCategories != null)
         {
-            chosenCategories = newChosenCategories;
+            chosenCategories = new TreeSet<>(newChosenCategories);
             String chosenCategoriesString = gson.toJson(newChosenCategories);
             sp.edit().putString(chosenCategoriesSpTag, chosenCategoriesString).apply();
         }
@@ -68,9 +70,9 @@ public class AppData
     public List<String> getChosenCategories() {
         if(chosenCategories == null)
         {
-            chosenCategories = new ArrayList<>();
+            chosenCategories = new TreeSet<>();
         }
-        return chosenCategories;
+        return new ArrayList<>(chosenCategories);
     }
 
     public Date getLastLoadedCategories() {

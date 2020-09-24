@@ -1,5 +1,7 @@
 package com.example.wikiaudio.activates.choose_categories;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -67,7 +69,13 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
                     ((WikiAudioApp) getApplication())
                             .getAppData()
                             .saveChosenCategories(categoryAdapter._categoriesChosen);
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("dataSaved", true);
+                    setResult(Activity.RESULT_OK,returnIntent);
+                    finish();
                 }
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_CANCELED, returnIntent);
                 finish();
             }
         });

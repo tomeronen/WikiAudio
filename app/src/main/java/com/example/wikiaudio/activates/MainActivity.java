@@ -2,6 +2,7 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,7 +12,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements
 
     //For logs
     private static final String TAG = "MainActivity";
+    private static final int CHOOSE_CATEGORY_TAG = 10172 ;
 
     private AppCompatActivity activity;
 
@@ -95,10 +96,8 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayerFragment mediaPlayerFragment;
     private PlaylistFragment searchResultFragment;
     private ViewPager viewPager;
-    private PlaylistsFragmentAdapter playListsFragmentAdapter;
     private AppData appData;
     private SupportMapFragment mapFragment;
-    private FrameLayout searchResultPlaceHolder;
 
 
     //
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private void testMediaPlayer() {
-        Playlist playList = playListsFragmentAdapter.getItem(0).getPlaylist();
+        Playlist playList = playlistsFragmentAdapter.getItem(0).getPlaylist();
         new Thread(() -> appData.setPlaylist(new Playlist("Biology", false, 0, 0))).start();
     }
 
@@ -203,9 +202,8 @@ public class MainActivity extends AppCompatActivity implements
         tabs = findViewById(R.id.tabs);
         chosenCategories = ((WikiAudioApp) getApplication())
                 .getAppData().getChosenCategories();
-        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        searchResultPlaceHolder = findViewById(R.id.search_result_placeholder);
         appData =((WikiAudioApp) getApplication()).getAppData();
+
 
     }
 
@@ -229,9 +227,20 @@ public class MainActivity extends AppCompatActivity implements
 
     private boolean needToReloadTabs() {
         // todo change to set? what happens if we take down and add again. order changes.
-        int tabCount = tabs.getTabCount();
-        return tabCount != chosenCategories.size();
+        if(PlaylistsHandler.getPlaylists().size() != chosenCategories.size())
+        {
+            return true;
+        }
+        for(String category: chosenCategories)
+        {
+            if(!categoryInPlaylists(category))
+            {
+                return true;
+            }
+        }
+        return false;
     }
+
 
     private void setOnClickButtons() {
         chooseCategories.setOnClickListener(new View.OnClickListener() {
@@ -239,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onClick(View v) {
                 Intent chooseCategoriesIntent =  new Intent(activity,
                         ChooseCategoriesActivity.class);
-                startActivity(chooseCategoriesIntent);
+                startActivityForResult(chooseCategoriesIntent, CHOOSE_CATEGORY_TAG);
             }
         });
 
@@ -289,20 +298,21 @@ public class MainActivity extends AppCompatActivity implements
      * based on location
      */
     private void loadPlaylists() {
-        if(loadingIcon != null) {
-            loadingIcon.setVisibility(VISIBLE);
+        if(loadingIcon == null) {
+            loadingIcon = findViewById(R.id.progressBar4);
         }
-        final PlaylistsFragmentAdapter playListsFragmentAdapter =
-                new PlaylistsFragmentAdapter(getSupportFragmentManager());
+        loadingIcon.setVisibility(VISIBLE);
+//        final PlaylistsFragmentAdapter playListsFragmentAdapter =
+//                new PlaylistsFragmentAdapter(getSupportFragmentManager());
         new Thread(() -> {
             Holder.playlistsHandler.createCategoryBasedPlaylists(chosenCategories);
+            playlistsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
             //Add all playlists as fragments to the adapter
             for (Playlist playlist: PlaylistsHandler.getPlaylists())
-                playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
-
+                playlistsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
             activity.runOnUiThread(() -> {
                 ViewPager viewPager = findViewById(R.id.view_pager);
-                viewPager.setAdapter(playListsFragmentAdapter);
+                viewPager.setAdapter(playlistsFragmentAdapter);
                 tabs = findViewById(R.id.tabs);
                 tabs.setupWithViewPager(viewPager);
                 int counter = 0;
@@ -634,4 +644,35 @@ public class MainActivity extends AppCompatActivity implements
             super.onBackPressed();
         }
     }
+
+    private boolean categoryInPlaylists(String category) {
+        for(int i = 0; i < PlaylistsHandler.getPlaylists().size(); ++i)
+        {
+            if(PlaylistsHandler.getPlaylists().get(i).getTitle().equals(category))
+            {
+                return true;
+            }
+        }
+        return false; // category was not found.
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CHOOSE_CATEGORY_TAG) {
+            if(resultCode == Activity.RESULT_OK){
+                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
+                if(dataSaved)
+                {
+                    chosenCategories = ((WikiAudioApp) getApplication())
+                            .getAppData().getChosenCategories();
+                    this.loadPlaylists();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
+    }//onActivityResult
 }

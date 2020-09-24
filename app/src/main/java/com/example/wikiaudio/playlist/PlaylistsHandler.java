@@ -72,9 +72,14 @@ public class PlaylistsHandler {
     public void createCategoryBasedPlaylists(List<String> categories) {
         if (categories != null && categories.size() > 0) {
             for (String category : categories)
-                PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
+                // todo advise with S.M
+                if(getPlaylistByTitle(category) == null)  // the playlist is new.
+                {
+                    PlaylistsHandler.addPlaylist(new Playlist(category, false, 0, 0));
+                }
         }
     }
+
 
     public static void displayNearbyPlaylistOnTheMap() {
         if (nearby == null) {
