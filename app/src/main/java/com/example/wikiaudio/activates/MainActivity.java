@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.audioPlayerFragment);
+                .findFragmentById(R.id.mediaPlayerFragment);
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);

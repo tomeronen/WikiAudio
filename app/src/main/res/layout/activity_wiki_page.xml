@@ -18,18 +18,16 @@
     <WebView
         android:id="@+id/WikipageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"
-        app:layout_constraintBottom_toTopOf="@+id/media_player"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" >
-    </WebView>
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="-71dp" />
 
     <fragment
-        android:id="@+id/media_player"
-        android:name="com.example.wikiaudio.activates.MediaPlayerFragment"
-        android:layout_width="0dp"
+        android:id="@+id/mediaPlayerFragment"
+        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
+        android:layout_width="match_parent"
         android:layout_height="110dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,11 +37,32 @@
         android:id="@+id/recordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0.95"
+        android:backgroundTint="#302A2B"
+        android:clickable="true"
+        app:srcCompat="@drawable/ic_voice_search" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/playButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_x="321dp"
-        android:layout_y="61dp"
-        android:clickable="true"
-        app:srcCompat="@android:drawable/presence_audio_online" />
+        android:backgroundTint="#302A2B"
+        app:srcCompat="@drawable/ic_menu_play_clip" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toStartOf="@+id/recordButton"
+        app:layout_constraintStart_toEndOf="@+id/playButton"
+        app:layout_constraintTop_toTopOf="parent"
+        android:backgroundTint="#302A2B"
+        app:srcCompat="@drawable/ic_menu_add" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

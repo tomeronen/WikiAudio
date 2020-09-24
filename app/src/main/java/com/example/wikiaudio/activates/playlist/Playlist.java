@@ -36,6 +36,15 @@ public class Playlist {
         this.title = title;
     }
 
+    public Playlist(Wikipage wikipage) {
+        if (wikipage == null) {
+            Log.d(TAG, "Playlist: got null wikipage");
+            return;
+        }
+        this.title = "";
+        wikipages.add(wikipage);
+    }
+
 
     /**
      * Creates a playlist of wikipages that belong to the given category and if the playlist is
@@ -63,15 +72,6 @@ public class Playlist {
                     }
                 });
     }
-
-//    /**
-//     * Create a playlist of wikipages that belong to the given categories and if nearby is true,
-//     * then are also nearby the user's current location
-//     * @param categories
-//     * @param nearby
-//     */
-//    public Playlist(WArrayList<String> categories, boolean nearby) {
-//    }
 
     /**
      * Creates a playlist of wikipages that are nearby the given location
@@ -181,7 +181,7 @@ public class Playlist {
         return wikipages.get(index);
     }
 
-    public void play(Wikipage wikipage) {
-
+    public void addWikipage(Wikipage wikipage) {
+        wikipages.add(wikipage);
     }
 }
