@@ -74,4 +74,5 @@ Changing Fetching Mechanism?:
 
 
 Questions:
-    (1) Are we suggesting only spoken based categories at the categories activity?
+    (1) Are we suggesting ONLY spoken based categories at the categories activity?
+    (2) Why is there a search bar in the ChooseCategoryActivity? it does nothing.

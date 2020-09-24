@@ -13,8 +13,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.wikiaudio.AppData;
+import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
@@ -22,27 +26,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseCategoriesActivity extends AppCompatActivity {
-    private Wikipedia wikipedia;
-    private List<String> categories = new ArrayList<>();
-    private RecyclerView categoriesView;
-    private SearchView searchCategoriesView;
     private AppCompatActivity app;
-    private Button saveButton;
+    private AppCompatActivity activity;
+    private AppData appData;
+
+    private List<String> categories = new ArrayList<>();
     private int columnAmount;
-    private ArrayList<String> chosenCategories;
-    CategoryAdapter categoryAdapter;
-    ProgressBar loadingIcon;
+
+//    private ArrayList<String> chosenCategories;
+    private CategoryAdapter categoryAdapter;
+
+
+    //Views
+    private SearchView searchCategoriesView;
+    private RecyclerView categoriesView;
+    private Button saveButton;
+    private ProgressBar loadingIcon;
+
+    //Media bar
+    private MediaPlayerFragment mediaPlayerFragment;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_categories);
         app = this;
+        activity = this;
+        appData =((WikiAudioApp) getApplication()).getAppData();
         categoriesView = findViewById(R.id.categoriesView);
         searchCategoriesView = findViewById(R.id.searchCategorysView);
         saveButton = findViewById(R.id.saveChoice);
         loadingIcon = findViewById(R.id.progressBar5);
-        wikipedia = new Wikipedia(this);
+        Holder.wikipedia = new Wikipedia(this);
 
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -73,7 +89,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         });
 
         loadingIcon.setVisibility(View.VISIBLE);
-         wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {
+        Holder.wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {
              @Override
              public void onSuccess() {
                  Log.d("load status", "loaded categories");
@@ -97,5 +113,16 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
 
              }
          });
+
+        initMediaPlayer();
+    }
+
+    private void initMediaPlayer() {
+        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mediaPlayerFragment);
+        mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
+        mediaPlayerFragment.setAudioPlayer(mediaPlayer);
+        Holder.playlistsManager.setMediaPlayer(mediaPlayer);
+        // TODO get lastplaylist and play it if not null
     }
 }
