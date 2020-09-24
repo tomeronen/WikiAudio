@@ -18,14 +18,16 @@ import java.util.List;
 public class PlaylistsManager {
     private static final String TAG = "PlaylistsHandler";
 
-    private static PlaylistsManager instance = null;
+    private static AppCompatActivity activity;
 
-    private AppCompatActivity activity;
+    private static PlaylistsManager instance = null;
     private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
+
+    private static boolean categoryBasedPlaylistsWereCreated = false;
 
 
     private PlaylistsManager(AppCompatActivity activity) {
@@ -80,9 +82,12 @@ public class PlaylistsManager {
     }
 
     public void createCategoryBasedPlaylists(List<String> categories) {
-        if (categories != null && categories.size() > 0) {
-            for (String category : categories)
-                PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
+        if (!categoryBasedPlaylistsWereCreated) {
+            categoryBasedPlaylistsWereCreated = true;
+            if (categories != null && categories.size() > 0) {
+                for (String category : categories)
+                    PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
+            }
         }
     }
 
@@ -105,6 +110,10 @@ public class PlaylistsManager {
     public Wikipage getWikipageByPlaylistTitleAndIndex(String playlistTitle, int index) {
         Playlist playlist = getPlaylistByTitle(playlistTitle);
         return playlist.getWikipageByIndex(index);
+    }
+
+    public static AppCompatActivity getActivity() {
+        return activity;
     }
 
 }

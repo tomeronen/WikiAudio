@@ -114,32 +114,13 @@ public class MainActivity extends AppCompatActivity implements
         initMap();
         loadPlaylists();
         initMediaPlayer();
-
-//        testMediaPlayer();
     }
 
-    //    //  todo option B check if crasches app.
-//    @Override
-//    public void onResume(){
-//        super.onResume();
-//        if(tabs != null)
-//        {
-//                setUpTabs();
-//                loadPlaylists();
-//                return;
-//        }
+    @Override
+    public void onResume() {
+        super.onResume();
 
-//        for (int i =0; i < tabCount; i++)
-//        {
-//
-//        }
-//        if(chosenCategories != ((WikiAudioApp)getApplication()).getAppData().getChosenCategories())
-//        {
-//             reload playlists
-//            loadPlayLists();
-//        }
-
-    //        }
+    }
 
     /**
      * Pretty self-explanatory, really.
@@ -218,9 +199,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void loadPlaylists() {
         loadingIcon.setVisibility(View.VISIBLE);
-        final PlaylistsFragmentAdapter playListsFragmentAdapter =
-                new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        // check without this^^
         new Thread(() -> {
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
 

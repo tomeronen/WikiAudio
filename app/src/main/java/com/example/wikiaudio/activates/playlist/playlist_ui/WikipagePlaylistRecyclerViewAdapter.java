@@ -1,5 +1,7 @@
 package com.example.wikiaudio.activates.playlist.playlist_ui;
 
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.List;
 
 public class WikipagePlaylistRecyclerViewAdapter extends
         RecyclerView.Adapter<WikipagePlaylistRecyclerViewAdapter.WikiPageViewHolder> {
+    private static final String TAG = "WikipagePlaylistRecyclerViewAdapter";
 
     private Playlist playlist;
     private List<Wikipage> mValues;
@@ -34,17 +39,17 @@ public class WikipagePlaylistRecyclerViewAdapter extends
     public WikiPageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.wikipage_item, parent, false);
-
         return new WikiPageViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
         Wikipage wikipage = mValues.get(position);
-        holder.mItem = wikipage;
+        holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
         holder.descriptionView.setText(wikipage.getDescription());
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
+
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
             holder.locationButton.setVisibility(View.GONE);
         } else {
@@ -69,7 +74,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         public final TextView descriptionView;
         private ImageButton locationButton;
         private ImageButton playButton;
-        public Wikipage mItem;
+        public Wikipage wikipage;
         private boolean expanded = false;
 
         public WikiPageViewHolder(View view) {
@@ -79,17 +84,34 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             descriptionView = view.findViewById(R.id.description_view);
             locationButton = view.findViewById(R.id.locationButton);
             playButton = view.findViewById(R.id.playButton);
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    expanded = !expanded;
-                    if(expanded && mItem.getDescription() != null) {
-                        descriptionView.setText(mItem.getDescription());
-                        descriptionView.setVisibility(View.VISIBLE);
-                    } else {
-                        descriptionView.setVisibility(View.GONE);
-                    }
+
+            view.setOnClickListener(v -> {
+                expanded = !expanded;
+                if (expanded && wikipage.getDescription() != null) {
+                    descriptionView.setText(wikipage.getDescription());
+                    descriptionView.setVisibility(View.VISIBLE);
+                } else {
+                    descriptionView.setVisibility(View.GONE);
                 }
+            });
+
+            // When long clicking on an item in the playlist, it opens its wikipage
+            view.setOnLongClickListener((View.OnLongClickListener) v -> {
+                if (wikipage != null && playlist != null) {
+                    int index = playlist.getIndexByWikipage(wikipage);
+                    if (index > -1) {
+                        Intent WikipageIntent = new Intent(PlaylistsManager.getActivity(), WikipageActivity.class);
+                        WikipageIntent.putExtra("playlistTitle", playlist.getTitle());
+                        WikipageIntent.putExtra("index", index);
+                        PlaylistsManager.getActivity().startActivity(WikipageIntent);
+                    } else {
+                        Log.d(TAG, "onInfoWindowClick: index is bad");
+                    }
+                } else {
+                    Log.d(TAG, "onInfoWindowClick: playlist is null :(");
+                }
+
+            return false;
             });
         }
     }
