@@ -133,7 +133,7 @@ public interface WikiServer {
 
     @GET("/w/api.php?" +
             "action=query&" +
-            "prop=links|extlinks&" +
+            "prop=extlinks&" +
             "ellimit=10&"+
             "elprotocol=https&"+
             "format=json")
