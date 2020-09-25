@@ -23,7 +23,7 @@ public class Playlist {
 
     private List<Wikipage> wikipages = new ArrayList<>();
     private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
-    PlaylistFragment playlistFragment;
+    private PlaylistFragment playlistFragment;
 
     // Location related
     private boolean isLocationBased;
@@ -184,4 +184,5 @@ public class Playlist {
     public void addWikipage(Wikipage wikipage) {
         wikipages.add(wikipage);
     }
+
 }

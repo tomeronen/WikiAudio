@@ -18,6 +18,7 @@ import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WikipagePlaylistRecyclerViewAdapter extends
@@ -26,6 +27,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
     private Playlist playlist;
     private List<Wikipage> mValues;
+    private List<WikiPageViewHolder> wikiPageViewHolders = new ArrayList<>();
 
     public WikipagePlaylistRecyclerViewAdapter(Playlist playlist) {
         this.playlist = playlist;
@@ -39,25 +41,33 @@ public class WikipagePlaylistRecyclerViewAdapter extends
     public WikiPageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.wikipage_item, parent, false);
-        return new WikiPageViewHolder(view);
+        WikiPageViewHolder wikiPageViewHolder = new WikiPageViewHolder(view);
+        wikiPageViewHolders.add(wikiPageViewHolder);
+        return wikiPageViewHolder;
     }
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
         Wikipage wikipage = mValues.get(position);
+        holder.position = position;
         holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
         holder.descriptionView.setText(wikipage.getDescription());
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
+        holder.highlight.setVisibility(View.GONE);
 
+        //Shows and sets the location button if that wikipage has coordinates
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
             holder.locationButton.setVisibility(View.GONE);
         } else {
             holder.locationButton.setOnClickListener(v ->
                     Holder.locationHandler.markAndZoom(wikipage));
         }
-        holder.playButton.setOnClickListener(v ->
-                Holder.playlistsManager.getMediaPlayer().play(playlist, position));
+
+        if (Holder.playlistsManager != null && Holder.playlistsManager.getMediaPlayer() != null) {
+            holder.playButton.setOnClickListener(v ->
+                    Holder.playlistsManager.getMediaPlayer().play(playlist, position));
+        }
     }
 
     @Override
@@ -67,14 +77,35 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         return 0;
     }
 
+    public void highlightWikipage(int position) {
+        for (WikiPageViewHolder wikiPageViewHolder: wikiPageViewHolders) {
+            if (wikiPageViewHolder.position == position) {
+                wikiPageViewHolder.highlight.setVisibility( View.VISIBLE);
+            } else {
+                wikiPageViewHolder.highlight.setVisibility( View.GONE);
+            }
+        }
+    }
+
+    public void clearHighlights() {
+        for (WikiPageViewHolder wikiPageViewHolder: wikiPageViewHolders) {
+            wikiPageViewHolder.highlight.setVisibility( View.GONE);
+        }
+    }
+
 
     public class WikiPageViewHolder extends RecyclerView.ViewHolder {
+        // Views
         public final View mView;
         public final TextView titleView;
         public final TextView descriptionView;
+        public TextView highlight;
         private FloatingActionButton locationButton;
         private FloatingActionButton playButton;
+
+
         public Wikipage wikipage;
+        public int position;
         private boolean expanded = false;
 
         public WikiPageViewHolder(View view) {
@@ -84,6 +115,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             descriptionView = view.findViewById(R.id.description_view);
             locationButton = view.findViewById(R.id.locationButton);
             playButton = view.findViewById(R.id.playButton);
+            highlight = view.findViewById(R.id.highlight);
 
             view.setOnClickListener(v -> {
                 expanded = !expanded;

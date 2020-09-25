@@ -52,15 +52,28 @@ public class MediaPlayer {
             pause();
         }
         player.playWiki(wikipage);
+        isPlaying = true;
+
+        // zoom in on wikipage
+        if (wikipage.getLat() != null && wikipage.getLon() != null) {
+            Holder.locationHandler.markAndZoom(wikipage);
+        }
+
+        // highlight the wikipage on the playlist
+        if (playlist.getPlaylistFragment() != null) {
+            playlist.getPlaylistFragment().highlightWikipage(index);
+        }
+
+        // if it's a new playlist, then remove all highlights from the previous one
+        if (currentPlaylist != null && playlist != currentPlaylist && currentPlaylist.getPlaylistFragment() != null) {
+            currentPlaylist.getPlaylistFragment().clearHighlights();
+        }
+
+        //Update
         mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
         setCurrentPlaylist(playlist);
         setCurrentWikipage(wikipage);
         setCurrentPositionInPlaying(index);
-        isPlaying = true;
-        if (wikipage.getLat() != null && wikipage.getLon() != null) {
-            // zoom in if possible
-            Holder.locationHandler.markAndZoom(wikipage);
-        }
     }
 
     public void playCurrent() {
@@ -69,7 +82,7 @@ public class MediaPlayer {
         }
         if (currentWikipage != null) {
             play(currentPlaylist, currentPositionInPlaying);
-            //todo resume from minute x - not necessary
+            //todo resume from minute x - not  a must
         } else {
             Log.d(TAG, "playCurrent: can't play current null wikipage :)");
         }
