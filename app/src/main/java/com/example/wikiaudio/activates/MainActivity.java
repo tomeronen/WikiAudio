@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
@@ -125,9 +126,6 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         activity = this;
-        //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
-        //it needs an activity
-        Holder.getInstance(activity);
         chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
         appData =((WikiAudioApp) getApplication()).getAppData();
@@ -169,8 +167,7 @@ public class MainActivity extends AppCompatActivity implements
     private void loadPlaylists() {
         loadingIcon.setVisibility(View.VISIBLE);
         new Thread(() -> {
-            Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
-
+//            Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories); // (moved to splash)
             //Add all playlists as fragments to the adapter
             for (Playlist playlist: PlaylistsManager.getPlaylists())
                 playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
@@ -185,7 +182,17 @@ public class MainActivity extends AppCompatActivity implements
                     Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
                     counter++;
                 }
-                loadingIcon.setVisibility(GONE);
+
+                // when first playlist fragment has data stop loading icon.
+                playListsFragmentAdapter.getItem(0).
+                        wikipagePlayListRecyclerViewAdapter.
+                        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                    @Override
+                    public void onChanged() {
+                        super.onChanged();
+                        loadingIcon.setVisibility(GONE);
+                    }
+                });
             });
         }).start();
     }

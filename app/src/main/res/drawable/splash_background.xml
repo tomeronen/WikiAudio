@@ -7,7 +7,7 @@
     <item android:drawable="@android:color/background_dark" />
     <item
         android:id="@+id/logo"
-        android:drawable="@drawable/wiki_audio_round"
+        android:drawable="@drawable/wiki_audio_round_with_shine"
         android:gravity="center_vertical|center_horizontal"
         />
 
