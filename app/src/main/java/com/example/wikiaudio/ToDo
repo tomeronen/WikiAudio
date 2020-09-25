@@ -1,7 +1,6 @@
 TODO:
-(1) Regarding the wikipages that appear on the playlist fragment:
-    (a) Highlight the wikipage that is being played on the playlist fragment.
-(2) While listening to a playlist, make sure it continues even if the user enters another activity.
+(1)
+(2)
 (3) When loading wikipage, action buttons appear on top of image "animation".
 (4)
 (5) When fetching articles from the wiki server by category, set maximum of 20 pages.

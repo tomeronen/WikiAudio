@@ -36,7 +36,7 @@ public class PlaylistFragment extends Fragment {
                 new WikipagePlaylistRecyclerViewAdapter(playlist);
     }
 
-//    // TODO: Customize parameter initialization
+    //    // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static PlaylistFragment newInstance() {
         PlaylistFragment fragment = new PlaylistFragment();
@@ -55,8 +55,8 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
-        if(setBorder)
-        {
+
+        if(setBorder) {
             view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
             view.setPadding(0,8,0,8);
         }
@@ -84,6 +84,13 @@ public class PlaylistFragment extends Fragment {
         wikipagePlayListRecyclerViewAdapter.notifyDataSetChanged();
     }
 
+    public void highlightWikipage(int position) {
+        wikipagePlayListRecyclerViewAdapter.highlightWikipage(position);
+    }
+
+    public void clearHighlights() {
+        wikipagePlayListRecyclerViewAdapter.clearHighlights();
+    }
 
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;

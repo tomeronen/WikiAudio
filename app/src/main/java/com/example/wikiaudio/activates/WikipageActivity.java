@@ -21,8 +21,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.AppData;
-import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
@@ -87,6 +87,13 @@ public class WikipageActivity extends AppCompatActivity {
         initOnClickButtons();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null)
+            mediaPlayer.pauseForActivityChange();
+    }
+
     /**
      * Pretty self-explanatory, really. Will finish the activity if bad intents were given.
      */
@@ -126,7 +133,6 @@ public class WikipageActivity extends AppCompatActivity {
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
-        // TODO get lastplaylist and play it if not null
     }
 
     /**

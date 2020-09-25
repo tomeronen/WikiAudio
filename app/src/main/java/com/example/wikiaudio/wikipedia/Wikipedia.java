@@ -2,8 +2,8 @@ package com.example.wikiaudio.wikipedia;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.wikipedia.server.WikiServerHolder;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
@@ -55,14 +55,14 @@ public class Wikipedia {
      * @param workerListener what to do if task fails or is successful.
      */
     public void searchForPage(final String pageName,
-                           final List<PageAttributes> attributes,
-                           final List<Wikipage> listToFill,
-                           final WorkerListener workerListener)
+                              final List<PageAttributes> attributes,
+                              final List<Wikipage> listToFill,
+                              final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
             try {
                 listToFill.addAll(WikiServerHolder
-                                                .getInstance().searchPage(pageName, attributes));
+                        .getInstance().searchPage(pageName, attributes));
                 activ.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -233,8 +233,8 @@ public class Wikipedia {
      * @param workerListener
      */
     public void loadSpokenPagesNamesByCategories(final String category,
-                                            final List<String> result,
-                                            final WorkerListener workerListener)
+                                                 final List<String> result,
+                                                 final WorkerListener workerListener)
     {
         try {
             String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
@@ -340,7 +340,7 @@ public class Wikipedia {
                         workerListener.onSuccess();
                     }
                 });
-} catch (IOException e) {
+            } catch (IOException e) {
                 // task failed with a exception.
                 activ.runOnUiThread(new Runnable() {
                     @Override
@@ -363,9 +363,9 @@ public class Wikipedia {
      * @param workerListener callback when finished.
      */
     public void getWikipagesByName(final List<String> names,
-                            final List<PageAttributes> pageAttributes,
-                            final List<Wikipage> listToFill,
-                            final WorkerListener workerListener)
+                                   final List<PageAttributes> pageAttributes,
+                                   final List<Wikipage> listToFill,
+                                   final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
             try {
