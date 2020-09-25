@@ -208,8 +208,10 @@ public class Wikipedia {
     }
 
 
-
-
+    /**
+     * checks if we need to reload Categories.
+     * @return true if we need to reload or false if not.
+     */
     private boolean needToLoadCategories() {
         Date currentTime = Calendar.getInstance().getTime();
         Date lastLoadedCategories = appData.getLastLoadedCategories();
@@ -235,7 +237,6 @@ public class Wikipedia {
                                             final WorkerListener workerListener)
     {
         try {
-            List<String> pageNames = new ArrayList<>();
             String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
             Document doc = null;
             doc = Jsoup.connect(url).get();
