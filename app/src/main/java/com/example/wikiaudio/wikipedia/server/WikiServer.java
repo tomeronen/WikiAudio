@@ -37,7 +37,8 @@ public interface WikiServer {
     public Call<QuarryResponse> callGetPagesNearby(@Query("ggscoord") String geoCoordinates,
                                                    @Query("ggsradius") String radius,
                                                    @Query("prop") String prop,
-                                                   @Query("inprop") String inprop);
+                                                   @Query("inprop") String inprop,
+                                                   @Query("piprop") String imageToBring);
 
 
     @GET("/w/api.php?" +

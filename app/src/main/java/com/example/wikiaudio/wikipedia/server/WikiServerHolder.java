@@ -221,7 +221,8 @@ public class WikiServerHolder {
                 callGetPagesNearby(latitude + "|" + longitude,
                         Integer.toString(radius),
                         prop,
-                        inprop).execute();
+                        inprop,
+                        "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<Wikipage> WikipageList = parseQuarryResponse(response.body());
