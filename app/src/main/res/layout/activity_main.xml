@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-
-    <SearchView
-        android:id="@+id/search_bar"
-        android:layout_width="409dp"
-        android:layout_height="58dp"
-        android:iconifiedByDefault="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <ProgressBar
         android:id="@+id/progressBar4"
         style="?android:attr/progressBarStyle"
@@ -35,7 +26,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <fragment
+    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
@@ -63,10 +54,23 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/addCategoryButton"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:tabMode="scrollable"
         tools:layout_editor_absoluteY="58dp" />
+
+    <ImageButton
+        android:id="@+id/addCategoryButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintBottom_toTopOf="@+id/view_pager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:background="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintHorizontal_bias="1"
+        app:srcCompat="@android:drawable/ic_menu_edit" />
 
     <fragment
         android:id="@+id/mediaPlayerFragment"
@@ -77,6 +81,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragmentMap" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout >
