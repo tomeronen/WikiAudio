@@ -23,8 +23,8 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
-import com.example.wikiaudio.AppData;
-import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
@@ -119,7 +119,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
+        //todo what would we like to add? prob mediaplayer related
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null)
+            mediaPlayer.pauseForActivityChange();
     }
 
     /**

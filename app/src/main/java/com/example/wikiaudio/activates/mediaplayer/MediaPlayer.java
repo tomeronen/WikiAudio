@@ -3,10 +3,11 @@ package com.example.wikiaudio.activates.mediaplayer;
 import android.app.Activity;
 import android.util.Log;
 
-import com.example.wikiaudio.AppData;
-import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.CurrentlyPlayed;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.Locale;
@@ -20,24 +21,39 @@ public class MediaPlayer {
     private AppData appData;
     private Activity activity;
 
+    CurrentlyPlayed currentlyPlayed;
     private boolean isPlaying = false;
-    private Playlist currentPlaylist;
-    private Wikipage currentWikipage;
-    private int currentPositionInPlaying;
+
 
     public MediaPlayer(Activity activity, AppData appData, MediaPlayerFragment mediaPlayerFragment) {
         player = new WikipagePlayer(activity, Locale.ENGLISH, READING_SPEED); //todo might have an issue with the activity input
         mpFragment = mediaPlayerFragment;
         this.appData = appData;
         this.activity = activity;
+        checkForActivePlaylist();
+    }
+
+    private void checkForActivePlaylist() {
+        CurrentlyPlayed currentlyPlayed = appData.getCurrentlyPlayed();
+        if (currentlyPlayed != null) {
+            play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex());
+        } else {
+            Log.d(TAG, "checkForActivePlaylist: currentlyPlayed is null");
+        }
     }
 
     public boolean getIsPlaying() {
         return isPlaying;
     }
 
+    public void pauseForActivityChange() {
+        player.pausePlaying();
+    }
+
     public void pause() {
         player.pausePlaying();
+        CurrentlyPlayed currentlyPlayed = appData.getCurrentlyPlayed();
+        currentlyPlayed.setIsPlaying(false);
         isPlaying = false;
     }
 
@@ -51,37 +67,20 @@ public class MediaPlayer {
             isPlaying = false;
             pause();
         }
+
         player.playWiki(wikipage);
         isPlaying = true;
 
-        // zoom in on wikipage
-        if (wikipage.getLat() != null && wikipage.getLon() != null) {
-            Holder.locationHandler.markAndZoom(wikipage);
-        }
-
-        // highlight the wikipage on the playlist
-        if (playlist.getPlaylistFragment() != null) {
-            playlist.getPlaylistFragment().highlightWikipage(index);
-        }
-
-        // if it's a new playlist, then remove all highlights from the previous one
-        if (currentPlaylist != null && playlist != currentPlaylist && currentPlaylist.getPlaylistFragment() != null) {
-            currentPlaylist.getPlaylistFragment().clearHighlights();
-        }
-
-        //Update
-        mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
-        setCurrentPlaylist(playlist);
-        setCurrentWikipage(wikipage);
-        setCurrentPositionInPlaying(index);
+        updateMediaPlayerVars(playlist, index, wikipage);
+        displayWhatIsBeingPlayed(playlist, index, wikipage);
     }
 
     public void playCurrent() {
         if (isPlaying) {
             return;
         }
-        if (currentWikipage != null) {
-            play(currentPlaylist, currentPositionInPlaying);
+        if (currentlyPlayed != null) {
+            play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex());
             //todo resume from minute x - not  a must
         } else {
             Log.d(TAG, "playCurrent: can't play current null wikipage :)");
@@ -89,55 +88,27 @@ public class MediaPlayer {
     }
 
     public void playPrevious() {
-        if (!isCurrentValid()) {
+        if (!currentlyPlayed.isValid()) {
             Log.d(TAG, "playPrevious: current wikipage/playlist/index is null/invalid");
             return;
         }
-        if (currentPositionInPlaying < 1) {
+        if (currentlyPlayed.getIndex() == 0) {
             Log.d(TAG, "playPrevious: there's no previous wikipage for the first one :)");
             return;
         }
-        play(currentPlaylist, currentPositionInPlaying - 1);
+        play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex() - 1);
     }
 
     public void playNext() {
-        if (!isCurrentValid()) {
-            Log.d(TAG, "playPrevious: current wikipage/playlist/index is null/invalid");
+        if (!currentlyPlayed.isValid()) {
+            Log.d(TAG, "playNext: current wikipage/playlist/index is null/invalid");
             return;
         }
-        if (currentPositionInPlaying >= currentPlaylist.size() - 1) {
-            Log.d(TAG, "playPrevious: there's no next wikipage for the last one :)");
+        if (currentlyPlayed.getIndex() == currentlyPlayed.getPlaylist().size() - 1) {
+            Log.d(TAG, "playNext: there's no next wikipage for the last one :)");
             return;
         }
-        play(currentPlaylist, currentPositionInPlaying + 1);
-    }
-
-    private boolean isCurrentValid() {
-        return (currentWikipage != null &&  currentPlaylist != null && currentPositionInPlaying >= 0);
-    }
-
-    private void setCurrentPlaylist(Playlist playlist) {
-        currentPlaylist = playlist;
-    }
-
-    public Playlist getCurrentPlaylist() {
-        return currentPlaylist;
-    }
-
-    private void setCurrentWikipage(Wikipage wikipage) {
-        currentWikipage = wikipage;
-    }
-
-    public Wikipage getCurrentWikipage() {
-        return currentWikipage;
-    }
-
-    private void setCurrentPositionInPlaying(int position) {
-        currentPositionInPlaying = position;
-    }
-
-    public int getCurrentPositionInPlaying() {
-        return currentPositionInPlaying;
+        play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex() + 1);
     }
 
     public AppData getAppData() {
@@ -148,4 +119,40 @@ public class MediaPlayer {
         return activity;
     }
 
+    private void displayWhatIsBeingPlayed(Playlist playlist, int index, Wikipage wikipage) {
+        // zoom in on wikipage
+        if (wikipage.getLat() != null && wikipage.getLon() != null) {
+            Holder.locationHandler.markAndZoom(wikipage);
+        }
+        // highlight the wikipage on the playlist
+        if (playlist.getPlaylistFragment() != null) {
+            playlist.getPlaylistFragment().highlightWikipage(index);
+        }
+        // if it's a new playlist, then remove all highlights from the previous one
+        if (currentlyPlayed.isValid() && playlist != currentlyPlayed.getPlaylist() && currentlyPlayed.getPlaylist().getPlaylistFragment() != null) {
+            currentlyPlayed.getPlaylist().getPlaylistFragment().clearHighlights();
+        }
+    }
+
+    private void updateMediaPlayerVars(Playlist playlist, int index, Wikipage wikipage) {
+        if (mpFragment != null) {
+            mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
+        } else {
+            Log.d(TAG, "updateMediaPlayerVars: got null mpFragment");
+        }
+        currentlyPlayed = new CurrentlyPlayed(playlist, wikipage, index, true);
+
+        if (appData != null) {
+            appData.setCurrentlyPlayed(currentlyPlayed);
+        } else {
+            Log.d(TAG, "updateMediaPlayerVars: got null appData");
+        }
+    }
+
+    public Playlist getCurrentPlaylist() {
+        if (currentlyPlayed.isValid()) {
+            return currentlyPlayed.getPlaylist();
+        }
+        return null;
+    }
 }

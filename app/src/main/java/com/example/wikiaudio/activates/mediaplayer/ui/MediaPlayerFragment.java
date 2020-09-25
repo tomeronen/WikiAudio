@@ -69,6 +69,7 @@ public class MediaPlayerFragment extends Fragment {
         if (fragmentActivity == null) {
             Log.d(TAG, "initVars: null activity error");
         }
+        playButton.change(false);
     }
 
     /**
@@ -78,8 +79,6 @@ public class MediaPlayerFragment extends Fragment {
         player = mediaPlayer;
         if (player == null) {
             Log.d(TAG, "setAudioPlayer: got null audioPlayer");
-        } else {
-            playButton.change(player.getIsPlaying());
         }
     }
 
@@ -105,11 +104,11 @@ public class MediaPlayerFragment extends Fragment {
             }
             if (player.getIsPlaying()) {
                 player.pause();
+                playButton.change(true);
             } else {
                 player.playCurrent();
+                playButton.change(false);
             }
-            playButton.change(!player.getIsPlaying());
-            Log.d(TAG, "setOnClickButtonsForPlayer: is playing? " + player.getIsPlaying());
         });
 
         nextButton.setOnClickListener(v -> {

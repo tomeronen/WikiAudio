@@ -1,4 +1,4 @@
-package com.example.wikiaudio;
+package com.example.wikiaudio.data;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -28,4 +28,5 @@ public class Holder {
         }
         return instance;
     }
+
 }

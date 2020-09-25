@@ -2,7 +2,7 @@ package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
-import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
