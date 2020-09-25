@@ -121,7 +121,7 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> WikipageList = parseQuarryResponse(response.body());
+            List<Wikipage> WikipageList = parseQuarryResponse( response.body());
 //            List<Wikipage> WikipageList = new ArrayList<>();
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl))
@@ -153,7 +153,15 @@ public class WikiServerHolder {
                 prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
+            if(pageAttr.contains(audioUrl))
+            {
+                Response<Object> r= server.callGetAudioByName(namesToSearch).execute();
+                Object body = r.body();
+                Response<Object> r2= server.callGetAudioFile("File:John Fraser (botanist).ogg").execute();
+                Object body2 = r2.body();
+            }
             List<Wikipage> wikipagesRuslt = parseQuarryResponse(response.body());
+
             if(pageAttr.contains(content) ||
                     pageAttr.contains(audioUrl) ) {
                 List<Wikipage> badPages = new ArrayList<>();

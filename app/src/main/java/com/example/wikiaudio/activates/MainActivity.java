@@ -167,15 +167,15 @@ public class MainActivity extends AppCompatActivity implements
     private void loadPlaylists() {
         loadingIcon.setVisibility(View.VISIBLE);
         new Thread(() -> {
-//            Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories); // (moved to splash)
+            Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories); // (moved to splash)
             //Add all playlists as fragments to the adapter
             for (Playlist playlist: PlaylistsManager.getPlaylists())
                 playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
+            ViewPager viewPager = findViewById(R.id.view_pager);
+            viewPager.setAdapter(playListsFragmentAdapter);
+            tabs = findViewById(R.id.tabs);
 
             activity.runOnUiThread(() -> {
-                ViewPager viewPager = findViewById(R.id.view_pager);
-                viewPager.setAdapter(playListsFragmentAdapter);
-                tabs = findViewById(R.id.tabs);
                 tabs.setupWithViewPager(viewPager);
                 int counter = 0;
                 for (Playlist playlist: PlaylistsManager.getPlaylists()) {

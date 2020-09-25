@@ -29,7 +29,7 @@ public interface WikiServer {
 //https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|description|info&inprop=url|watchers&pithumbsize=144&generator=geosearch&ggsradius=10000&ggslimit=10&format=json&ggscoord=32.443814|34.892546
     @GET("/w/api.php?" +
             "action=query&" + // get data from wikipedia
-            "prop=coordinates|info|description|extracts|pageviews&" + // properties to get for queried pages
+            "prop=coordinates|info|description|extracts|pageviewsֻ&" + // properties to get for queried pages
             "generator=geosearch&" +
             "ggslimit=10&" + // max number of pages to query (50 max)
             "inprop=url&" +
@@ -120,4 +120,23 @@ public interface WikiServer {
             "&meta=tokens" +
             "&format=json")
     Call<QuarryResponse> getCsrfToken();
+
+
+    @GET("/w/api.php?" +
+            "action=query&" +
+            "prop=info|extlinks|links&" +
+            "inprop=url&" +
+            "generator=links&"+
+            "gplnamespace=6&" +
+            "format=json") // format for queried pages (json recommended)
+    public Call<Object> callGetAudioByName(@Query("titles") String pageName);
+
+    @GET("/w/api.php?" +
+            "action=query&" +
+            "prop=links|extlinks&" +
+            "ellimit=10&"+
+            "elprotocol=https&"+
+            "format=json")
+    public Call<Object> callGetAudioFile(@Query("titles") String pageName);
+
 }

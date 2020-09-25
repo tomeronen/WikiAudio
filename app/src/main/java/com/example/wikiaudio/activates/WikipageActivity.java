@@ -196,6 +196,8 @@ public class WikipageActivity extends AppCompatActivity {
                 playButton.performClick();
             }
         });
+
+
     }
 
     /**
@@ -260,8 +262,14 @@ public class WikipageActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+            public boolean onResourceReady(Drawable resource, Object model,
+                                           Target<Drawable> target,
+                                           DataSource dataSource,
+                                           boolean isFirstResource) {
                 fadeOut(articleImage);
+                articleImage.setOnClickListener(v -> {
+                    articleImage.setVisibility(View.GONE);
+                });
                 return false;
             }
         }).into(articleImage);
