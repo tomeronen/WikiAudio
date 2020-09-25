@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,14 +27,12 @@ import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -56,7 +53,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
+import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -68,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements
 
     //For logs
     private static final String TAG = "MainActivity";
-    private static final int CHOOSE_CATEGORY_TAG = 10172 ;
 
     private AppCompatActivity activity;
 
@@ -84,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     //Playlist related
-    private PlaylistsFragmentAdapter playlistsFragmentAdapter;
+    private PlaylistsFragmentAdapter playListsFragmentAdapter;
 
     //MediaPlayer related
     private MediaPlayerFragment mediaPlayerFragment;
@@ -96,15 +92,10 @@ public class MainActivity extends AppCompatActivity implements
 
     //Views
     private ImageButton chooseCategoriesButton;
-    private SearchView searchBar;
     private TabLayout tabs;
     private ProgressBar loadingIcon;
-    private MediaPlayerFragment mediaPlayerFragment;
-    private PlaylistFragment searchResultFragment;
-    private ViewPager viewPager;
 
 
-    private PlaylistsFragmentAdapter playListsFragmentAdapter;
     private AppData appData;
     private SupportMapFragment mapFragment;
 
@@ -118,7 +109,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-        setOnClickButtons();
         initMap();
         loadPlaylists();
         initMediaPlayer();
@@ -151,11 +141,7 @@ public class MainActivity extends AppCompatActivity implements
                         == PackageManager.PERMISSION_GRANTED;
         //Views
         chooseCategoriesButton = findViewById(R.id.chooseCategories);
-        searchBar = findViewById(R.id.search_bar);
-        searchBar.setIconified(true);
-        searchBar.onActionViewCollapsed();
         loadingIcon = findViewById(R.id.progressBar4);
-        viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
     }
 
@@ -176,60 +162,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * For setting the buttons (choose categories, search bar, etc.)
-     */
-    private void setOnClickButtons() {
-        chooseCategories.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent chooseCategoriesIntent =  new Intent(activity,
-                        ChooseCategoriesActivity.class);
-                startActivityForResult(chooseCategoriesIntent, CHOOSE_CATEGORY_TAG);
-            }
-        });
-
-        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Playlist playlist = Holder.playlistsHandler.createSearchBasedPlaylist(query);
-                searchResultFragment = playlist.getPlaylistFragment();
-                searchResultFragment.showBorder(true);
-                searchResultVisibility(true, searchResultFragment);
-                searchBar.onActionViewCollapsed();
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-    }
-
-    private void searchResultVisibility(boolean bool, PlaylistFragment searchResultFragment) {
-        if(searchResultFragment == null)
-        {
-            return;
-        }
-        int othersAreVisible;
-        if (bool) {
-            getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .addToBackStack(null)
-                    .replace(R.id.search_result_placeholder, searchResultFragment)
-                    .commit();
-            othersAreVisible = GONE;
-        } else {
-            searchResultFragment.getView().setVisibility(GONE);
-            othersAreVisible = VISIBLE;
-        }
-        viewPager.setVisibility(othersAreVisible);
-        tabs.setVisibility(othersAreVisible);
-        chooseCategories.setVisibility(othersAreVisible);
-        mapFragment.getView().setVisibility(othersAreVisible);
-        findViewById(R.id.mapBackground).setVisibility(othersAreVisible);
-    }
 
     /**
      * Creates category based playlists and Loads the playlists fragment
@@ -245,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements
 
             activity.runOnUiThread(() -> {
                 ViewPager viewPager = findViewById(R.id.view_pager);
-                viewPager.setAdapter(playlistsFragmentAdapter);
+                viewPager.setAdapter(playListsFragmentAdapter);
                 tabs = findViewById(R.id.tabs);
                 tabs.setupWithViewPager(viewPager);
                 int counter = 0;
@@ -472,12 +404,6 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
     }
 
-    private boolean needToReloadTabs() {
-        // todo change to set? what happens if we take down and add again. order changes.
-        int tabCount = tabs.getTabCount();
-        return tabCount != chosenCategories.size();
-    }
-
     private void cleanData() {
         WorkManager.getInstance(this).cancelAllWork();
         ((WikiAudioApp) getApplication()).getAppData().saveChosenCategories(new ArrayList<>());
@@ -598,31 +524,7 @@ public class MainActivity extends AppCompatActivity implements
 //
 //
 //    }
-    @Override
-    public void onBackPressed() {
 
-        if(searchResultFragment != null &&
-                searchResultFragment.getView() != null &&
-                    searchResultFragment.getView().getVisibility() == VISIBLE)
-        {
-            searchResultVisibility(false, searchResultFragment);
-        }
-        else
-        {
-            super.onBackPressed();
-        }
-    }
-
-    private boolean categoryInPlaylists(String category) {
-        for(int i = 0; i < PlaylistsHandler.getPlaylists().size(); ++i)
-        {
-            if(PlaylistsHandler.getPlaylists().get(i).getTitle().equals(category))
-            {
-                return true;
-            }
-        }
-        return false; // category was not found.
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -639,7 +541,8 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
+
+
             }
         }
     }//onActivityResult
