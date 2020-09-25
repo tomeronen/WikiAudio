@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@android:color/white" />
+
+
+
+    <item android:drawable="@android:color/background_dark" />
     <item
         android:id="@+id/logo"
-        android:drawable="@mipmap/ic_launcher"
+        android:drawable="@drawable/wiki_audio_round"
         android:gravity="center_vertical|center_horizontal"
         />
-    <item
-        android:drawable="@drawable/welcome"
-        android:top="150dp"
-        android:gravity="center_vertical|center_horizontal"
-        />
+
 
 </layer-list>
