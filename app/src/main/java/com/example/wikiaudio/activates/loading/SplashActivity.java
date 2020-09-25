@@ -9,16 +9,25 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wikiaudio.activates.MainActivity;
 
 public class SplashActivity extends AppCompatActivity {
+    private static final int DELAY_IN_MILISEC = 2500;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent main = new Intent(SplashActivity.this, MainActivity.class);
-                startActivity(main);
-                finish();
-            }
-        }, 2500);
+
+        //todo worth checking MERGYMERG
+//        //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
+//        //it needs an activity
+//        Holder.getInstance(this);
+//        List<String> chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
+
+//        // start loading categories playlists in splash screen
+//        new Thread(()
+//                -> Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories)).start();
+
+        new Handler().postDelayed(() -> {
+            Intent main = new Intent(SplashActivity.this, MainActivity.class);
+            startActivity(main);
+            finish();
+        }, DELAY_IN_MILISEC);
     }
 }

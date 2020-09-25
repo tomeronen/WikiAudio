@@ -2,6 +2,7 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,28 +14,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import androidx.work.WorkManager;
 
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
+import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
-import com.example.wikiaudio.activates.search_page.SearchPageActivity;
-import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -54,6 +53,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
+
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationClickListener,
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
 
     private AppCompatActivity activity;
+    private AppData appData;
 
     //Google services related (error for handling when the google service version is incorrect)
     private static final int ERROR_DIALOG_REQUEST = 9002;
@@ -76,34 +78,25 @@ public class MainActivity extends AppCompatActivity implements
     private Boolean isGPSEnabled = false;
     private Boolean mapWasInit= false;
     private GoogleMap mMap;
-
+    private SupportMapFragment mapFragment;
 
     //Playlist related
-    private PlaylistsFragmentAdapter playlistsFragmentAdapter;
+    private PlaylistsFragmentAdapter playListsFragmentAdapter;
 
     //MediaPlayer related
     private MediaPlayerFragment mediaPlayerFragment;
-    static private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer;
+
+    //Views
+    private ImageButton chooseCategoriesButton;
+    private TabLayout tabs;
+    private ProgressBar loadingIcon;
+    private ViewPager viewPager;
 
     // idk
     private ArrayList<PlaylistFragment> playLists = new ArrayList<>();
     private List<String> chosenCategories;
 
-    //Views
-    private ImageButton chooseCategoriesButton;
-    private SearchView searchBar;
-    private TabLayout tabs;
-    private ProgressBar loadingIcon;
-    private ViewPager viewPager;
-
-
-    private PlaylistsFragmentAdapter playListsFragmentAdapter;
-    private AppData appData;
-
-
-    static public MediaPlayer getap(){
-        return mediaPlayer;
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 //        cleanData(); //todo if wanted for debugging.
@@ -134,12 +127,12 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initVars() {
         activity = this;
+        appData =((WikiAudioApp) getApplication()).getAppData();
         //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
         //it needs an activity
         Holder.getInstance(activity);
         chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
-        appData =((WikiAudioApp) getApplication()).getAppData();
 
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -150,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements
                         == PackageManager.PERMISSION_GRANTED;
         //Views
         chooseCategoriesButton = findViewById(R.id.chooseCategories);
-        searchBar = findViewById(R.id.search_bar);
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
@@ -161,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void initMap() {
         if (isGoogleServicesOK()) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.fragmentMap);
             if (mapFragment == null) {
                 Log.d(TAG, "initMap: mapFragment is null");
@@ -177,28 +169,11 @@ public class MainActivity extends AppCompatActivity implements
      * For setting the buttons (choose categories, search bar, etc.)
      */
     private void setOnClickButtons() {
-        chooseCategoriesButton.setOnClickListener(v -> {
-            Intent chooseCategoriesIntent =  new Intent(activity,
-                    ChooseCategoriesActivity.class);
-            startActivity(chooseCategoriesIntent);
-        });
-
-        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                Intent searchWikipageIntent =
-                        new Intent(activity, SearchPageActivity.class);
-                searchWikipageIntent.putExtra(SearchPageActivity.SEARCH_TAG,
-                        query);
-                startActivity(searchWikipageIntent);
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+//        chooseCategoriesButton.setOnClickListener(v -> {
+//            Intent chooseCategoriesIntent =  new Intent(activity,
+//                    ChooseCategoriesActivity.class);
+//            startActivity(chooseCategoriesIntent);
+//        });
     }
 
     /**
@@ -207,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements
     private void loadPlaylists() {
         loadingIcon.setVisibility(View.VISIBLE);
         new Thread(() -> {
+            //todo comment below when checking splash upload MERGYMERG
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
 
             //Add all playlists as fragments to the adapter
@@ -220,10 +196,23 @@ public class MainActivity extends AppCompatActivity implements
                 tabs.setupWithViewPager(viewPager);
                 int counter = 0;
                 for (Playlist playlist: PlaylistsManager.getPlaylists()) {
+                    if(counter >= tabs.getTabCount()){
+                        break;
+                    }
                     Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
                     counter++;
                 }
-                loadingIcon.setVisibility(View.GONE);
+
+                // when first playlist fragment has data stop loading icon.
+                playListsFragmentAdapter.getItem(0).
+                        wikipagePlayListRecyclerViewAdapter.
+                        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                            @Override
+                            public void onChanged() {
+                                super.onChanged();
+                                loadingIcon.setVisibility(View.GONE);
+                            }
+                        });
             });
         }).start();
     }
@@ -461,6 +450,25 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_CATEGORY_TAG) {
+            if(resultCode == Activity.RESULT_OK){
+                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
+                if(dataSaved)
+                {
+                    chosenCategories = ((WikiAudioApp) getApplication())
+                            .getAppData().getChosenCategories();
+                    this.loadPlaylists();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // todo? why is this empty
+            }
+        }
+    }
+
 //    private void testUploadFile() {
 //        FileManager fileManager = new FileManager(this);
 //        String fp = fileManager.getFilePath("BenDeLaCreme",
@@ -499,73 +507,5 @@ public class MainActivity extends AppCompatActivity implements
 //                    }
 //                }
 //        );
-//    }
-
-//    private void testMediaPlayerFragment() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                String category = "Biology";
-//                final List<String> results = new ArrayList<>();
-//                wikipedia.loadSpokenPagesNamesByCategories(category,
-//                        results,
-//                        new WorkerListener() {
-//                            @Override
-//                            public void onSuccess() {
-//                                final List<Wikipage> playableList = new ArrayList<>();
-//                                int numberOfPagesTryLoading = 0;
-//                                for(final String pageName: results) {
-//                                    numberOfPagesTryLoading++;
-//                                    final Wikipage wikipage = new Wikipage();
-//                                    ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
-//                                    pageAttributes.add(PageAttributes.audioUrl);
-//                                    pageAttributes.add(PageAttributes.content);
-//                                    final int finalNumberOfPagesTryLoading = numberOfPagesTryLoading;
-//                                    wikipedia.getWikipage(pageName,
-//                                            pageAttributes,
-//                                            wikipage,
-//                                            new WorkerListener() {
-//                                                @Override
-//                                                public void onSuccess() {
-//                                                    Toast
-//                                                            .makeText(activity,
-//                                                                    "loaded" + playableList.size(),
-//                                                                    Toast.LENGTH_SHORT);
-//                                                    wikipage.setTitle(pageName);
-//                                                    playableList.add(wikipage);
-//                                                    if(finalNumberOfPagesTryLoading == results.size()) {
-//                                                        Toast
-//                                                                .makeText(activity,
-//                                                                        "all results began loading" + pageName,
-//                                                                        Toast.LENGTH_SHORT);
-//                                                        // all result were fully loaded.
-//                                                        mediaPlayerFragment.updatePlayList(playableList, false);
-//                                                    }
-//                                                }
-//
-//                                                @Override
-//                                                public void onFailure() {
-//                                                    Toast
-//                                                            .makeText(activity,
-//                                                                    "something went wrong with loading" + pageName,
-//                                                                    Toast.LENGTH_SHORT)
-//                                                            .show();
-//
-//                                                }
-//                                            });
-//
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onFailure() {
-//
-//                            }
-//                        }
-//                );
-//            }
-//        }).start();
-//
-//
 //    }
 }

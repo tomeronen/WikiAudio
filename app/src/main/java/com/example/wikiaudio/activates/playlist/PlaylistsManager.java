@@ -86,7 +86,10 @@ public class PlaylistsManager {
             categoryBasedPlaylistsWereCreated = true;
             if (categories != null && categories.size() > 0) {
                 for (String category : categories)
-                    PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
+                    if(getPlaylistByTitle(category) == null) {
+                    // the category was not yet created.
+                        PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
+                    }
             }
         }
     }
@@ -116,4 +119,14 @@ public class PlaylistsManager {
         return activity;
     }
 
+    /**
+     * creates a playlist that is the wikipage search result of query value.
+     * @param query the value to search.
+     * @return the playlist created.
+     */
+    public Playlist createSearchBasedPlaylist(String query) {
+        // todo (S.M)
+        return new Playlist(query, "search");
+
+    }
 }

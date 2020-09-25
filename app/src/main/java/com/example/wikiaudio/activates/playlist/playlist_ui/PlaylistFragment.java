@@ -21,7 +21,8 @@ public class PlaylistFragment extends Fragment {
     private static final String TAG = "PlaylistFragment";
 
     private Playlist playlist;
-    private WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
+    public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
+    private boolean setBorder = false;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -55,6 +56,11 @@ public class PlaylistFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
 
+        if(setBorder) {
+            view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
+            view.setPadding(0,8,0,8);
+        }
+
         //Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
@@ -84,5 +90,14 @@ public class PlaylistFragment extends Fragment {
 
     public void clearHighlights() {
         wikipagePlayListRecyclerViewAdapter.clearHighlights();
+    }
+
+    public void setPlaylist(Playlist playlist) {
+        this.playlist = playlist;
+        playlist.setPlaylistFragment(this);
+    }
+
+    public void showBorder(boolean b) {
+        this.setBorder = b;
     }
 }

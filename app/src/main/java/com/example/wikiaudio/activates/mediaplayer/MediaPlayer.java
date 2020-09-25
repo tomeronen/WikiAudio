@@ -35,7 +35,7 @@ public class MediaPlayer {
 
     private void checkForActivePlaylist() {
         CurrentlyPlayed currentlyPlayed = appData.getCurrentlyPlayed();
-        if (currentlyPlayed != null) {
+        if (currentlyPlayed != null && currentlyPlayed.getIsPlaying()) {
             play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex());
         } else {
             Log.d(TAG, "checkForActivePlaylist: currentlyPlayed is null");

@@ -1,5 +1,7 @@
 package com.example.wikiaudio.activates.choose_categories;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,12 +15,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
@@ -73,6 +75,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
                 // what to do when a category is pressed.
             }
         };
+
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,10 +84,17 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
                     ((WikiAudioApp) getApplication())
                             .getAppData()
                             .saveChosenCategories(categoryAdapter._categoriesChosen);
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("dataSaved", true);
+                    setResult(Activity.RESULT_OK,returnIntent);
+                    finish();
                 }
+                Intent returnIntent = new Intent();
+                setResult(Activity.RESULT_CANCELED, returnIntent);
                 finish();
             }
         });
+
 
         loadingIcon.setVisibility(View.VISIBLE);
         Holder.wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {

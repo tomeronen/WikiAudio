@@ -10,6 +10,8 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Cross application data
@@ -28,7 +30,7 @@ public class AppData {
     private final Gson gson = new Gson();
 
     //category related
-    private static List<String> chosenCategories;
+    private static SortedSet<String> chosenCategories;
 
     //playlist related
     public CurrentlyPlayed currentlyPlayed;
@@ -44,9 +46,9 @@ public class AppData {
 
         //Categories
         String chosenCategoriesString = sp.getString(CHOSEN_CATEGORIES_SP_TAG, "");
-        chosenCategories = gson.fromJson(chosenCategoriesString, List.class);
+        chosenCategories = gson.fromJson(chosenCategoriesString, SortedSet.class);
         if(chosenCategories == null) {
-            chosenCategories = new ArrayList<>();
+            chosenCategories = new TreeSet<>();
         }
 
         //Playlist
@@ -67,7 +69,7 @@ public class AppData {
     {
         if(newChosenCategories != null)
         {
-            chosenCategories = newChosenCategories;
+            chosenCategories = new TreeSet<>(newChosenCategories);
             String chosenCategoriesString = gson.toJson(newChosenCategories);
             sp.edit().putString(CHOSEN_CATEGORIES_SP_TAG, chosenCategoriesString).apply();
         }
@@ -76,9 +78,9 @@ public class AppData {
     public List<String> getChosenCategories() {
         if(chosenCategories == null)
         {
-            chosenCategories = new ArrayList<>();
+            chosenCategories = new TreeSet<>();
         }
-        return chosenCategories;
+        return new ArrayList<>(chosenCategories);
     }
 
     public Date getLastLoadedCategories() {

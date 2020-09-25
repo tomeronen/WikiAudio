@@ -2,8 +2,8 @@ package com.example.wikiaudio.wikipedia;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.wikipedia.server.WikiServerHolder;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
@@ -55,14 +55,14 @@ public class Wikipedia {
      * @param workerListener what to do if task fails or is successful.
      */
     public void searchForPage(final String pageName,
-                           final List<PageAttributes> attributes,
-                           final List<Wikipage> listToFill,
-                           final WorkerListener workerListener)
+                              final List<PageAttributes> attributes,
+                              final List<Wikipage> listToFill,
+                              final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
             try {
                 listToFill.addAll(WikiServerHolder
-                                                .getInstance().searchPage(pageName));
+                        .getInstance().searchPage(pageName, attributes));
                 activ.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -208,8 +208,10 @@ public class Wikipedia {
     }
 
 
-
-
+    /**
+     * checks if we need to reload Categories.
+     * @return true if we need to reload or false if not.
+     */
     private boolean needToLoadCategories() {
         Date currentTime = Calendar.getInstance().getTime();
         Date lastLoadedCategories = appData.getLastLoadedCategories();
@@ -231,11 +233,10 @@ public class Wikipedia {
      * @param workerListener
      */
     public void loadSpokenPagesNamesByCategories(final String category,
-                                            final List<String> result,
-                                            final WorkerListener workerListener)
+                                                 final List<String> result,
+                                                 final WorkerListener workerListener)
     {
         try {
-            List<String> pageNames = new ArrayList<>();
             String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
             Document doc = null;
             doc = Jsoup.connect(url).get();
@@ -339,7 +340,7 @@ public class Wikipedia {
                         workerListener.onSuccess();
                     }
                 });
-} catch (IOException e) {
+            } catch (IOException e) {
                 // task failed with a exception.
                 activ.runOnUiThread(new Runnable() {
                     @Override
@@ -361,25 +362,39 @@ public class Wikipedia {
      * @param listToFill the list to fill with the results.
      * @param workerListener callback when finished.
      */
-    public void getWikipages(final List<String> names,
-                            final List<PageAttributes> pageAttributes,
-                            final List<Wikipage> listToFill,
-                            final WorkerListener workerListener)
+    public void getWikipagesByName(final List<String> names,
+                                   final List<PageAttributes> pageAttributes,
+                                   final List<Wikipage> listToFill,
+                                   final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
-            for (String name : names) {
-                try {
-                    listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-                } catch (IOException e) {
-                    // task failed with a exception.
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                }
+            try {
+                List<Wikipage> pages = WikiServerHolder
+                        .getInstance().getPagesByName(names, pageAttributes);
+                listToFill.addAll(pages);
+            } catch (IOException e) {
+                // task failed with a exception.
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
             }
+            //todo option B one page at a time. overall longer. user might see some faster. (S.M)
+
+//                    for (String name : names) {
+//                        try {
+//                            listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+//                        } catch (IOException e) {
+//                            // task failed with a exception.
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    workerListener.onFailure();
+//                                }
+//                            });
+//                        }
             activ.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
