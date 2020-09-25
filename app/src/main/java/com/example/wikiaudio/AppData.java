@@ -25,7 +25,7 @@ public class AppData {
     private SharedPreferences sp;
 
     //category related
-    private static List<String> chosenCategories;
+    private static SortedSet<String> chosenCategories;
 
     //playlist related
     private Playlist lastPlayedPlaylist;
