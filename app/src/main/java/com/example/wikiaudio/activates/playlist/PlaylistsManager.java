@@ -116,4 +116,14 @@ public class PlaylistsManager {
         return activity;
     }
 
+    /**
+     * creates a playlist that is the wikipage search result of query value.
+     * @param query the value to search.
+     * @return the playlist created.
+     */
+    public Playlist createSearchBasedPlaylist(String query) {
+        // todo (S.M)
+        return new Playlist(query, "search");
+
+    }
 }
