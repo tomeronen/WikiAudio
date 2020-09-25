@@ -179,7 +179,10 @@ public class MainActivity extends AppCompatActivity implements
                 tabs.setupWithViewPager(viewPager);
                 int counter = 0;
                 for (Playlist playlist: PlaylistsManager.getPlaylists()) {
-                    Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
+                    if(counter < tabs.getTabCount())
+                    {
+                        Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
+                    }
                     counter++;
                 }
 
