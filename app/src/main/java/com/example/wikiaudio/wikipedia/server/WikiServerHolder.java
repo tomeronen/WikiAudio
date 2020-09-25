@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.LinkedTreeMap;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +19,6 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,6 @@ import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.url;
 import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.watchers;
 
 public class WikiServerHolder {
-    static final HashMap<PageAttributes, String> attributesStringMap = new HashMap<>();
     private static final String BASE_URL = "https://en.wikipedia.org";
     private static WikiServerHolder instance = null;
     private final WikiServer server;
@@ -99,35 +98,17 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.searchPage(pageName, prop, inprop).execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> WikipageList = parseSearchResponse(response.body());
-            return WikipageList;
+            List<Wikipage> wikipages = parseQuarryResponse(response.body());
+            if(pageAttr.contains(content) ||
+                    pageAttr.contains(audioUrl)) {
+                for (Wikipage wikipage : wikipages) {
+
+                    WikiHtmlParser.parseAdvanceAttr(wikipage);
+                }
+            }
+            return wikipages;
         } else {
             // task failed.
-            throw new IOException();
-        }
-    }
-
-    /**
-     * parses a QuarryResponse to List of Wikipage.
-     * @param searchResponse the Response to parse.
-     * @return the list of wikipages which data is in the response.
-     * @throws IOException if got a bad format response throws a IOException, something went wrong
-     * with the communication with wikipedia servers. (can also be our fault)
-     */
-    private List<Wikipage> parseSearchResponse(QuarryResponse searchResponse)
-            throws IOException {
-        if (searchResponse != null
-                && searchResponse.query != null
-                && searchResponse.query.search != null) {
-            List<Wikipage> resultList = new ArrayList<>();
-            for(QuarryResponse.PageData pageData: searchResponse.query.search)
-            {
-                resultList.add(parseWikiData(pageData));
-            }
-            return resultList;
-        }
-        else
-        {
             throw new IOException();
         }
     }
@@ -143,8 +124,7 @@ public class WikiServerHolder {
             List<Wikipage> WikipageList = parseQuarryResponse(response.body());
 //            List<Wikipage> WikipageList = new ArrayList<>();
             if(pageAttr.contains(content) ||
-                    pageAttr.contains(audioUrl) ||
-                    pageAttr.contains(thumbnail))
+                    pageAttr.contains(audioUrl))
             {
                 WikiHtmlParser.parseAdvanceAttr(WikipageList.get(0));
             }
@@ -155,7 +135,59 @@ public class WikiServerHolder {
         }
     }
 
+    /**
+     * find Wikipages objects by there names.
+     * @param names the name of the wikipages to bring.
+     * @param pageAttr the Attributes to bring on each page.
+     * @return a list of Wikipages based on the names given.
+     * @throws IOException if task fails.
+     */
+    public List<Wikipage> getPagesByName(List<String> names,
+                                         List<PageAttributes> pageAttr)
+            throws IOException
+    {
+        String prop = getQueryProp(pageAttr);
+        String inprop = getQueryInProp(pageAttr);
+        String namesToSearch = getNamesToSearch(names);
+        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+                prop, inprop, "original|thumbnail").execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
+            List<Wikipage> wikipagesRuslt = parseQuarryResponse(response.body());
+            if(pageAttr.contains(content) ||
+                    pageAttr.contains(audioUrl) ) {
+                List<Wikipage> badPages = new ArrayList<>();
+                for (Wikipage wikipage : wikipagesRuslt) {
+                    try {
+                        WikiHtmlParser.parseAdvanceAttr(wikipage);
+                    } catch (HttpStatusException e) {
+                        Log.e("http error",
+                                "something went wrong with bringing " +
+                                        "advance Attributes of page:" + wikipage.getTitle());
+                        badPages.add(wikipage);
+                    }
+                }
+                wikipagesRuslt.removeAll(badPages); // todo do we want to remove if failed?
+            }
+            return wikipagesRuslt;
+        } else {
+            // task failed.
+            throw new IOException();
+        }
+    }
 
+    private String getNamesToSearch(List<String> names) {
+        StringBuilder result = new StringBuilder();
+        for(String name:names)
+        {
+            result.append(name).append("|");
+        }
+        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
+        {
+            result = new StringBuilder(result.substring(0, result.length() - 1));
+        }
+        return result.toString();
+    }
 
     List<Wikipage> getPagesByCategory(String categoryName, List<PageAttributes> pageAttr)
             throws IOException
@@ -194,8 +226,7 @@ public class WikiServerHolder {
             // task was successful.
             List<Wikipage> WikipageList = parseQuarryResponse(response.body());
             if(pageAttr.contains(content) ||
-                    pageAttr.contains(audioUrl) ||
-                    pageAttr.contains(thumbnail))
+                    pageAttr.contains(audioUrl))
             {
                 for(Wikipage wikipage: WikipageList)
                 {
