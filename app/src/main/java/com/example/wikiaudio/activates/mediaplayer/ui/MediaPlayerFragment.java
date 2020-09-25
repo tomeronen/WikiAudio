@@ -26,6 +26,7 @@ import com.ohoussein.playpause.PlayPauseView;
 public class MediaPlayerFragment extends Fragment {
     private static final String TAG = "MediaPlayerFragment";
     private static final float READING_SPEED = 1f;
+    public static final int CHOOSE_CATEGORY_TAG = 1072;
 
     //Vars
     private View fragmentInflated;
@@ -150,10 +151,12 @@ public class MediaPlayerFragment extends Fragment {
             //if we're in SearchPageActivity, we change nothing
             if (activeActivity.getLocalClassName().equals("activates.search_page.SearchPageActivity")) {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on SearchPageActivity");
+               ((SearchPageActivity) getActiveActivity()).openSearchBar();
             } else {
                 // ow, redirects to the SearchPageActivity
-                Intent i = new Intent(player.getActivity(), SearchPageActivity.class);
-                startActivity(i);
+                Intent searchPageIntent =  new Intent(player.getActivity(),
+                        SearchPageActivity.class);
+                startActivityForResult(searchPageIntent, CHOOSE_CATEGORY_TAG);
             }
         });
 

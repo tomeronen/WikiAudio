@@ -6,42 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".activates.search_page.SearchPageActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchResults"
+    <FrameLayout
+        android:id="@+id/search_result_placeholder"
+        android:name="com.example.wikiaudio.activates.playlist_ui.PlaylistFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/mediaPlayerFragment"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@+id/search_bar_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintTop_toBottomOf="@+id/search_title" />
+
 
     <SearchView
         android:id="@+id/search_bar_view"
         android:layout_width="match_parent"
         android:layout_height="58dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar_view" />
-
-    <ProgressBar
-        android:id="@+id/progressBar2"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:iconifiedByDefault="false"
+        android:layoutDirection="rtl"
+        android:queryHint="Search Value"
         app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
-        app:layout_constraintEnd_toEndOf="@+id/searchResults"
-        app:layout_constraintStart_toStartOf="@+id/searchResults"
-        app:layout_constraintTop_toBottomOf="@+id/view" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
     <fragment
         android:id="@+id/mediaPlayerFragment"
@@ -51,5 +39,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/search_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="12dp"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -61,9 +61,11 @@ public class Playlist {
                     @Override
                     public void onSuccess() {
                         Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
-                        for (String title : titles) {
-                            loadWikipageByTitle(title);
-                        }
+                        // todo option B. (S.M) what to choose?
+//                        for (String title : titles) {
+//                            loadWikipageByTitle(title);
+//                        }
+                        loadWikipagesByTitles(titles);
                         playlistFragment.notifyAdapter();
                     }
                     @Override
@@ -73,9 +75,43 @@ public class Playlist {
                 });
     }
 
+    /**
+     * gets all wikipages at once. (faster at total time.)
+     * @param titles names of all wikipages to bring.
+     */
+    private void loadWikipagesByTitles(List<String> titles) {
+        if (Holder.wikipedia == null) {
+            Log.d(TAG, "getWikipageByTitle: error, wikipedia object is null");
+        }
+        final List<Wikipage> result = new ArrayList<>() ;
+        Holder.wikipedia.getWikipagesByName(titles, pageAttributes, result,
+                new WorkerListener() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onSuccess");
+                        // TODO Add location related condition - now it adds regardless
+                        wikipages.addAll(result);
+                        for(Wikipage wikipage:result) // todo S.M
+                        {
+                            wikipage.setPlaylist(currentPlaylist);
+                        }
+                        playlistFragment.notifyAdapter();
+                    }
+                    @Override
+                    public void onFailure() {
+                        Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onFailure: something went wrong");
+                    }
+                });
+    }
+
     public Playlist(String query, String action) {
         if(action.equals("search")) {
             this.title = query;
+            List<PageAttributes> pageAttributes = new ArrayList<>();
+            pageAttributes.add(PageAttributes.title);
+            pageAttributes.add(PageAttributes.url);
+            pageAttributes.add(PageAttributes.thumbnail);
+            pageAttributes.add(PageAttributes.description);
             this.playlistFragment = new PlaylistFragment(this);
             Holder.wikipedia.searchForPage(query, pageAttributes, this.getWikipages(),
                     new WorkerListener() {

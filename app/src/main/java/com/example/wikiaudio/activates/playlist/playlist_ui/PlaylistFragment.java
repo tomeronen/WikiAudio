@@ -57,7 +57,8 @@ public class PlaylistFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
         if(setBorder)
         {
-        view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
+            view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
+            view.setPadding(0,8,0,8);
         }
 
         //Set the adapter

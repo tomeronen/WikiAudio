@@ -1,29 +1,22 @@
 package com.example.wikiaudio.activates.search_page;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wikiaudio.AppData;
 import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
-import com.example.wikiaudio.wikipedia.server.WorkerListener;
-import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 
 public class SearchPageActivity extends AppCompatActivity {
 
@@ -31,13 +24,13 @@ public class SearchPageActivity extends AppCompatActivity {
     private AppCompatActivity activity;
     private AppData appData;
     private Context app;
+    private PlaylistFragment searchResultFragment;
 
-    private RecyclerView resultsView;
 
     // Views
-    private SearchView searchView;
+    private SearchView searchBar;
     private ProgressBar loadingIcon;
-
+    private TextView searchTitle;
     //Media bar
     private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
@@ -45,18 +38,30 @@ public class SearchPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_search_page);
+        initVar();
+        initMediaPlayer();
+    }
+
+    private void initVar() {
         activity = this;
         appData =((WikiAudioApp) getApplication()).getAppData();
-        setContentView(R.layout.activity_search_page);
-        resultsView = findViewById(R.id.searchResults);
-        searchView = findViewById(R.id.search_bar_view);
-        loadingIcon = findViewById(R.id.progressBar2);
+        searchBar = findViewById(R.id.search_bar_view);
+        searchBar.setIconified(false);
+        searchBar.onActionViewExpanded();
+        searchTitle = findViewById(R.id.search_title);
+        searchTitle.setVisibility(View.GONE);
         app = getApplicationContext();
-        String valueToSearch = getIntent().getStringExtra(SEARCH_TAG);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchValue(query);
+                Playlist searchResult = Holder.playlistsManager.createSearchBasedPlaylist(query);
+                searchResultFragment = searchResult.getPlaylistFragment();
+                searchResultFragment.showBorder(true);
+                searchResultVisibility();
+                searchTitle.setText(query);
+                searchTitle.setVisibility(View.VISIBLE);
+                searchBar.onActionViewCollapsed();
                 return false;
             }
 
@@ -65,43 +70,7 @@ public class SearchPageActivity extends AppCompatActivity {
                 return false;
             }
         });
-        searchView.setQuery(valueToSearch, true);
-        searchView.setQueryHint(valueToSearch);
-        initMediaPlayer();
     }
-
-    private void searchValue(String textToSearch) {
-        final List<Wikipage> results = new ArrayList<>();
-        loadingIcon.setVisibility(View.VISIBLE);
-        Holder.wikipedia.searchForPage(textToSearch, null, results,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        WikiSearchAdapter wikiSearchAdapter = new WikiSearchAdapter(results,
-                                new com.example.wikiaudio.activates.search_page.ResultClickListeners() {
-                                    @Override
-                                    public void onClick(String string) {
-                                        String title = string;
-                                        Intent WikipageIntent = new Intent(app, WikipageActivity.class);
-                                        WikipageIntent.putExtra("title", title);
-                                        startActivity(WikipageIntent);
-                                    }
-                                });
-                        resultsView.setLayoutManager(new LinearLayoutManager(app));
-                        resultsView.setAdapter(wikiSearchAdapter);
-                        loadingIcon.setVisibility(View.INVISIBLE);
-                    }
-                    @Override
-                    public void onFailure() {
-                        Toast.makeText(SearchPageActivity.this,
-                                "something went wrong with the search  :)",
-                                Toast.LENGTH_SHORT).show();
-                        loadingIcon.setVisibility(View.GONE);
-                    }
-                });
-    }
-
-    // ADD CLICK LISTENER HERE WITH TODO
 
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
@@ -111,4 +80,24 @@ public class SearchPageActivity extends AppCompatActivity {
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
         // TODO get lastplaylist and play it if not null
     }
+
+    private void searchResultVisibility() {
+        if(searchResultFragment == null)
+        {
+            return;
+        }
+        getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .replace(R.id.search_result_placeholder, searchResultFragment)
+                    .commit();
+    }
+
+    public void openSearchBar() {
+        if(searchBar != null)
+        {
+            searchBar.onActionViewExpanded();
+        }
+    }
 }
+
+

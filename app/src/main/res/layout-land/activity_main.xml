@@ -6,18 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/search_result_placeholder"
-        android:name="com.example.wikiaudio.activates.playlist_ui.PlaylistFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toTopOf="@id/audioPlayerFragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        android:focusable="true">
-    </FrameLayout>
 
     <ProgressBar
         android:id="@+id/progressBar4"

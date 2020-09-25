@@ -6,19 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/search_result_placeholder"
-        android:name="com.example.wikiaudio.activates.playlist_ui.PlaylistFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toTopOf="@id/audioPlayerFragment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        android:focusable="true">
-    </FrameLayout>
-
 
     <SearchView
         android:id="@+id/search_bar"
@@ -74,24 +61,12 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
         android:layout_width="0dp"
-        app:tabMode="scrollable"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        app:layout_constraintEnd_toStartOf="@+id/chooseCategories"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
-
-    <ImageButton
-        android:id="@+id/chooseCategories"
-        android:layout_width="44dp"
-        android:layout_height="0dp"
-        android:background="@android:color/white"
-        android:backgroundTint="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/view_pager"
-        app:layout_constraintStart_toEndOf="@+id/tabs"
-        app:layout_constraintEnd_toEndOf="@id/mediaPlayerFragment"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        app:tabMode="scrollable"
+        tools:layout_editor_absoluteY="58dp" />
 
     <fragment
         android:id="@+id/mediaPlayerFragment"
