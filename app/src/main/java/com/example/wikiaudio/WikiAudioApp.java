@@ -24,7 +24,7 @@ public class WikiAudioApp extends Application {
     private AppData appData;
     private Activity activeActivity;
     private ExecutorService executorService; // the thread pool of the app.
-    private static final int TOTAL_THREADS = 14; //todo test what is best amount of threads.
+    private static final int TOTAL_THREADS = 20; //todo test what is best amount of threads.
 
     @Override
     public void onCreate() {
