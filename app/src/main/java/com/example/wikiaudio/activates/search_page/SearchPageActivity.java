@@ -9,14 +9,14 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.AppData;
-import com.example.wikiaudio.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 
 public class SearchPageActivity extends AppCompatActivity {
 
@@ -72,13 +72,37 @@ public class SearchPageActivity extends AppCompatActivity {
         });
     }
 
+    private void searchResultVisibility() {
+        if(searchResultFragment == null)
+        {
+            return;
+        }
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.search_result_placeholder, searchResultFragment)
+                .commit();
+    }
+
+    public void openSearchBar() {
+        if(searchBar != null)
+        {
+            searchBar.onActionViewExpanded();
+        }
+    }
+
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
-        // TODO get lastplaylist and play it if not null
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mediaPlayer != null)
+            mediaPlayer.pauseForActivityChange();
     }
 
     private void searchResultVisibility() {
@@ -99,5 +123,3 @@ public class SearchPageActivity extends AppCompatActivity {
         }
     }
 }
-
-

@@ -1,65 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/audioPlayedTitle"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    tools:context=".activates.MediaPlayerFragment">
+    android:layout_height="110dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#302A2B"
+    tools:context=".activates.mediaplayer.ui.MediaPlayerFragment">
 
-
-    <TextView
-        android:id="@+id/audioPlayingTitle"
+    <LinearLayout
+        android:id="@+id/infoLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_height="match_parent"
+        android:layout_above="@id/centerView"
         android:gravity="center"
-        android:text=""
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        android:weightSum="3" >
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/nextSoung"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:src="@android:drawable/ic_media_next"
-        app:layout_constraintBottom_toBottomOf="@+id/play_pause"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/play_pause"
-        app:layout_constraintTop_toTopOf="@+id/play_pause" />
+        <LinearLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="vertical"
+            android:weightSum="2">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/previuosSoung"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:src="@android:drawable/ic_media_previous"
-        app:layout_constraintBottom_toBottomOf="@+id/play_pause"
-        app:layout_constraintEnd_toStartOf="@+id/play_pause"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/play_pause"
-        app:maxImageSize="24dp"
-        app:rippleColor="#FFFFFF" />
+            <TextView
+                android:id="@+id/wikipageTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="1.5dp"
+                android:textColor="#ACA9AA"
+                android:text="@string/no_wikipage_title"
+                android:textSize="18sp"
+                tools:ignore="NestedWeights" />
 
-    <com.ohoussein.playpause.PlayPauseView
-        android:id="@+id/play_pause"
-        android:layout_width="54dp"
-        android:layout_height="61dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?android:selectableItemBackground"
-        app:fill_color="#e1e1e1"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/audioPlayingTitle"
-        app:pause_bg="#00a2ed"
-        app:play_bg="#001eff">
+            <TextView
+                android:id="@+id/playlistTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="1.5dp"
+                android:textColor="#ACA9AA"
+                android:text="@string/no_wikipage_title"
+                android:textSize="14sp" />
 
-    </com.ohoussein.playpause.PlayPauseView>
+        </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <LinearLayout
+            android:id="@+id/playerLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+
+            <ImageButton
+                android:id="@+id/previousButton"
+                app:srcCompat="@android:drawable/ic_media_rew"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="#302A2B" />
+
+            <com.ohoussein.playpause.PlayPauseView
+                android:id="@+id/playPauseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:foreground="?android:selectableItemBackground"
+                app:fill_color="#ACA9AA"
+                app:pause_bg="#302A2B"
+                app:play_bg="#302A2B"
+                android:focusable="true">
+            </com.ohoussein.playpause.PlayPauseView>
+
+            <ImageButton
+                android:id="@+id/nextButton"
+                app:srcCompat="@android:drawable/ic_media_ff"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="#302A2B" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/centerView"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#000000"
+        android:gravity="center|bottom"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
+    <LinearLayout
+        android:id="@+id/navigationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/centerView"
+        android:orientation="horizontal"
+        android:weightSum="3" >
+
+        <ImageButton
+            android:id="@+id/homeButton"
+            android:src="@drawable/ic_menu_home"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="#302A2B"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:id="@+id/searchButton"
+            app:srcCompat="@android:drawable/ic_menu_search"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="#302A2B"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/categoriesButton"
+            app:srcCompat="@android:drawable/ic_menu_sort_by_size"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="#302A2B"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</RelativeLayout>
+
+

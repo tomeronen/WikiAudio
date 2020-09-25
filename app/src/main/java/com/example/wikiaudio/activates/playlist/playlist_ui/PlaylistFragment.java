@@ -84,6 +84,13 @@ public class PlaylistFragment extends Fragment {
         wikipagePlayListRecyclerViewAdapter.notifyDataSetChanged();
     }
 
+    public void highlightWikipage(int position) {
+        wikipagePlayListRecyclerViewAdapter.highlightWikipage(position);
+    }
+
+    public void clearHighlights() {
+        wikipagePlayListRecyclerViewAdapter.clearHighlights();
+    }
 
     public void setPlaylist(Playlist playlist) {
         this.playlist = playlist;

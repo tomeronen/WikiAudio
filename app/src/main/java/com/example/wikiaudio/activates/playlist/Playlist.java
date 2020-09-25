@@ -2,7 +2,7 @@ package com.example.wikiaudio.activates.playlist;
 
 import android.util.Log;
 
-import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
@@ -23,7 +23,7 @@ public class Playlist {
 
     private List<Wikipage> wikipages = new ArrayList<>();
     private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
-    PlaylistFragment playlistFragment;
+    private PlaylistFragment playlistFragment;
 
     // Location related
     private boolean isLocationBased;
@@ -61,7 +61,6 @@ public class Playlist {
                     @Override
                     public void onSuccess() {
                         Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
-                        // todo option B. (S.M) what to choose?
 //                        for (String title : titles) {
 //                            loadWikipageByTitle(title);
 //                        }
@@ -130,14 +129,7 @@ public class Playlist {
         }
     }
 
-//    /**
-//     * Create a playlist of wikipages that belong to the given categories and if nearby is true,
-//     * then are also nearby the user's current location
-//     * @param categories
-//     * @param nearby
-//     */
-//    public Playlist(WArrayList<String> categories, boolean nearby) {
-//    }
+
 
     /**
      * Creates a playlist of wikipages that are nearby the given location

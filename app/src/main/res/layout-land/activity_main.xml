@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activates.MainActivity">
 
-
     <ProgressBar
         android:id="@+id/progressBar4"
         style="?android:attr/progressBarStyle"
@@ -71,7 +70,7 @@
 
     <fragment
         android:id="@+id/audioPlayerFragment"
-        android:name="com.example.wikiaudio.activates.MediaPlayerFragment"
+        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="0dp"
         android:layout_height="110dp"
         app:layout_constraintBottom_toBottomOf="parent"

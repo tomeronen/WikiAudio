@@ -153,6 +153,59 @@ public class WikiServerHolder {
                 prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
+            List<Wikipage> wikipagesRuslt = parseQuarryResponse(response.body());
+            if(pageAttr.contains(content) ||
+                    pageAttr.contains(audioUrl) ) {
+                List<Wikipage> badPages = new ArrayList<>();
+                for (Wikipage wikipage : wikipagesRuslt) {
+                    try {
+                        WikiHtmlParser.parseAdvanceAttr(wikipage);
+                    } catch (HttpStatusException e) {
+                        Log.e("http error",
+                                "something went wrong with bringing " +
+                                        "advance Attributes of page:" + wikipage.getTitle());
+                        badPages.add(wikipage);
+                    }
+                }
+                wikipagesRuslt.removeAll(badPages); // todo do we want to remove if failed?
+            }
+            return wikipagesRuslt;
+        } else {
+            // task failed.
+            throw new IOException();
+        }
+    }
+
+    private String getNamesToSearch(List<String> names) {
+        StringBuilder result = new StringBuilder();
+        for(String name:names)
+        {
+            result.append(name).append("|");
+        }
+        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
+        {
+            result = new StringBuilder(result.substring(0, result.length() - 1));
+        }
+        return result.toString();
+    }
+    /**
+     * find Wikipages objects by there names.
+     * @param names the name of the wikipages to bring.
+     * @param pageAttr the Attributes to bring on each page.
+     * @return a list of Wikipages based on the names given.
+     * @throws IOException if task fails.
+     */
+    public List<Wikipage> getPagesByName(List<String> names,
+                                         List<PageAttributes> pageAttr)
+            throws IOException
+    {
+        String prop = getQueryProp(pageAttr);
+        String inprop = getQueryInProp(pageAttr);
+        String namesToSearch = getNamesToSearch(names);
+        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+                prop, inprop, "original|thumbnail").execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
             if(pageAttr.contains(audioUrl))
             {
                 Response<Object> r= server.callGetAudioByName(namesToSearch).execute();

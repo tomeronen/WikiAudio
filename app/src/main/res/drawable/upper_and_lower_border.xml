@@ -3,7 +3,6 @@
     layer-list
         A LayerDrawable is a drawable object that manages an array of other drawables. Each drawable
         in the list is drawn in the order of the list—the last drawable in the list is drawn on top.
-
         Each drawable is represented by an <item> element inside a single <layer-list> element.
 -->
 <layer-list
@@ -23,7 +22,6 @@
         item
             Defines a drawable to place in the layer drawable, in a position defined
             by its attributes.
-
             android:top
                 Integer. The top offset in pixels.
             android:right

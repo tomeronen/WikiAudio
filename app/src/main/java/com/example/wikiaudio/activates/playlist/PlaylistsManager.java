@@ -4,7 +4,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.Holder;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
@@ -86,9 +86,8 @@ public class PlaylistsManager {
             categoryBasedPlaylistsWereCreated = true;
             if (categories != null && categories.size() > 0) {
                 for (String category : categories)
-                    if(getPlaylistByTitle(category) == null)
-                        // the category was not yet created.
-                    {
+                    if(getPlaylistByTitle(category) == null) {
+                    // the category was not yet created.
                         PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
                     }
             }

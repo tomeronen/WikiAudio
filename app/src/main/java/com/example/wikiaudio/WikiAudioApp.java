@@ -6,6 +6,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
+import com.example.wikiaudio.activates.playlist.Playlist;
+import com.example.wikiaudio.data.AppData;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,17 +23,18 @@ import java.util.concurrent.Executors;
  * invalid at any time.
  */
 public class WikiAudioApp extends Application {
+    private static final int TOTAL_THREADS = 20; //todo test what is best amount of threads.
+    private ExecutorService executorService; // the thread pool of the app.
 
     private AppData appData;
     private Activity activeActivity;
-    private ExecutorService executorService; // the thread pool of the app.
-    private static final int TOTAL_THREADS = 20; //todo test what is best amount of threads.
+    private Playlist activePlaylist;
+    private int activeTrack;
 
     @Override
     public void onCreate() {
         super.onCreate();
         appData = new AppData(this);
-        appData.loadData();
         setupActivityListener();
         executorService = Executors.newFixedThreadPool(TOTAL_THREADS);
     }
@@ -76,4 +80,19 @@ public class WikiAudioApp extends Application {
         return executorService;
     }
 
+    public void updateActivePlaylist(Playlist playlist) {
+        activePlaylist = playlist;
+    }
+
+    public Playlist getActivePlaylist() {
+        return activePlaylist;
+    }
+
+    public void updateActiveTrack(int index) {
+        activeTrack = index;
+    }
+
+    public int getActiveTrack() {
+        return activeTrack;
+    }
 }

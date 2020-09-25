@@ -49,7 +49,7 @@ public class MediaPlayerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        fragmentInflated = inflater.inflate(R.layout.fragment_media_player1, container, false);
+        fragmentInflated = inflater.inflate(R.layout.fragment_media_player, container, false);
         initVars();
         setOnClickButtonsForPlayer();
         setOnClickButtonsForNavigationBar();
@@ -70,6 +70,7 @@ public class MediaPlayerFragment extends Fragment {
         if (fragmentActivity == null) {
             Log.d(TAG, "initVars: null activity error");
         }
+        playButton.change(false);
     }
 
     /**
@@ -79,8 +80,6 @@ public class MediaPlayerFragment extends Fragment {
         player = mediaPlayer;
         if (player == null) {
             Log.d(TAG, "setAudioPlayer: got null audioPlayer");
-        } else {
-            playButton.change(player.getIsPlaying());
         }
     }
 
@@ -106,11 +105,11 @@ public class MediaPlayerFragment extends Fragment {
             }
             if (player.getIsPlaying()) {
                 player.pause();
+                playButton.change(true);
             } else {
                 player.playCurrent();
+                playButton.change(false);
             }
-            playButton.change(!player.getIsPlaying());
-            Log.d(TAG, "setOnClickButtonsForPlayer: is playing? " + player.getIsPlaying());
         });
 
         nextButton.setOnClickListener(v -> {
@@ -135,9 +134,9 @@ public class MediaPlayerFragment extends Fragment {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on MainActivity");
             } else {
                 // ow, redirects to the main activity AND clears all running intents
-                Intent i = new Intent(player.getActivity(), MainActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
+                Intent main = new Intent(player.getActivity(), MainActivity.class);
+                main.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(main);
             }
         });
 
@@ -154,8 +153,7 @@ public class MediaPlayerFragment extends Fragment {
                ((SearchPageActivity) getActiveActivity()).openSearchBar();
             } else {
                 // ow, redirects to the SearchPageActivity
-                Intent searchPageIntent =  new Intent(player.getActivity(),
-                        SearchPageActivity.class);
+                Intent searchPageIntent  = new Intent(player.getActivity(), SearchPageActivity.class);
                 startActivityForResult(searchPageIntent, CHOOSE_CATEGORY_TAG);
             }
         });
@@ -172,8 +170,8 @@ public class MediaPlayerFragment extends Fragment {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on ChooseCategoriesActivity");
             } else {
                 // ow, redirects to the ChooseCategoriesActivity
-                Intent i = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
-                startActivity(i);
+                Intent chooseCategories = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
+                startActivity(chooseCategories);
             }
         });
     }
