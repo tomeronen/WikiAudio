@@ -361,25 +361,39 @@ public class Wikipedia {
      * @param listToFill the list to fill with the results.
      * @param workerListener callback when finished.
      */
-    public void getWikipages(final List<String> names,
+    public void getWikipagesByName(final List<String> names,
                             final List<PageAttributes> pageAttributes,
                             final List<Wikipage> listToFill,
                             final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
-            for (String name : names) {
-                try {
-                    listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-                } catch (IOException e) {
-                    // task failed with a exception.
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
-                }
+            try {
+                List<Wikipage> pages = WikiServerHolder
+                        .getInstance().getPagesByName(names, pageAttributes);
+                listToFill.addAll(pages);
+            } catch (IOException e) {
+                // task failed with a exception.
+                activ.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        workerListener.onFailure();
+                    }
+                });
             }
+            //todo option B one page at a time. overall longer. user might see some faster. (S.M)
+
+//                    for (String name : names) {
+//                        try {
+//                            listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
+//                        } catch (IOException e) {
+//                            // task failed with a exception.
+//                            activ.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    workerListener.onFailure();
+//                                }
+//                            });
+//                        }
             activ.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

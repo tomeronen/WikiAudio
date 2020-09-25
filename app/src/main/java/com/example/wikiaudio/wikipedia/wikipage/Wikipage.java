@@ -34,7 +34,6 @@ public class Wikipage {
             this.thumbnailSrc = page.getThumbnailSrc();
             this.computerUrl = page.getComputerUrl();
         }
-
     }
 
     public String getFullText() {
