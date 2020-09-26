@@ -124,19 +124,18 @@ public interface WikiServer {
 
     @GET("/w/api.php?" +
             "action=query&" +
-            "prop=info|extlinks|links&" +
+            "prop=info&" +
             "inprop=url&" +
-            "generator=links&"+
+            "generator=links&" +
             "gplnamespace=6&" +
             "format=json") // format for queried pages (json recommended)
-    public Call<Object> callGetAudioByName(@Query("titles") String pageName);
+    public Call<QuarryResponse> callGetAudioFilesNames(@Query("titles") String pageName);
 
     @GET("/w/api.php?" +
             "action=query&" +
-            "prop=extlinks&" +
-            "ellimit=10&"+
-            "elprotocol=https&"+
-            "format=json")
-    public Call<Object> callGetAudioFile(@Query("titles") String pageName);
+            "prop=imageinfo" +
+            "&iiprop=url" +
+            "&format=json")
+    public Call<QuarryResponse> callGetAudioFile(@Query("titles") String pageName);
 
 }

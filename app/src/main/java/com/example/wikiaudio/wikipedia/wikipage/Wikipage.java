@@ -7,6 +7,8 @@ import java.util.List;
 public class Wikipage {
 
 
+    private String audioFileName;
+
     public String getComputerUrl() {
         return computerUrl;
     }
@@ -52,6 +54,14 @@ public class Wikipage {
 
     public void setComputerUrl(String computerUrl) {
         this.computerUrl = computerUrl;
+    }
+
+    public void setAudioFileName(String audioFileName) {
+        this.audioFileName = audioFileName;
+    }
+
+    public String getAudioFileName() {
+        return audioFileName;
     }
 
 

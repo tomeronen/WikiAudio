@@ -128,9 +128,6 @@ public class AppData {
     }
 
     //
-    public WikiAudioApp getWikiAudioApp() {
-        return wikiAudioApp;
-    }
 
     public void setCurrentlyPlayed(CurrentlyPlayed currentlyPlayed) {
         this.currentlyPlayed = currentlyPlayed;

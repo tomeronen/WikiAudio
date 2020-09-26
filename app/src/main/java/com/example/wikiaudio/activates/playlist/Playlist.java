@@ -54,24 +54,48 @@ public class Playlist {
         this.title = category;
         this.playlistFragment = new PlaylistFragment(this);
         initVars(isLocationBased, lat, lon);
-        final List<String> titles = new ArrayList<>();
-        // todo preferably replace this with a func that returns wikipages, not strings, if possible
-        Holder.wikipedia.loadSpokenPagesNamesByCategories(category, titles,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
-//                        for (String title : titles) {
+        // option A
+//        final List<String> titles = new ArrayList<>();
+////        // todo preferably replace this with a func that returns wikipages, not strings, if possible
+////        Holder.wikipedia.loadSpokenPagesNamesByCategories(category, titles,
+////                new WorkerListener() {
+////                    @Override
+////                    public void onSuccess() {
+////                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
+//////                        for (String title : titles) {
 //                            loadWikipageByTitle(title);
-//                        }
-                        loadWikipagesByTitles(titles);
-                        playlistFragment.notifyAdapter();
-                    }
-                    @Override
-                    public void onFailure() {
-                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onFailure");
-                    }
-                });
+//////                        }
+////                        loadWikipagesByTitles(titles);
+////                        playlistFragment.notifyAdapter();
+////                    }
+////                    @Override
+////                    public void onFailure() {
+////                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onFailure");
+////                    }
+////                });
+
+        List<Wikipage> spokenPages = new ArrayList<>();
+        // option B:
+        Holder.wikipedia.loadSpokenPagesByCategories(category, pageAttributes, spokenPages,
+                new WorkerListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
+                for(Wikipage wikipage: spokenPages)
+                {// todo (t)
+                    if (wikipages.size() < MAX_WIKIPAGES)
+                        wikipages.add(wikipage);
+                    wikipage.setPlaylist(currentPlaylist);
+                    playlistFragment.notifyAdapter();
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onFailure");
+
+            }
+        });
     }
 
     /**

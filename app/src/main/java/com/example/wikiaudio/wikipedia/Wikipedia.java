@@ -5,18 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.wikipedia.server.WikiServerHolder;
+import com.example.wikiaudio.wikipedia.server.WikipageDataManager;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
-import com.google.gson.internal.LinkedTreeMap;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,9 +26,7 @@ public class Wikipedia {
 
     private static final int DAYS_BETWEEN_LOADING_CATEGORIES = 7;
     private final ExecutorService threadPool;
-    public ArrayList<String> spokenPagesCategories;
-    private static Wikipedia instance = null;
-    LinkedTreeMap<String, List<String>> spokenCategories;
+    private WikipageDataManager wikipageDataManager;
     private AppCompatActivity activ;
     AppData appData;
 
@@ -42,6 +34,15 @@ public class Wikipedia {
         activ = activity;
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
         appData = ((WikiAudioApp) this.activ.getApplication()).getAppData();
+        wikipageDataManager = new WikipageDataManager();
+        threadPool.execute(()-> {
+            try {
+                wikipageDataManager.initWikipageDataManager();
+            } catch (IOException e) {
+                e.printStackTrace();
+                // todo what to do if wikipageDataManager fails to init?
+            }
+        });
     }
 
     /**
@@ -135,6 +136,7 @@ public class Wikipedia {
         if (needToLoadCategories()) { // need to reload Categories -> load from wiki.
             threadPool.execute(() -> {
                 try {
+                    listToFill.addAll(wikipageDataManager.getSpokenCategories());
                     listToFill
                             .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
                     Date currentTime = Calendar.getInstance().getTime();
@@ -168,43 +170,6 @@ public class Wikipedia {
             }
 
         }
-
-
-
-        // worker option:
-
-//        WorkRequest loadSpokenCategoriseWorkerReq =
-//                new OneTimeWorkRequest
-//                        .Builder(loadSpokenCategoriseWorker.class)
-//                        .setInputData(new Data.Builder()
-//                                .build())
-//                        .build();
-//        WorkManager.getInstance(activ).enqueue(loadSpokenCategoriseWorkerReq);
-//        WorkManager.getInstance(activ)
-//                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
-//                .observe(activ, new Observer<WorkInfo>() {
-//                    @Override
-//                    public void onChanged(WorkInfo workInfo) {
-//                        if (workInfo.getState() == WorkInfo.State.FAILED)
-//                        {
-//                            activ.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                         workerListener.onFailure();
-//                                }
-//                            });
-//                        }
-//                        else if (workInfo.getState() == WorkInfo.State.SUCCEEDED)
-//                        {
-//                            activ.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    workerListener.onSuccess();
-//                                }
-//                            });
-//                        }
-//                    }
-//                });
     }
 
 
@@ -227,7 +192,7 @@ public class Wikipedia {
 
 
     /**
-     *
+     * load
      * @param category
      * @param result
      * @param workerListener
@@ -237,84 +202,12 @@ public class Wikipedia {
                                                  final WorkerListener workerListener)
     {
         try {
-            String url = "https://en.wikipedia.org/wiki/Wikipedia:Spoken_articles";
-            Document doc = null;
-            doc = Jsoup.connect(url).get();
-            Elements elements = doc.select(".mw-headline, li");
-            for (int i = 1; i < elements.size(); i++) {
-                Element curElement = elements.get(i);
-                if ("mw-headline".equals(curElement.className()) && curElement.text().equals(category)) {
-                    ++i;
-                    curElement = elements.get(i);
-                    while (i < elements.size() && !"mw-headline".equals(curElement.className())) {
-                        result.add(curElement.text());
-                        ++i;
-                        curElement = elements.get(i);
-                    }
-                    break;
-                }
-            }
-            activ.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    workerListener.onSuccess();
-                }
-            });
+            result.addAll(this.wikipageDataManager.getSpokenPagesNamesByCategories(category));
+            threadPool.execute(workerListener::onSuccess);
         } catch (IOException e) {
             e.printStackTrace();
-            workerListener.onFailure();
+            threadPool.execute(workerListener::onFailure);
         }
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    result.addAll(WikiServerHolder.callGetSpokenPagesNamesByCategories(category));
-//                    activ.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            workerListener.onSuccess();
-//                        }
-//                    });
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                    activ.runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            workerListener.onFailure();
-//                        }
-//                    });
-//                }
-//            }
-//        }).start();
-
-//        option with worker:
-//        WorkRequest loadSpokenCategoriseWorkerReq =
-//                new OneTimeWorkRequest
-//                        .Builder(loadSpokenPagesByCategoriseWorker.class)
-//                        .setInputData(new Data.Builder()
-//                        .putString(loadSpokenPagesByCategoriseWorker.categoryTag, category).build())
-//                        .build();
-//        WorkManager.getInstance(ownerActivity).enqueue(loadSpokenCategoriseWorkerReq);
-//        // todo is activity a life cycle owner?
-//        WorkManager.getInstance(ownerActivity)
-//                .getWorkInfoByIdLiveData(loadSpokenCategoriseWorkerReq.getId())
-//                .observe((LifecycleOwner) activ, new Observer<WorkInfo>() {
-//                    @Override
-//                    public void onChanged(WorkInfo workInfo) {
-//                        if(workInfo.getState() == WorkInfo.State.SUCCEEDED)
-//                        {
-//                            activ.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    workerListener.onSuccess();
-//                                }
-//                            });
-//                        }
-//
-//
-//                    }
-//                });
-//        return loadSpokenCategoriseWorkerReq.getId();
     }
 
 
@@ -332,22 +225,11 @@ public class Wikipedia {
     {
         threadPool.execute(() -> {
             try {
-                pageToFill.copy(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onSuccess();
-                    }
-                });
+                pageToFill.copy(wikipageDataManager.getWikipage(name, pageAttributes));
+                activ.runOnUiThread(workerListener::onSuccess);
             } catch (IOException e) {
                 // task failed with a exception.
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onFailure();
-                    }
-                });
+                activ.runOnUiThread(workerListener::onFailure);
             }
         });
     }
@@ -372,14 +254,10 @@ public class Wikipedia {
                 List<Wikipage> pages = WikiServerHolder
                         .getInstance().getPagesByName(names, pageAttributes);
                 listToFill.addAll(pages);
+                activ.runOnUiThread(workerListener::onSuccess);
             } catch (IOException e) {
                 // task failed with a exception.
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onFailure();
-                    }
-                });
+                activ.runOnUiThread(workerListener::onFailure);
             }
             //todo option B one page at a time. overall longer. user might see some faster. (S.M)
 
@@ -395,12 +273,6 @@ public class Wikipedia {
 //                                }
 //                            });
 //                        }
-            activ.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    workerListener.onSuccess();
-                }
-            });
         });
     }
 
@@ -425,4 +297,31 @@ public class Wikipedia {
 //    public void login(String a, String b) {
 //        WikiServerHolder.getInstance().callLogin(a,b);
 //    }
+
+
+    /**
+     *
+     * @param category
+     * @param result
+     * @param pageAttributes
+     * @param workerListener
+     */
+    public void loadSpokenPagesByCategories(final String category,
+                                                 final List<PageAttributes> pageAttributes,
+                                                 final List<Wikipage> result,
+                                                 final WorkerListener workerListener)
+    {
+        threadPool.execute(() -> {
+            try {
+                List<Wikipage> spokenPages = this.wikipageDataManager
+                        .getSpokenPagesByCategories(category, pageAttributes);
+                result.addAll(spokenPages);
+                activ.runOnUiThread(workerListener::onSuccess);
+            } catch (IOException e) {
+                // task failed with a exception.
+                activ.runOnUiThread(workerListener::onFailure);
+            }
+        });
+    }
+
 }

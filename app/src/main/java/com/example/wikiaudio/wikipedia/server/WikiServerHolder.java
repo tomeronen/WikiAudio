@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -176,63 +177,31 @@ public class WikiServerHolder {
         }
     }
 
-    private String getNamesToSearch(List<String> names) {
-        StringBuilder result = new StringBuilder();
-        for(String name:names)
-        {
-            result.append(name).append("|");
-        }
-        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
-        {
-            result = new StringBuilder(result.substring(0, result.length() - 1));
-        }
-        return result.toString();
-    }
-    /**
-     * find Wikipages objects by there names.
-     * @param names the name of the wikipages to bring.
-     * @param pageAttr the Attributes to bring on each page.
-     * @return a list of Wikipages based on the names given.
-     * @throws IOException if task fails.
-     */
-    public List<Wikipage> getPagesByName(List<String> names,
-                                         List<PageAttributes> pageAttr)
-            throws IOException
-    {
-        String prop = getQueryProp(pageAttr);
-        String inprop = getQueryInProp(pageAttr);
-        String namesToSearch = getNamesToSearch(names);
-        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
-                prop, inprop, "original|thumbnail").execute();
-        if (response.code() == 200 && response.isSuccessful()) {
-            // task was successful.
-            if(pageAttr.contains(audioUrl))
-            {
-                Response<Object> r= server.callGetAudioByName(namesToSearch).execute();
-                Object body = r.body();
-                Response<Object> r2= server.callGetAudioFile("File:John Fraser (botanist).ogg").execute();
-                Object body2 = r2.body();
-            }
-            List<Wikipage> wikipagesRuslt = parseQuarryResponse(response.body());
 
-            if(pageAttr.contains(content) ||
-                    pageAttr.contains(audioUrl) ) {
-                List<Wikipage> badPages = new ArrayList<>();
-                for (Wikipage wikipage : wikipagesRuslt) {
-                    try {
-                        WikiHtmlParser.parseAdvanceAttr(wikipage);
-                    } catch (HttpStatusException e) {
-                        Log.e("http error",
-                                "something went wrong with bringing " +
-                                        "advance Attributes of page:" + wikipage.getTitle());
-                        badPages.add(wikipage);
-                    }
-                }
-                wikipagesRuslt.removeAll(badPages); // todo do we want to remove if failed?
+
+    private static boolean quarryResponseIsLegal(QuarryResponse quarryResponse) {
+        return quarryResponse != null
+                && quarryResponse.query != null
+                && quarryResponse.query.pages != null;
+    }
+
+    private String parseAudioFileResponse(QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            StringBuilder fileNames = new StringBuilder();
+            if(    quarryResponse.query.pages.values().size() == 1)
+            {
+                return quarryResponse.query.pages.get(0).title;
             }
-            return wikipagesRuslt;
-        } else {
-            // task failed.
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                fileNames.insert(0, pageData.title + "|");
+            }
+            return fileNames.toString();
+        }
+        else
+        {
             throw new IOException();
         }
     }
@@ -304,9 +273,7 @@ public class WikiServerHolder {
 
     private static List<Wikipage> parseQuarryResponse(QuarryResponse quarryResponse)
             throws IOException {
-        if (quarryResponse != null
-                && quarryResponse.query != null
-                && quarryResponse.query.pages != null) {
+        if (quarryResponseIsLegal(quarryResponse)) {
             List<Wikipage> resultList = new ArrayList<>();
             for(QuarryResponse.PageData pageData:
                     quarryResponse.query.pages.values())
@@ -503,4 +470,197 @@ public class WikiServerHolder {
         return inprop.toString();
     }
 
+
+    private String getNames(List<Wikipage> wikipages) {
+        StringBuilder result = new StringBuilder();
+        for(Wikipage wikipage:wikipages)
+        {
+            result.append(wikipage.getTitle()).append("|");
+        }
+        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
+        {
+            result = new StringBuilder(result.substring(0, result.length() - 1));
+        }
+        return result.toString();
+    }
+
+
+    public void loadPagesByName(HashMap<String, Wikipage> wikipagesData,
+                                List<String> pagesNames,
+                                List<PageAttributes> pageAttr)
+            throws IOException {
+        String prop = getQueryProp(pageAttr) + "|" + "images" ;
+        String inprop = getQueryInProp(pageAttr);
+        String namesToSearch = getNamesToSearch(pagesNames);
+        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+                prop, inprop, "original|thumbnail").execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
+            loadQuarryResponse(wikipagesData,response.body());
+        } else {
+            // task failed.
+            throw new IOException();
+        }
+    }
+
+    private void loadQuarryResponse(HashMap<String, Wikipage> wikipagesData,
+                                    QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                Wikipage wikipage = parseWikiData(pageData);
+                wikipagesData.put(wikipage.getTitle(), wikipage);
+            }
+        }
+        else
+        {
+            throw new IOException();
+        }
+
+    }
+
+
+
+    private HashMap<String, String> parseAudioSourceResponse(QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            HashMap<String, String> fileSourcesResults = new HashMap<>();
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                if(pageData.imageinfo != null && pageData.imageinfo.get(0) != null)
+                {
+                    fileSourcesResults.put(pageData.title, pageData.imageinfo.get(0).url);
+                }
+            }
+            return fileSourcesResults;
+        }
+        else
+        {
+            throw new IOException();
+        }
+
+
+    }
+
+    private String getFileNames(HashMap<String, String> spokenWikipagesMetaData,
+                                List<String> pagesNames) {
+        StringBuilder fileNames = new StringBuilder();
+        boolean first = true;
+        for (String name : pagesNames) {
+            String curFileName = spokenWikipagesMetaData.get(name);
+            if (curFileName != null) {
+                if (first) {
+                    fileNames = new StringBuilder(curFileName);
+                    first = false;
+                } else {
+                    fileNames.append("|").append(spokenWikipagesMetaData.get(name));
+                }
+            }
+        }
+        return fileNames.toString();
+    }
+
+    public void loadAudioSource(HashMap<String, Wikipage> wikipagesData,
+                            HashMap<String, String> spokenWikipagesMetaData,
+                            List<String> pagesNames) throws IOException {
+        String fileNames = getFileNames(spokenWikipagesMetaData, pagesNames);
+        Response<QuarryResponse> fileResponse = server.callGetAudioFile(fileNames).execute();
+        if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
+            HashMap<String, String> fileSourcesResults =
+                    parseAudioSourceResponse(fileResponse.body());
+            for (String pageName : pagesNames) {
+                String fileName = spokenWikipagesMetaData.get(pageName);
+                String fileSource = fileSourcesResults.get(fileName);
+                Wikipage wikipage = wikipagesData.get(pageName);
+                if (wikipage != null) {
+                    wikipage.setAudioUrl(fileSource);
+                }
+            }
+        }
+    }
 }
+
+
+
+// unused options for functions:
+
+
+//    private void parseAudioSourceResponse(QuarryResponse quarryResponse,
+//                                                  List<Wikipage> wikipages) throws IOException {
+//        if (quarryResponseIsLegal(quarryResponse)) {
+//            List<String> result = new ArrayList<>();
+//            int counter = 0;
+//            for(QuarryResponse.PageData pageData:
+//                    quarryResponse.query.pages.values())
+//            {
+//                if(pageData.imageinfo != null && pageData.imageinfo.get(0) != null)
+//                {
+//                    wikipages.get(counter).setAudioUrl(pageData.imageinfo.get(0).url);
+////                    result.add(pageData.imageinfo.get(0).url);
+//                }
+//                counter++;
+//            }
+////            return result;
+//        }
+//        else
+//        {
+//            throw new IOException();
+//        }
+//
+//    }
+
+
+
+//    private void loadAudioSources(String names, List<Wikipage> wikipages) throws IOException {
+//        Response<QuarryResponse> response = server.callGetAudioFilesNames(names).execute();
+//        // todo for a weird reason brings back values in reverse order.
+//        if (response.code() == 200 && response.isSuccessful()) {
+//            // call to get audio files name was Successful
+//            String audioFileNames =  parseAudioFileResponse(response.body());
+//            Response<QuarryResponse> fileResponse = server.callGetAudioFile(audioFileNames).execute();
+//            if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
+//                // we got the files source.
+//                parseAudioSourceResponse(fileResponse.body(), wikipages);
+//            }
+//        }
+//    }
+
+
+//    public void fillWikipages(List<Wikipage> wikipages, List<PageAttributes> pageAttr)
+//            throws IOException {
+//        String prop = getQueryProp(pageAttr) + "|" + "images" ;
+//        String inprop = getQueryInProp(pageAttr);
+//        String namesToSearch = getNames(wikipages);
+//        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+//                prop, inprop, "original|thumbnail").execute();
+//        if (response.code() == 200 && response.isSuccessful()) {
+//            // task was successful.
+//            HashMap<String, Wikipage> wikipageMap = new HashMap<>();
+//            List<Wikipage> wikipagesResult = parseQuarryResponse(response.body());
+//
+//            if(pageAttr.contains(audioUrl))
+//            {
+//                loadAudioSources(namesToSearch, wikipagesResult);
+//            }
+//            if(pageAttr.contains(content) ) {
+//                List<Wikipage> badPages = new ArrayList<>();
+//                for (Wikipage wikipage : wikipagesResult) {
+//                    try {
+//                        WikiHtmlParser.parseAdvanceAttr(wikipage);
+//                    } catch (HttpStatusException e) {
+//                        Log.e("http error",
+//                                "something went wrong with bringing " +
+//                                        "advance Attributes of page:" + wikipage.getTitle());
+//                        badPages.add(wikipage);
+//                    }
+//                }
+//                wikipagesResult.removeAll(badPages); // todo do we want to remove if failed?
+//            }
+//        } else {
+//            // task failed.
+//            throw new IOException();
+//        }
+//    }

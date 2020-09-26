@@ -105,21 +105,5 @@ public class SearchPageActivity extends AppCompatActivity {
             mediaPlayer.pauseForActivityChange();
     }
 
-    private void searchResultVisibility() {
-        if(searchResultFragment == null)
-        {
-            return;
-        }
-        getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.search_result_placeholder, searchResultFragment)
-                    .commit();
-    }
 
-    public void openSearchBar() {
-        if(searchBar != null)
-        {
-            searchBar.onActionViewExpanded();
-        }
-    }
 }

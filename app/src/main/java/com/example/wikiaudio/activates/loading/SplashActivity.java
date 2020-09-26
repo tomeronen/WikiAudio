@@ -6,11 +6,7 @@ import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.Holder;
-import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.MainActivity;
-
-import java.util.List;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int DELAY_IN_MILISEC = 2500;
