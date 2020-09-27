@@ -36,7 +36,7 @@ public class MediaPlayer {
                 currentlyPlayed.getIsPlaying()) {
             this.currentlyPlayed = currentlyPlayed;
             isPlaying = true;
-            displayWhatIsBeingPlayed(null); //todo maybe null is not the answer
+            displayWhatIsBeingPlayed(null);
         } else {
             Log.d(TAG, "checkForActivePlaylist: currentlyPlayed is null");
         }

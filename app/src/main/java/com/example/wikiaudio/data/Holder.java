@@ -21,10 +21,7 @@ public class Holder {
 
     private Holder(AppCompatActivity activity, AppData appData){
         wikipedia = new Wikipedia(activity);
-
-        //todo remove the input activity
         wikipagePlayer = new WikipagePlayer(activity);
-
         locationHandler = LocationHandler.getInstance(activity);
         playlistsManager = PlaylistsManager.getInstance(activity);
     }

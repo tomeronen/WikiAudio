@@ -191,7 +191,6 @@ public class LocationHandler {
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
         mMap.addMarker(new MarkerOptions()
                 .position(latLng).title(wikipage.getTitle())).setTag(wikipage);
-        //TODO: add thumbnail one day :)
     }
 
     /**
@@ -207,12 +206,6 @@ public class LocationHandler {
         for (Wikipage wikipage: playlist.getWikipages()) {
             markLocation(wikipage);
         }
-    }
-
-    // TODO
-    // do we want to create and display a path of the playlist's locations?
-    // we will also have to play the articles in that same order
-    public void createPath(Location[] locations) {
     }
 
     /**

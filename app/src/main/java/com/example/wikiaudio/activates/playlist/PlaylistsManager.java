@@ -129,4 +129,8 @@ public class PlaylistsManager {
         return new Playlist(query, "search");
 
     }
+
+    public int getIndexByPlaylist(Playlist playlist) {
+        return playlists.indexOf(playlist);
+    }
 }

@@ -34,8 +34,6 @@ public class PlaylistRecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
-
-        // update wiki page view holder: todo add what else we want to do.
         holder.mItem = mWikipages.get(position);
         holder.titleView.setText(mWikipages.get(position).getTitle());
         holder.descriptionView.setText(mWikipages.get(position).getDescription());

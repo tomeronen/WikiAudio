@@ -36,15 +36,6 @@ public class PlaylistFragment extends Fragment {
                 new WikipagePlaylistRecyclerViewAdapter(playlist);
     }
 
-//    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static PlaylistFragment newInstance() {
-        PlaylistFragment fragment = new PlaylistFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -14,7 +14,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //todo worth checking MERGYMERG
+        //todo tried and didn't work
 //        //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
 //        //it needs an activity
 //        Holder.getInstance(this);

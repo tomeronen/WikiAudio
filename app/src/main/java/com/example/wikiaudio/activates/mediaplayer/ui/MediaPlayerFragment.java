@@ -152,7 +152,7 @@ public class MediaPlayerFragment extends Fragment {
             if (activeActivity.getLocalClassName().equals("activates.MainActivity")) {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on MainActivity");
             } else {
-                // ow, redirects to the main activity AND clears all running intents
+                // ow, redirects to the main activity AND clear all running intents
                 Intent main = new Intent(player.getActivity(), MainActivity.class);
                 main.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(main);

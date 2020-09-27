@@ -25,11 +25,11 @@ import androidx.work.WorkManager;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
-import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
@@ -85,13 +85,12 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayer mediaPlayer;
 
     //Views
-    private ImageButton chooseCategoriesButton;
     private TabLayout tabs;
     private ProgressBar loadingIcon;
+    private ImageButton chooseCategoriesButton;
     private ViewPager viewPager;
 
     // idk
-    private ArrayList<PlaylistFragment> playLists = new ArrayList<>();
     private List<String> chosenCategories;
 
     @Override
@@ -100,20 +99,17 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-        setOnClickButtons();
         initMap();
         loadPlaylists();
         initMediaPlayer();
+        setOnClickButtons();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mediaPlayer != null) {
+        if (mediaPlayer != null)
             mediaPlayer.checkForActivePlaylist();
-            // todo add map zoom on article if possible
-            // todo tabs - show current playlist and mark played wikipage if possible
-        }
     }
 
     @Override
@@ -143,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements
                 ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED;
         //Views
-        chooseCategoriesButton = findViewById(R.id.chooseCategories);
+        chooseCategoriesButton = findViewById(R.id.addCategoryButton);
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
@@ -167,15 +163,13 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * For setting the buttons (choose categories, search bar, etc.)
+     * For setting the buttons (choose categories, etc.)
      */
     private void setOnClickButtons() {
-        // TODO change to a plus button and restore new intent to ChooseCategories
-//        chooseCategoriesButton.setOnClickListener(v -> {
-//            Intent chooseCategoriesIntent =  new Intent(activity,
-//                    ChooseCategoriesActivity.class);
-//            startActivity(chooseCategoriesIntent);
-//        });
+        chooseCategoriesButton.setOnClickListener(v -> {
+            Intent chooseCategoriesIntent =  new Intent(activity, ChooseCategoriesActivity.class);
+            startActivity(chooseCategoriesIntent);
+        });
     }
 
     /**
@@ -191,6 +185,16 @@ public class MainActivity extends AppCompatActivity implements
             for (Playlist playlist: PlaylistsManager.getPlaylists())
                 playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
 
+            // get current played playlist index to select in
+            int selectedIndex = -1;
+            if (mediaPlayer != null && mediaPlayer.getIsPlaying()) {
+                Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+                if (currentPlaylist != null) {
+                    selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
+                }
+            }
+
+            int finalSelectedIndex = selectedIndex;
             activity.runOnUiThread(() -> {
                 ViewPager viewPager = findViewById(R.id.view_pager);
                 viewPager.setAdapter(playListsFragmentAdapter);
@@ -202,6 +206,9 @@ public class MainActivity extends AppCompatActivity implements
                         break;
                     }
                     Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
+                    if (counter == finalSelectedIndex) {
+                        tabs.getTabAt(counter).select();
+                    }
                     counter++;
                 }
 
@@ -271,9 +278,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        //TODO this will change when we'll add audio and storing permissions
         mLocationPermissionGranted = false;
-//        Log.d(TAG, "onRequestPermissionsResult: ");
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0) {
                 for (int grantResult : grantResults) {
@@ -336,17 +341,30 @@ public class MainActivity extends AppCompatActivity implements
         if (mMap != null && mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
             isLocationEnabled();
-            if (isGPSEnabled) {
-                LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
-                if (currentLatLng != null) {
-                    //Zoom in to user's location
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                    //Create (and display) the nearby playlist
-                    Holder.playlistsManager.createLocationBasedPlaylist(
-                            currentLatLng.latitude, currentLatLng.longitude, true);
+            // id there's something being played:
+            // mark the playlist and zoom in on the wikipage being played
+            if (mediaPlayer != null && mediaPlayer.getIsPlaying()) {
+                Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+                if (currentPlaylist != null) {
+                    Holder.locationHandler.markPlaylist(currentPlaylist);
+                    Holder.locationHandler.markAndZoom(mediaPlayer.getCurrentWikipage());
+                } else {
+                    Log.d(TAG, "initUserLocationOnTheMap: got null currentPlaylist");
                 }
             } else {
-                Log.d(TAG, "initUserLocationOnTheMap: no GPS");
+                // ow, zoom in on user's location
+                if (isGPSEnabled) {
+                    LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
+                    if (currentLatLng != null) {
+                        //Zoom in to user's location
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                        //Create (and display) the nearby playlist
+                        Holder.playlistsManager.createLocationBasedPlaylist(
+                                currentLatLng.latitude, currentLatLng.longitude, true);
+                    }
+                } else {
+                    Log.d(TAG, "initUserLocationOnTheMap: no GPS");
+                }
             }
         } else {
             Log.d(TAG, "initUserLocationOnTheMap: either google map is null or we have no perm");
