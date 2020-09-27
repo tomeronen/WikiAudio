@@ -128,7 +128,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             });
 
             // When long clicking on an item in the playlist, it opens its wikipage
-            view.setOnLongClickListener((View.OnLongClickListener) v -> {
+            view.setOnLongClickListener(v -> {
                 if (wikipage != null && playlist != null) {
                     int index = playlist.getIndexByWikipage(wikipage);
                     if (index > -1) {
@@ -142,7 +142,6 @@ public class WikipagePlaylistRecyclerViewAdapter extends
                 } else {
                     Log.d(TAG, "onInfoWindowClick: playlist is null :(");
                 }
-
             return false;
             });
         }

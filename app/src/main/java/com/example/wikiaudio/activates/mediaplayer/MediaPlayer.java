@@ -68,8 +68,7 @@ public class MediaPlayer {
             pause();
         }
 
-        player.playWiki(wikipage);
-        isPlaying = true;
+        isPlaying = player.playWikipage(wikipage);
 
         updateMediaPlayerVars(playlist, index, wikipage);
         displayWhatIsBeingPlayed(playlist, index, wikipage);
@@ -132,16 +131,17 @@ public class MediaPlayer {
         if (currentlyPlayed.isValid() && playlist != currentlyPlayed.getPlaylist() && currentlyPlayed.getPlaylist().getPlaylistFragment() != null) {
             currentlyPlayed.getPlaylist().getPlaylistFragment().clearHighlights();
         }
-    }
-
-    private void updateMediaPlayerVars(Playlist playlist, int index, Wikipage wikipage) {
+        // display on the media player fragment
         if (mpFragment != null) {
+            mpFragment.togglePlayPauseButton(false);
             mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
         } else {
             Log.d(TAG, "updateMediaPlayerVars: got null mpFragment");
         }
-        currentlyPlayed = new CurrentlyPlayed(playlist, wikipage, index, true);
+    }
 
+    private void updateMediaPlayerVars(Playlist playlist, int index, Wikipage wikipage) {
+        currentlyPlayed = new CurrentlyPlayed(playlist, wikipage, index, true);
         if (appData != null) {
             appData.setCurrentlyPlayed(currentlyPlayed);
         } else {
@@ -152,6 +152,13 @@ public class MediaPlayer {
     public Playlist getCurrentPlaylist() {
         if (currentlyPlayed.isValid()) {
             return currentlyPlayed.getPlaylist();
+        }
+        return null;
+    }
+
+    public Wikipage getCurrentWikipage() {
+        if (currentlyPlayed.isValid()) {
+            return currentlyPlayed.getWikipage();
         }
         return null;
     }

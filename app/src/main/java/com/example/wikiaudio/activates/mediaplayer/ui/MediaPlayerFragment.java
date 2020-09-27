@@ -185,4 +185,10 @@ public class MediaPlayerFragment extends Fragment {
         return player.getAppData().getWikiAudioApp().getActiveActivity();
     }
 
+    public void togglePlayPauseButton(boolean toggle) {
+        if (playButton != null) {
+            playButton.change(toggle);
+        }
+    }
+
 }
