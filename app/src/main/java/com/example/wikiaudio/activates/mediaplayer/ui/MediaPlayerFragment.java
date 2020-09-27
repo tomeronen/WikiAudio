@@ -15,9 +15,11 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.MainActivity;
+import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
+import com.example.wikiaudio.data.CurrentlyPlayed;
 import com.ohoussein.playpause.PlayPauseView;
 
 /**
@@ -119,6 +121,23 @@ public class MediaPlayerFragment extends Fragment {
             }
             player.playNext();
             playButton.change(!player.getIsPlaying());
+        });
+
+        // clicking on the title of the wikipage redirects to the relevant WikipageActivity
+        wikipageTitleView.setOnClickListener(v -> {
+            if (player == null) {
+                Log.d(TAG, "setOnClickButtonsForPlayer: null player");
+                return;
+            }
+            CurrentlyPlayed currentlyPlayed = player.getCurrentlyPlayed();
+            if (currentlyPlayed.isValid()) {
+                Intent WikipageIntent = new Intent(getActiveActivity(), WikipageActivity.class);
+                WikipageIntent.putExtra("playlistTitle", currentlyPlayed.getPlaylist().getTitle());
+                WikipageIntent.putExtra("index", currentlyPlayed.getIndex());
+                startActivity(WikipageIntent);
+            } else {
+                Log.d(TAG, "setOnClickButtonsForPlayer: got null wikipage, nowhere to redirect");
+            }
         });
     }
 

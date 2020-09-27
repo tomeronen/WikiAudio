@@ -2,7 +2,6 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -52,8 +51,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -169,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements
      * For setting the buttons (choose categories, search bar, etc.)
      */
     private void setOnClickButtons() {
+        // TODO change to a plus button and restore new intent to ChooseCategories
 //        chooseCategoriesButton.setOnClickListener(v -> {
 //            Intent chooseCategoriesIntent =  new Intent(activity,
 //                    ChooseCategoriesActivity.class);
@@ -450,24 +448,25 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CHOOSE_CATEGORY_TAG) {
-            if(resultCode == Activity.RESULT_OK){
-                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-                if(dataSaved)
-                {
-                    chosenCategories = ((WikiAudioApp) getApplication())
-                            .getAppData().getChosenCategories();
-                    this.loadPlaylists();
-                }
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                // todo? why is this empty
-            }
-        }
-    }
+    // TODO crashed the app on resume..
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == CHOOSE_CATEGORY_TAG) {
+//            if(resultCode == Activity.RESULT_OK){
+//                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
+//                if(dataSaved)
+//                {
+//                    chosenCategories = ((WikiAudioApp) getApplication())
+//                            .getAppData().getChosenCategories();
+//                    this.loadPlaylists();
+//                }
+//            }
+//            if (resultCode == Activity.RESULT_CANCELED) {
+//                // todo? why is this empty
+//            }
+//        }
+//    }
 
 //    private void testUploadFile() {
 //        FileManager fileManager = new FileManager(this);

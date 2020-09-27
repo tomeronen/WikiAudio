@@ -16,12 +16,12 @@ public class MediaPlayer {
     private static final String TAG = "AudioPlayer";
     private static final float READING_SPEED = 1f;
 
-    private WikipagePlayer player;
-    private MediaPlayerFragment mpFragment;
-    private AppData appData;
     private Activity activity;
+    private WikipagePlayer player;
+    private AppData appData;
+    private MediaPlayerFragment mpFragment;
 
-    CurrentlyPlayed currentlyPlayed;
+    private CurrentlyPlayed currentlyPlayed;
     private boolean isPlaying = false;
 
 
@@ -161,5 +161,9 @@ public class MediaPlayer {
             return currentlyPlayed.getWikipage();
         }
         return null;
+    }
+
+    public CurrentlyPlayed getCurrentlyPlayed() {
+        return currentlyPlayed;
     }
 }
