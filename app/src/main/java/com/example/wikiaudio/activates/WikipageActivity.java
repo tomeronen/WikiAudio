@@ -21,8 +21,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
@@ -32,6 +30,8 @@ import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
@@ -185,11 +185,24 @@ public class WikipageActivity extends AppCompatActivity {
         });
 
         playButton.setOnClickListener(v -> {
-            // if the user wants to only play this article, we create a playlist based on it solely
-            // and play that playlist (the user might add wikipages to this playlist)
-            Playlist playlist = new Playlist(wikipage);
-            PlaylistsManager.addPlaylist(playlist);
-            mediaPlayer.play(playlist, 0);
+            // if the media player now holds this wikipage, play it if it's on pause
+            if (mediaPlayer != null){
+                if (mediaPlayer.getCurrentWikipage() != null &&
+                        mediaPlayer.getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
+                        if (!mediaPlayer.getIsPlaying()){
+                            Log.d(TAG, "initOnClickButtons - PLAY: track was paused");
+                            mediaPlayer.playCurrent();
+                        }
+                    return;
+                }
+                Log.d(TAG, "initOnClickButtons - PLAY: CurrentWikipage() == null");
+                // create a playlist based on this wikipage solely and play it
+                Playlist playlist = new Playlist(wikipage);
+                PlaylistsManager.addPlaylist(playlist);
+                mediaPlayer.play(playlist, 0);
+           } else {
+                Log.d(TAG, "initOnClickButtons - PLAY: null media player");
+            }
         });
 
         addButton.setOnClickListener(v -> {
@@ -218,6 +231,7 @@ public class WikipageActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "onSuccess, fetchWikipage");
+                wikipageTitle = wikipage.getTitle();
                 setLayout();
             }
             @Override

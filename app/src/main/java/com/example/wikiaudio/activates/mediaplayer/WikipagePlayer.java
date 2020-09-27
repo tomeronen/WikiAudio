@@ -1,10 +1,11 @@
 package com.example.wikiaudio.activates.mediaplayer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
@@ -16,24 +17,26 @@ import java.util.concurrent.ExecutorService;
 public class WikipagePlayer implements TextToSpeech.OnInitListener{
 
     private static final String TAG = "WikipagePlayer";
+    private static final Locale ENGLISH = Locale.ENGLISH;
+    private static final float READING_SPEED = 1f;
+    private static final float VOICE_PITCH = 1;
 
     private final Context context;
+
     private final ExecutorService threadPool;
-    private Locale language;
-    private final float speed;
-    private boolean playingUrl = false;
-    private boolean playingTextToSpeech = false;
     private MediaPlayer mp;
     private TextToSpeech engine;
-    private String textToSpeak;
-    private boolean paused = false;
 
-    public WikipagePlayer(Activity activity, Locale language, float speed) {
+    private boolean playingUrl = false;
+    private boolean playingTextToSpeech = false;
+
+    private boolean paused = false;
+    private String textToSpeak;
+
+    public WikipagePlayer(AppCompatActivity activity) {
         this.context = activity.getApplicationContext();
-        this.language = language;
-        this.speed = speed;
-        mp = new MediaPlayer();
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
+        mp = new MediaPlayer();
     }
 
     /**
@@ -127,8 +130,7 @@ public class WikipagePlayer implements TextToSpeech.OnInitListener{
      * resumes playing after paused.
      */
     public void resumePlaying() {
-        if(paused)
-        {
+        if(paused) {
             mp.start();
         }
     }
@@ -138,22 +140,16 @@ public class WikipagePlayer implements TextToSpeech.OnInitListener{
      * when the text to speech engine is ready. what do you do.
      * @param status
      */
-        @Override
+    @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            //Setting speech Language
-            engine.setLanguage(language);
-            engine.setPitch(1);
-            engine.setSpeechRate(speed);
-            if(textToSpeak != null)
-            {
-                speakText(textToSpeak);
-            }
-            else
-            {
-                engine.speak("text to speech error.",
-                        TextToSpeech.QUEUE_FLUSH,
-                        null, null);
+            engine.setLanguage(ENGLISH);
+            engine.setSpeechRate(READING_SPEED);
+            engine.setPitch(VOICE_PITCH);
+            if (textToSpeak != null) {
+                speakText();
+            } else {
+                engine.speak("text to speech error.", TextToSpeech.QUEUE_FLUSH, null, null);
             }
         }
     }
@@ -161,14 +157,12 @@ public class WikipagePlayer implements TextToSpeech.OnInitListener{
     /**
      * 'specks' the given text.
      * (default engine can only handle small blocks of text.)
-     * @param textToSpeak the text to speak.
      */
-    private void speakText(String textToSpeak) {
+    private void speakText() {
         for (int start = 0; start < textToSpeak.length(); start += 200) {
-            String curBlockText = textToSpeak.substring(start, Math.min(textToSpeak.length(), start + 200));
-            engine.speak(curBlockText,
-                    TextToSpeech.QUEUE_ADD,
-                    null, null);
+            String curBlockText = textToSpeak.substring(start, Math.min(textToSpeak.length(),
+                    start + 200));
+            engine.speak(curBlockText, TextToSpeech.QUEUE_ADD, null, null);
         }
     }
 

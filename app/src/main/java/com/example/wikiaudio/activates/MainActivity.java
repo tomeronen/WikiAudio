@@ -109,7 +109,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
-        //todo what would we like to add? prob mediaplayer related
+        if (mediaPlayer != null) {
+            mediaPlayer.checkForActivePlaylist();
+            // todo add map zoom on article if possible
+            // todo tabs - show current playlist and mark played wikipage if possible
+        }
     }
 
     @Override
@@ -127,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements
         appData =((WikiAudioApp) getApplication()).getAppData();
         //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
         //it needs an activity
-        Holder.getInstance(activity);
+        Holder.getInstance(activity, appData);
         chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
 
