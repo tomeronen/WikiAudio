@@ -107,8 +107,13 @@ public class MediaPlayerFragment extends Fragment {
                 return;
             }
             if (player.getIsPlaying()) {
-                player.pause();
-                playButton.change(true);
+                if (player.getIsPaused()) {
+                    player.resume();
+                    playButton.change(false);
+                } else {
+                    player.pause();
+                    playButton.change(true);
+                }
             } else {
                 player.playCurrent();
                 playButton.change(false);

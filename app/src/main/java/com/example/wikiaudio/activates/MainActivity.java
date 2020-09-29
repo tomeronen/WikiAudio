@@ -112,13 +112,6 @@ public class MainActivity extends AppCompatActivity implements
             mediaPlayer.checkForActivePlaylist();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
-    }
-
     /**
      * Pretty self-explanatory, really.
      */

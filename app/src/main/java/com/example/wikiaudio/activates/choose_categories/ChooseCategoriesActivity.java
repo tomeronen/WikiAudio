@@ -133,10 +133,4 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
-    }
 }

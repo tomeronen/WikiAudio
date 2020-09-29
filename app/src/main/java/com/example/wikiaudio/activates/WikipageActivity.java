@@ -87,13 +87,6 @@ public class WikipageActivity extends AppCompatActivity {
         initOnClickButtons();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
-    }
-
     /**
      * Pretty self-explanatory, really. Will finish the activity if bad intents were given.
      */

@@ -14,19 +14,20 @@ public class MediaPlayer {
     private static final String TAG = "MediaPlayer";
 
     private Activity activity;
-    private WikipagePlayer player;
+    private PlaylistPlayer player;
     private AppData appData;
     private MediaPlayerFragment mpFragment;
 
     private CurrentlyPlayed currentlyPlayed;
     private boolean isPlaying = false;
+    private boolean isPaused = false;
 
 
     public MediaPlayer(Activity activity, AppData appData, MediaPlayerFragment mediaPlayerFragment) {
         this.activity = activity;
         this.appData = appData;
         mpFragment = mediaPlayerFragment;
-        player = Holder.wikipagePlayer;
+        player = Holder.playlistPlayer;
         checkForActivePlaylist();
     }
 
@@ -42,22 +43,21 @@ public class MediaPlayer {
         }
     }
 
-    public boolean getIsPlaying() {
-        return isPlaying;
-    }
-
-    public void pauseForActivityChange() {
-        Log.d(TAG, "pauseForActivityChange: :)");
-    }
-
     public void pause() {
         player.pausePlaying();
-        appData.getCurrentlyPlayed().setIsPlaying(false);
-        isPlaying = false;
+        isPaused = true;
+//        appData.getCurrentlyPlayed().setIsPlaying(false); todo maybe add a paused func
+    }
+
+    public void resume() {
+        player.resumePlaying();
+        isPaused = false;
+        isPlaying = true;
     }
 
     public void play(Playlist playlist, int index) {
-        if (playlist == null || index < 0 || playlist.getWikipageByIndex(index) == null) {
+        if (playlist == null || index < 0 || index >= playlist.size() ||
+                playlist.getWikipageByIndex(index) == null) {
             Log.d(TAG, "play: null playlist/wikipage or bad index");
             return;
         }
@@ -68,13 +68,14 @@ public class MediaPlayer {
         }
 
         if (isPlaying) {
+            player.stopPlayer();
             isPlaying = false;
-            pause();
         }
 
-        Wikipage wikipage = playlist.getWikipageByIndex(index);
-        isPlaying = player.playWikipage(wikipage);
-        updateMediaPlayerVars(playlist, index, wikipage);
+        isPlaying = player.playPlaylistFromIndex(playlist, index);
+        isPaused = false;
+
+        updateMediaPlayerVars(playlist, index, playlist.getWikipageByIndex(index));
         displayWhatIsBeingPlayed(previousPlaylist);
     }
 
@@ -83,8 +84,7 @@ public class MediaPlayer {
             return;
         }
         if (currentlyPlayed != null) {
-            play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex());
-            //todo resume from minute x - not  a must
+            player.resumePlaying();
         } else {
             Log.d(TAG, "playCurrent: can't play current null wikipage :)");
         }
@@ -114,12 +114,25 @@ public class MediaPlayer {
         play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex() + 1);
     }
 
-    public AppData getAppData() {
-        return appData;
-    }
+    /**
+     * Used for when the (PlaylistPlayer) player continues to its next wikipage on the playlist.
+     */
+    public void updateNextWikipage() {
+        if (currentlyPlayed == null || !currentlyPlayed.isValid()) {
+            Log.d(TAG, "updateNextWikipage: currentlyPlayed is null, nothing to display");
+            return;
+        }
 
-    public Activity getActivity() {
-        return activity;
+        Playlist playlist = currentlyPlayed.getPlaylist();
+        int index = currentlyPlayed.getIndex() + 1;
+        if (index <= 0  || index >= playlist.size()) {
+            Log.d(TAG, "updateNextWikipage: bad index");
+            return;
+        }
+        Wikipage wikipage = playlist.getWikipageByIndex(index);
+
+        updateMediaPlayerVars(playlist, index, wikipage);
+        displayWhatIsBeingPlayed(null);
     }
 
     private void updateMediaPlayerVars(Playlist playlist, int index, Wikipage wikipage) {
@@ -140,7 +153,7 @@ public class MediaPlayer {
         Wikipage wikipage = currentlyPlayed.getWikipage();
         int index = currentlyPlayed.getIndex();
 
-        // map zoom in on wikipage
+        // zoom in on wikipage (map)
         if (wikipage.getLat() != null && wikipage.getLon() != null) {
             Holder.locationHandler.markAndZoom(wikipage);
         }
@@ -168,6 +181,14 @@ public class MediaPlayer {
         return null;
     }
 
+    public AppData getAppData() {
+        return appData;
+    }
+
+    public Activity getActivity() {
+        return activity;
+    }
+
     public Wikipage getCurrentWikipage() {
         if (currentlyPlayed.isValid()) {
             return currentlyPlayed.getWikipage();
@@ -178,4 +199,13 @@ public class MediaPlayer {
     public CurrentlyPlayed getCurrentlyPlayed() {
         return currentlyPlayed;
     }
+
+    public boolean getIsPaused() {
+        return isPaused;
+    }
+
+    public boolean getIsPlaying() {
+        return isPlaying;
+    }
+
 }
