@@ -4,17 +4,12 @@ import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 public class CurrentlyPlayed {
-    private Playlist playlist;
-    private Wikipage wikipage;
-    private int index;
-    private boolean isPlaying;
+    private Playlist playlist = null;
+    private Wikipage wikipage = null;
+    private int index = -1;
+    private boolean isPlaying = false;
 
-    public CurrentlyPlayed() {
-        this.playlist = null;
-        this.wikipage = null;
-        this.index = -1;
-        this.isPlaying = false;
-    }
+    public CurrentlyPlayed() {}
 
     public CurrentlyPlayed(Playlist playlist, Wikipage wikipage, int index, boolean isPlaying) {
         this.playlist = playlist;

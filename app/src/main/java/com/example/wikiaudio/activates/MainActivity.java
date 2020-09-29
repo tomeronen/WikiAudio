@@ -63,13 +63,12 @@ public class MainActivity extends AppCompatActivity implements
     //For logs
     private static final String TAG = "MainActivity";
 
+    //Vars
     private AppCompatActivity activity;
     private AppData appData;
 
-    //Google services related (error for handling when the google service version is incorrect)
-    private static final int ERROR_DIALOG_REQUEST = 9002;
-
     //Location related
+    private static final int ERROR_DIALOG_REQUEST = 9002;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Boolean mLocationPermissionGranted = false;
     private Boolean isGPSEnabled = false;
@@ -84,14 +83,15 @@ public class MainActivity extends AppCompatActivity implements
     private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
 
+    //Categories
+    private List<String> chosenCategories;
+
     //Views
     private TabLayout tabs;
     private ProgressBar loadingIcon;
     private ImageButton chooseCategoriesButton;
     private ViewPager viewPager;
 
-    // idk
-    private List<String> chosenCategories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

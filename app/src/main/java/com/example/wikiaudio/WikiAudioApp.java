@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.data.AppData;
 
 import java.util.concurrent.ExecutorService;
@@ -28,8 +27,6 @@ public class WikiAudioApp extends Application {
 
     private AppData appData;
     private Activity activeActivity;
-    private Playlist activePlaylist;
-    private int activeTrack;
 
     @Override
     public void onCreate() {
@@ -39,8 +36,7 @@ public class WikiAudioApp extends Application {
         executorService = Executors.newFixedThreadPool(TOTAL_THREADS);
     }
 
-    public AppData getAppData()
-    {
+    public AppData getAppData() {
         return appData;
     }
 
@@ -80,19 +76,4 @@ public class WikiAudioApp extends Application {
         return executorService;
     }
 
-    public void updateActivePlaylist(Playlist playlist) {
-        activePlaylist = playlist;
-    }
-
-    public Playlist getActivePlaylist() {
-        return activePlaylist;
-    }
-
-    public void updateActiveTrack(int index) {
-        activeTrack = index;
-    }
-
-    public int getActiveTrack() {
-        return activeTrack;
-    }
 }
