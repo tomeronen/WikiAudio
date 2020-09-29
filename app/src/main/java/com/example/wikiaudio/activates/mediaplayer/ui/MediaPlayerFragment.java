@@ -63,6 +63,7 @@ public class MediaPlayerFragment extends Fragment {
         playButton = fragmentInflated.findViewById(R.id.playPauseButton);
         nextButton = fragmentInflated.findViewById(R.id.nextButton);
         wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
+        wikipageTitleView.setSelected(true);
         playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
         homeButton = fragmentInflated.findViewById(R.id.homeButton);
         searchButton = fragmentInflated.findViewById(R.id.searchButton);
