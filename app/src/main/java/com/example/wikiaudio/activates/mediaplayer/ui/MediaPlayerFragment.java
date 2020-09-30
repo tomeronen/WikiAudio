@@ -209,11 +209,11 @@ public class MediaPlayerFragment extends Fragment {
             //if we're in SearchPageActivity, we change nothing
             if (activeActivity.getLocalClassName().equals("activates.search_page.SearchPageActivity")) {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on SearchPageActivity");
+                ((SearchPageActivity) getActiveActivity()).openSearchBar();
             } else {
                 // ow, redirects to the SearchPageActivity
                 Intent searchPageIntent  = new Intent(player.getActivity(), SearchPageActivity.class);
-                startActivityForResult(searchPageIntent, CHOOSE_CATEGORY_TAG);
-//                startActivity(searchPageIntent);
+                startActivity(searchPageIntent);
             }
         });
 
@@ -230,7 +230,7 @@ public class MediaPlayerFragment extends Fragment {
             } else {
                 // ow, redirects to the ChooseCategoriesActivity
                 Intent chooseCategories = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
-                startActivity(chooseCategories);
+                startActivityForResult(chooseCategories, CHOOSE_CATEGORY_TAG);
             }
         });
     }

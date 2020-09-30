@@ -32,7 +32,6 @@ import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 
 public class WikipageActivity extends AppCompatActivity {
     private static final String TAG = "WikipageActivity";
@@ -117,9 +116,7 @@ public class WikipageActivity extends AppCompatActivity {
     private void initOnClickButtons() {
         recordButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, WikiRecordActivity.class);
-            Gson gson = new Gson();
-            String wiki = gson.toJson(wikipage);
-            intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+            intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wikipage.getTitle());
             startActivity(intent);
         });
 

@@ -22,7 +22,7 @@ public class PlaylistsManager {
     private static AppCompatActivity activity;
     private static List<Playlist> playlists = new ArrayList<>();
     private static Playlist nearby;
-//    private static Playlist search;
+    private static Playlist searchPlaylists;
 
     private MediaPlayer mediaPlayer;
 
@@ -75,7 +75,8 @@ public class PlaylistsManager {
      * @return the playlist created.
      */
     public Playlist createSearchBasedPlaylist(String query) {
-        return new Playlist(query, "search");
+        searchPlaylists = new Playlist(query, "search");
+        return searchPlaylists;
 
     }
 
@@ -99,6 +100,9 @@ public class PlaylistsManager {
         for (Playlist playlist: playlists) {
             if (playlist.getTitle().equals(playlistTitle))
                 return playlist;
+        }
+        if (searchPlaylists != null && searchPlaylists.getTitle().equals(playlistTitle)) {
+            return searchPlaylists;
         }
         return null;
     }

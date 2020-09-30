@@ -2,6 +2,7 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -51,6 +52,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
 
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
@@ -128,25 +131,24 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // TODO crashed the app on resume..this is used for updating chosen categories
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == CHOOSE_CATEGORY_TAG) {
-//            if(resultCode == Activity.RESULT_OK){
-//                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-//                if(dataSaved)
-//                {
-//                    chosenCategories = ((WikiAudioApp) getApplication())
-//                            .getAppData().getChosenCategories();
-//                    this.loadPlaylists();
-//                }
-//            }
-//            if (resultCode == Activity.RESULT_CANCELED) {
-//                // todo? why is this empty
-//            }
-//        }
-//    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_CATEGORY_TAG) {
+            if(resultCode == Activity.RESULT_OK){
+                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
+                if(dataSaved)
+                {
+                    chosenCategories = ((WikiAudioApp) getApplication())
+                            .getAppData().getChosenCategories();
+                    this.loadPlaylists();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                // todo? why is this empty
+            }
+        }
+    }
 
     /**
      * Pretty self-explanatory, really.
@@ -197,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void setOnClickButtons() {
         chooseCategoriesButton.setOnClickListener(v -> {
-            Intent chooseCategoriesIntent =  new Intent(activity, ChooseCategoriesActivity.class);
-            startActivity(chooseCategoriesIntent);
+            Intent chooseCategories = new Intent(this, ChooseCategoriesActivity.class);
+            startActivityForResult(chooseCategories, CHOOSE_CATEGORY_TAG);
         });
     }
 
@@ -245,15 +247,17 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
                 // when first playlist fragment has data stop loading icon.
-                playListsFragmentAdapter.getItem(0).
-                        wikipagePlayListRecyclerViewAdapter.
-                        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                            @Override
-                            public void onChanged() {
-                                super.onChanged();
-                                loadingIcon.setVisibility(View.GONE);
-                            }
-                        });
+                if(playListsFragmentAdapter.getCount() > 0) {
+                    playListsFragmentAdapter.getItem(0).
+                            wikipagePlayListRecyclerViewAdapter.
+                            registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                                @Override
+                                public void onChanged() {
+                                    super.onChanged();
+                                    loadingIcon.setVisibility(View.GONE);
+                                }
+                            });
+                }
             });
         }).start();
     }
@@ -505,43 +509,4 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-//    private void testUploadFile() {
-//        FileManager fileManager = new FileManager(this);
-//        String fp = fileManager.getFilePath("BenDeLaCreme",
-//                1,
-//                3)
-//                + "." + "3gp";
-//        String fileName = "BenDeLaCreme.3gp";
-//        wikipedia.uploadFile(fileName,fp);
-//    }
-
-//    private void testChooseCategoriesActivity() {
-//        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
-//        startActivity(intent);
-//    }
-
-//    private void testWikiRecordActivity() {
-//        final Wikipage testPage = new Wikipage();
-//        String pageName = "Hurricane_Irene_(2005)";
-//        List<PageAttributes> pageAttributes = new ArrayList<>();
-//        pageAttributes.add(PageAttributes.title);
-//        pageAttributes.add(PageAttributes.content);
-//        wikipedia.getWikipage(pageName,
-//                pageAttributes,
-//                testPage,
-//                new WorkerListener() {
-//                    @Override
-//                    public void onSuccess() {
-//                        Intent intent = new Intent(activity, WikiRecordActivity.class);
-//                        Gson gson = new Gson();
-//                        String wiki = gson.toJson(testPage);
-//                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
-//                        startActivity(intent);
-//                    }
-//                    @Override
-//                    public void onFailure() {
-//                    }
-//                }
-//        );
-//    }
 }
