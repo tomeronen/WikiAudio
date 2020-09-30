@@ -42,18 +42,107 @@ public class WikipageDataManager {
         if(wikipagesData != null) // we were initialized.
         {
             Wikipage wikipage = wikipagesData.getOrDefault(name, null);
-            if(wikipage != null) //  we already have the wanted page data. (todo check we have all attributes)
+            if(wikipage != null && (!attributes.contains(PageAttributes.content)
+                    || wikipage.getSections() != null
+                    &&  !attributes.contains(PageAttributes.thumbnail))) //  we already have the wanted page data. (todo check we have all attributes)
             {
-                return wikipage;
+                    return wikipage;
             }
             else // we don't have the data -> load it.
             {
                 Wikipage page = WikiServerHolder.getInstance().getPage(name, attributes);
-                this.setWikipage(page);
-                return page;
+                if(wikipage != null)
+                {
+                    // we had a wikipage just without sections, add sections to page.
+                    wikipage.setSections(page.getSections());
+                    return wikipage;
+
+                }
+                else
+                {  // there was no data on the page, set a new page.
+                    this.setWikipage(page);
+                    return page;
+                }
             }
         }
         throw new IOException(); // attempt to get page from uninitialized WikipageDataManager.
+    }
+
+    private boolean haveAttributes(Wikipage wikipage, List<PageAttributes> attributes) {
+        boolean haveAttributes = true;
+        if(attributes.contains(PageAttributes.title))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+
+        }
+        if(attributes.contains(PageAttributes.url))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.content))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.description))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.categories))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.indicators))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.watchers))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.thumbnail))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.coordinates))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+        if(attributes.contains(PageAttributes.audioUrl))
+        {
+            if(wikipage.getTitle() == null)
+            {
+                return false;
+            }
+        }
+
+        return haveAttributes;
     }
 
     public void setWikipage(Wikipage wikipage)

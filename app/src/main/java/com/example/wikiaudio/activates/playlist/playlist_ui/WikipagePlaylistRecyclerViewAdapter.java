@@ -132,7 +132,8 @@ public class WikipagePlaylistRecyclerViewAdapter extends
                 if (wikipage != null && playlist != null) {
                     int index = playlist.getIndexByWikipage(wikipage);
                     if (index > -1) {
-                        Intent WikipageIntent = new Intent(PlaylistsManager.getActivity(), WikipageActivity.class);
+                        Intent WikipageIntent = new Intent(PlaylistsManager.getActivity(),
+                                WikipageActivity.class);
                         WikipageIntent.putExtra("playlistTitle", playlist.getTitle());
                         WikipageIntent.putExtra("index", index);
                         PlaylistsManager.getActivity().startActivity(WikipageIntent);

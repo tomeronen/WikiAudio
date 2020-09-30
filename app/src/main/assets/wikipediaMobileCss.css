@@ -1,0 +1,291 @@
+/**
+You are editing the global css file for all mobile site users.
+With Great Power Comes Great Responsibility.
+
+Some words of caution:
+* Avoid any changes which impact layout on a mobile device.
+** Please be careful not to introduce any margin / padding rules. These should be done inside the template itself via an inline style.
+** Be especially cautious when a template is likely to be used within the top 480px of the screen (the content that the user will see first on a mobile device).
+* Do not use display:none. Instead edit the template and markup the element you want to hide with the `nomobile` class.
+* Try to keep rules as generic and minimal as possible. Do not have 2 selectors doing the same thing. Introduce a common class and use that instead.
+* For big changes consult the [https://grafana.wikimedia.org/dashboard/db/mobile-2g grafana dashboard] to ensure you don't introduce any performance regressions.
+* Group common css rules together where possible.
+
+Do not put specific styles for the following into this file:
+
+== Template:Navbar (.navbar) ==
+See [[Template:Navbar/styles.css]] ([[Template_talk:Navbar#Request%3A_Add_template_styles_to_existing_stylesheet]])
+
+== Template:Hlist (.hlist) ==
+See [[Template:Hlist/styles.css]]
+
+*/
+
+/* Mobile template hacks (see phab T56176)
+If you are looking for the following, please update your template to use TemplateStyles:
+.mobile-float-reset {
+	float: none !important;
+	width: 100% !important;
+}
+
+*/
+
+
+/* Hide the images */
+.geo-nondefault, .geo-multi-punct,
+/* Hide stuff meant for accounts with special permissions. Made visible again in
+   [[MediaWiki:Group-sysop.css]], [[MediaWiki:Group-patroller.css]] and
+   [[MediaWiki:Group-autoconfirmed.css]]. */
+.checkuser-show,
+.sysop-show,
+.templateeditor-show,
+.extendedmover-show,
+.patroller-show,
+.extendedconfirmed-show,
+.autoconfirmed-show,
+/* Copied from Common.css - allow for hiding text in compact form e.g. clean up templates */
+.hide-when-compact,
+/* portal pages are badly formatted. Until this changes these should be hidden. (see https://phabricator.wikimedia.org/T86495) */
+.noprint.portal {
+	display: none;
+}
+
+/* For linked citation numbers and document IDs, where
+   the number need not be shown on a screen or a handheld,
+   but should be included in the printed version
+TODO: Move to Citation template when templates have stylesheets
+See https://www.mediawiki.org/wiki/Requests_for_comment/Allow_styling_in_templates
+*/
+@media screen, handheld {
+	.citation *.printonly {
+		display: none;
+	}
+}
+/*
+Should be moved into Template:Cite_web
+Styling for citations (CSS3). Breaks long urls, etc., rather than overflowing box */
+.citation {
+	word-wrap: break-word;
+}
+
+/*
+.infobox
+DO NOT style infobox's here. That should be taken care of in the associated templates via template styles. Styles here will lead to flash of unstyled content on mobile.
+*/
+
+/* Default styling for Navbar template
+TODO: Move to Navbar template ASAP
+*/
+.navbar {
+	display: inline;
+	font-size: 88%;
+	font-weight: normal;
+}
+.navbar ul {
+	display: inline;
+	white-space: nowrap;
+}
+.navbar li {
+	word-spacing: -0.125em;
+}
+.navbar.mini li span {
+	font-variant: small-caps;
+}
+/* Navbar styling when nested in infobox and navbox */
+.navbox .navbar,
+.infobox .navbar {
+	font-size: 100%;
+}
+.navbox .navbar {
+	display: block;
+}
+.navbox-title .navbar {
+	/* @noflip */
+	float: left;
+	/* @noflip */
+	text-align: left;
+	/* @noflip */
+	margin-right: 0.5em;
+	width: 6em;
+}
+/* Unbulleted lists e.g. Barack Obama page*/
+.plainlist ul {
+	list-style: none;
+	padding-left: 0; /* Reset Minerva defaults */
+}
+
+.visualhide {
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Geographical coordinates hidden in mobile. Any styles relating to them should be put inside
+.[[Template:Coord/link]]
+ */
+
+/* Prevent line breaks in silly places:
+   1) Where desired
+   2) Links when we don't want them to
+   3) Bold "links" to the page itself
+   4) Ref tags with group names <ref group="Note"> --> "[Note 1]"
+Please document here what pages use this
+Enabled
+*/
+.mw-parser-output .nowrap,
+.nowraplinks a,
+.nowraplinks .selflink,
+sup.reference a {
+	white-space: nowrap;
+}
+.mw-parser-output .infobox .nowrap {
+	white-space: normal !important;
+}
+/* But allow wrapping where desired: */
+.wrap,
+.wraplinks a {
+	white-space: normal;
+}
+
+/* Generic class for Times-based serif, texhtml class for inline math */
+.times-serif,
+span.texhtml {
+	font-family: serif;
+}
+span.texhtml {
+	white-space: nowrap;
+}
+
+/* Enable custom list style types for lists of references */
+.reflist ol.references {
+	list-style-type: inherit;
+}
+
+/* Hanging indentation for Template:Refbegin */
+.refbegin-hanging-indents > ul,
+.refbegin-hanging-indents > dl {
+	list-style-type: none;
+	margin-left: 0;
+}
+.refbegin-hanging-indents > ul > li,
+.refbegin-hanging-indents > dl > dd {
+	margin-left: 0;
+	padding-left: 1.0em;
+	text-indent: -1.0em;
+	list-style: none;
+}
+
+/* Prevent flags in tables from collapsing
+Fix for T116318
+*/
+.flagicon img {
+	min-width: 25px;
+}
+
+/* Prevent unnecessary margin at the bottom of centralnotices */
+.cnotice {
+	margin-bottom: 0 !important;
+}
+
+
+/* The message body cell(s), such as for {{Commonscat}}.
+ * this is a very small subset of the styles from Common.css
+ * just to make sure the box isn't squashed without any spacing
+ * which looks out of place with visuals of other nearby elements
+ */
+.mbox-text {
+	/* @noflip */
+	padding: 0.25em 0.9em;
+}
+
+/**
+******************DEPRECATED STYLES ************************************
+These styles will be removed shortly. Please see inline comments.
+**/
+
+
+/*
+Generate interpuncts
+FIXME: Move to template.
+*/
+/* Can be removed when T169315 is resolved */
+#content .hlist-separated li:after {
+	font-size: 0.8em;
+	color: #333;
+}
+/*
+FIXME: DUPLICATES Template:Hlist/styles.css
+Note the mobile skin provides a `hlist-separated` class for this purpose. Use this class name alongside the hlist class instead as this will result in a FOUC.
+Should be removed and moved to templates.
+*/
+/* Counter hlist indenting of Minerva*/
+.mw-parser-output .hlist ul,
+.mw-parser-output .hlist ol {
+	padding-left: 0;
+}
+/* reset hlist margins of Minerva
+do not add li here (see T235416) */
+.mw-parser-output .hlist dd,
+.mw-parser-output .hlist dt {
+	margin-right: 0;
+}
+/* do not add li here. Minerva provides it already*/
+.mw-parser-output .hlist dd:after {
+	content: " · ";
+	font-weight: bold;
+}
+.mw-parser-output .hlist dt:after {
+	content: ": ";
+}
+/* Should be removed and moved to templates once TemplateStyles is live */
+
+.heading-holder hlist li:after,
+.mw-parser-output .hlist dd:last-child:after,
+.mw-parser-output .hlist dt:last-child:after,
+.mw-parser-output .hlist li:last-child:after {
+	content: none;
+}
+/* Add parentheses around nested lists */
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist dd dd:first-child:before, .mw-parser-output .hlist dd dt:first-child:before, .mw-parser-output .hlist dd li:first-child:before,
+.mw-parser-output .hlist dt dd:first-child:before, .mw-parser-output .hlist dt dt:first-child:before, .mw-parser-output .hlist dt li:first-child:before,
+.mw-parser-output .hlist li dd:first-child:before, .mw-parser-output .hlist li dt:first-child:before, .mw-parser-output .hlist li li:first-child:before {
+	content: " (";
+	font-weight: normal;
+}
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist dd dd:last-child:after, .mw-parser-output .hlist dd dt:last-child:after, .mw-parser-output .hlist dd li:last-child:after,
+.mw-parser-output .hlist dt dd:last-child:after, .mw-parser-output .hlist dt dt:last-child:after, .mw-parser-output .hlist dt li:last-child:after,
+.mw-parser-output .hlist li dd:last-child:after, .mw-parser-output .hlist li dt:last-child:after, .mw-parser-output .hlist li li:last-child:after {
+	content: ") ";
+	font-weight: normal;
+}
+/* Put ordinals in front of ordered list items */
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist ol {
+	counter-reset: listitem;
+}
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist ol > li {
+	counter-increment: listitem;
+}
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist ol > li:before {
+	content: " " counter(listitem) " ";
+	white-space: nowrap;
+}
+/* Should be removed and moved to templates once TemplateStyles is live */
+.mw-parser-output .hlist dd ol > li:first-child:before,
+.mw-parser-output .hlist dt ol > li:first-child:before,
+.mw-parser-output .hlist li ol > li:first-child:before {
+	content: " (" counter(listitem) " ";
+}
+
+/* https://phabricator.wikimedia.org/T180396#5317728 */
+
+@media print {
+  .navbox, .hatnote, .ambox { display: none; }
+}

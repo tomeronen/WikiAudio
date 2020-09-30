@@ -21,8 +21,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
@@ -32,12 +30,13 @@ import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,14 +75,12 @@ public class WikipageActivity extends AppCompatActivity {
         getIntentExtras();
         initVars();
         initMediaPlayer();
-
         if (wikipageTitle != null) {
             setLayoutForTitleBased();
             setLoadingScreen();
         } else {
             setLayoutForWikipageBased();
         }
-
         initOnClickButtons();
     }
 
@@ -99,11 +96,9 @@ public class WikipageActivity extends AppCompatActivity {
      */
     private void getIntentExtras() {
         Intent intent = getIntent();
-
         playlistTitle = intent.getStringExtra("playlistTitle");
         wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
         wikipageTitle = intent.getStringExtra("title");
-
         if (!((wikipageTitle == null && playlistTitle != null && wikipageIndexInPlaylist > -1)
             || (wikipageTitle != null && playlistTitle == null)
             ||  (wikipageTitle != null && wikipageIndexInPlaylist < 0))) {
@@ -178,9 +173,7 @@ public class WikipageActivity extends AppCompatActivity {
     private void initOnClickButtons() {
         recordButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, WikiRecordActivity.class);
-            Gson gson = new Gson();
-            String wiki = gson.toJson(wikipage);
-            intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
+            intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wikipage.getTitle());
             startActivity(intent);
         });
 
@@ -202,8 +195,6 @@ public class WikipageActivity extends AppCompatActivity {
                 playButton.performClick();
             }
         });
-
-
     }
 
     /**
@@ -279,6 +270,12 @@ public class WikipageActivity extends AppCompatActivity {
                 return false;
             }
         }).into(articleImage);
+
+        // record button
+        if(wikipage.getAudioUrl() == null)
+        {
+            recordButton.setVisibility(View.VISIBLE);
+        }
 
     }
 

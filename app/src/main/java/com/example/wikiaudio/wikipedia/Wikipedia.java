@@ -259,20 +259,6 @@ public class Wikipedia {
                 // task failed with a exception.
                 activ.runOnUiThread(workerListener::onFailure);
             }
-            //todo option B one page at a time. overall longer. user might see some faster. (S.M)
-
-//                    for (String name : names) {
-//                        try {
-//                            listToFill.add(WikiServerHolder.getInstance().getPage(name, pageAttributes));
-//                        } catch (IOException e) {
-//                            // task failed with a exception.
-//                            activ.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    workerListener.onFailure();
-//                                }
-//                            });
-//                        }
         });
     }
 
@@ -284,11 +270,11 @@ public class Wikipedia {
      */
     public void uploadFile(final String fileName, final String filePath) {
         threadPool.execute(() -> {
-//                try {
-//                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
+                try {
+                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         });
     }
 

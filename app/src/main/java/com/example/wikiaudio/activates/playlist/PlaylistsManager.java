@@ -24,6 +24,8 @@ public class PlaylistsManager {
     private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
+    private static Playlist searchPlaylists;
+
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
 
@@ -65,7 +67,7 @@ public class PlaylistsManager {
         }
     }
 
-    public static List<Playlist> getPlaylists() {
+    public static List<Playlist> getPlaylists(){
         return playlists;
     }
 
@@ -107,6 +109,11 @@ public class PlaylistsManager {
             if (playlist.getTitle().equals(playlistTitle))
                 return playlist;
         }
+        if(searchPlaylists!= null &&
+                searchPlaylists.getTitle().equals(playlistTitle))
+        {
+            return searchPlaylists;
+        }
         return null;
     }
 
@@ -125,8 +132,8 @@ public class PlaylistsManager {
      * @return the playlist created.
      */
     public Playlist createSearchBasedPlaylist(String query) {
-        // todo (S.M)
-        return new Playlist(query, "search");
-
+        searchPlaylists = new Playlist(query, "search");
+        return searchPlaylists;
     }
+
 }

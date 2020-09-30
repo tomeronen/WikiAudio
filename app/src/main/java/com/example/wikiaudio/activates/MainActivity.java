@@ -55,9 +55,6 @@ import java.util.Objects;
 
 import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
 
-import static android.view.View.GONE;
-import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
-
 public class MainActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationClickListener,
@@ -206,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
                 // when first playlist fragment has data stop loading icon.
+                if(playListsFragmentAdapter.getCount() > 0)
+                {
                 playListsFragmentAdapter.getItem(0).
                         wikipagePlayListRecyclerViewAdapter.
                         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -215,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements
                                 loadingIcon.setVisibility(View.GONE);
                             }
                         });
+                }
             });
         }).start();
     }
@@ -457,8 +457,8 @@ public class MainActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CHOOSE_CATEGORY_TAG) {
             if(resultCode == Activity.RESULT_OK){
-                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-                if(dataSaved)
+                boolean dataChange = data.getBooleanExtra("dataSaved", false);
+                if(dataChange)
                 {
                     chosenCategories = ((WikiAudioApp) getApplication())
                             .getAppData().getChosenCategories();
@@ -467,6 +467,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 // todo? why is this empty
+
             }
         }
     }
