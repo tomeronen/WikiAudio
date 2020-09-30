@@ -4,12 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.google.android.material.tabs.TabLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
 
     private final List<PlaylistFragment> mFragmentList = new ArrayList<>();
+    private TabLayout tabs;
 
     public PlaylistsFragmentAdapter(FragmentManager manager) {
         super(manager);
@@ -33,5 +36,13 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
     public void refreshAllFragments() {
         for (PlaylistFragment playlistFragment: mFragmentList)
             playlistFragment.notifyAdapter();
+    }
+
+    public void setTabs(TabLayout tabs) {
+        this.tabs = tabs;
+    }
+
+    public TabLayout getTabs() {
+        return tabs;
     }
 }

@@ -90,6 +90,9 @@ public class SearchPageActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Creates the media player + navigation bar at the bottom.
+     */
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
@@ -97,13 +100,5 @@ public class SearchPageActivity extends AppCompatActivity {
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
     }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
-    }
-
 
 }

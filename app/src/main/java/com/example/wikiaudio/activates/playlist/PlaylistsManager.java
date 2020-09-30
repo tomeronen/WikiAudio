@@ -8,6 +8,7 @@ import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
+import com.example.wikiaudio.data.Holder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +19,21 @@ import java.util.List;
 public class PlaylistsManager {
     private static final String TAG = "PlaylistsHandler";
 
+    private static PlaylistsManager instance = null;
+
     private static AppCompatActivity activity;
 
     private static PlaylistsManager instance = null;
     private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
-    private static Playlist searchPlaylists;
-
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
+    private static Playlist searchPlaylists;
+
+    //    private static Playlist search;
+    private static Playlist searchPlaylists;
+    private MediaPlayer mediaPlayer;
 
     private static boolean categoryBasedPlaylistsWereCreated = false;
 
@@ -67,10 +73,14 @@ public class PlaylistsManager {
         }
     }
 
-    public static List<Playlist> getPlaylists(){
+    public static List<Playlist> getPlaylists() {
         return playlists;
     }
 
+    /**
+     * Creates a playlist based on location
+     * @param isNearby if true then overrides the current nearby playlist
+     */
     public void createLocationBasedPlaylist(double lat, double lon, boolean isNearby) {
         Playlist playlist = new Playlist(true, lat, lon);
         if (isNearby) {
@@ -96,9 +106,27 @@ public class PlaylistsManager {
         }
     }
 
+    /**
+     * creates a playlist that is the wikipage search result of query value.
+     * @param query the value to search.
+     * @return the playlist created.
+     */
+    public Playlist createSearchBasedPlaylist(String query) {
+        return new Playlist(query, "search");
+
+    }
+
+    public static void addPlaylist(Playlist playlist) {
+        if (playlist != null) {
+            playlists.add(playlist);
+        } else {
+            Log.d(TAG, "add: got null playlist");
+        }
+    }
+
     public static void displayNearbyPlaylistOnTheMap() {
         if (nearby == null) {
-            // todo create it?
+            Log.d(TAG, "displayNearbyPlaylistOnTheMap: null nearby playlist, nothing to display");
             return;
         }
         Holder.locationHandler.markPlaylist(nearby);
@@ -117,6 +145,11 @@ public class PlaylistsManager {
         return null;
     }
 
+
+    public int getIndexByPlaylist(Playlist playlist) {
+        return playlists.indexOf(playlist);
+    }
+
     public Wikipage getWikipageByPlaylistTitleAndIndex(String playlistTitle, int index) {
         Playlist playlist = getPlaylistByTitle(playlistTitle);
         return playlist.getWikipageByIndex(index);
@@ -125,6 +158,10 @@ public class PlaylistsManager {
     public static AppCompatActivity getActivity() {
         return activity;
     }
+    public Playlist getNearby() {
+        return nearby;
+    }
+
 
     /**
      * creates a playlist that is the wikipage search result of query value.
@@ -132,8 +169,9 @@ public class PlaylistsManager {
      * @return the playlist created.
      */
     public Playlist createSearchBasedPlaylist(String query) {
-        searchPlaylists = new Playlist(query, "search");
-        return searchPlaylists;
+        // todo (S.M)
+        return new Playlist(query, "search");
+
     }
 
 }

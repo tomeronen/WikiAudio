@@ -15,10 +15,16 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.MainActivity;
+import com.example.wikiaudio.activates.WikipageActivity;
 import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.search_page.SearchPageActivity;
+import com.example.wikiaudio.data.CurrentlyPlayed;
+import com.example.wikiaudio.data.Holder;
 import com.ohoussein.playpause.PlayPauseView;
+
+import java.util.Objects;
 
 /**
  * The lower bar used as the wikipages player AND user navigator.
@@ -61,6 +67,7 @@ public class MediaPlayerFragment extends Fragment {
         playButton = fragmentInflated.findViewById(R.id.playPauseButton);
         nextButton = fragmentInflated.findViewById(R.id.nextButton);
         wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
+        wikipageTitleView.setSelected(true);  // for moving text if needed
         playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
         homeButton = fragmentInflated.findViewById(R.id.homeButton);
         searchButton = fragmentInflated.findViewById(R.id.searchButton);
@@ -103,8 +110,13 @@ public class MediaPlayerFragment extends Fragment {
                 return;
             }
             if (player.getIsPlaying()) {
-                player.pause();
-                playButton.change(true);
+                if (player.getIsPaused()) {
+                    player.resume();
+                    playButton.change(false);
+                } else {
+                    player.pause();
+                    playButton.change(true);
+                }
             } else {
                 player.playCurrent();
                 playButton.change(false);
@@ -119,6 +131,53 @@ public class MediaPlayerFragment extends Fragment {
             player.playNext();
             playButton.change(!player.getIsPlaying());
         });
+
+        // clicking on the title of the wikipage redirects to the relevant WikipageActivity
+        wikipageTitleView.setOnClickListener(v -> {
+            if (player == null) {
+                Log.d(TAG, "setOnClickButtonsForPlayer: null player");
+                return;
+            }
+            CurrentlyPlayed currentlyPlayed = player.getCurrentlyPlayed();
+            if (currentlyPlayed.isValid()) {
+                Intent WikipageIntent = new Intent(getActiveActivity(), WikipageActivity.class);
+                WikipageIntent.putExtra("playlistTitle", currentlyPlayed.getPlaylist().getTitle());
+                WikipageIntent.putExtra("index", currentlyPlayed.getIndex());
+                startActivity(WikipageIntent);
+            } else {
+                Log.d(TAG, "setOnClickButtonsForPlayer: got null wikipage, nowhere to redirect");
+            }
+        });
+
+        // clicking on the title of the playlist shows its tab
+        playlistTitleView.setOnClickListener(v -> {
+            if (player == null) {
+                Log.d(TAG, "setOnClickButtonsForPlayer - playlistTitleView: null player");
+                return;
+            }
+            CurrentlyPlayed currentlyPlayed = player.getCurrentlyPlayed();
+            if (currentlyPlayed != null && currentlyPlayed.isValid() && currentlyPlayed.getPlaylist() != null) {
+                Playlist playlist = currentlyPlayed.getPlaylist();
+                int playlistIndex = Holder.playlistsManager.getIndexByPlaylist(playlist);
+                // gets the TabLayout object and selects the current playlist
+                if (playlistIndex > -1 && playlist.getPlaylistFragment() != null &&
+                        playlist.getPlaylistFragment().getPlaylistsFragmentAdapter() != null &&
+                        playlist.getPlaylistFragment().getPlaylistsFragmentAdapter().getTabs() != null ) {
+                    Activity activeActivity = getActiveActivity();
+                    if (activeActivity != null) {
+                        activeActivity.runOnUiThread(() -> {
+                            Objects.requireNonNull(playlist.getPlaylistFragment()
+                                    .getPlaylistsFragmentAdapter().getTabs().getTabAt(playlistIndex))
+                                    .select();
+                        });
+                    }
+                } else {
+                    Log.d(TAG, "setOnClickButtonsForPlayer - playlistTitleView: got bad index");
+                }
+            } else {
+                Log.d(TAG, "setOnClickButtonsForPlayer - playlistTitleView: got null playlist, nothing to show");
+            }
+        });
     }
 
     private void setOnClickButtonsForNavigationBar() {
@@ -132,7 +191,7 @@ public class MediaPlayerFragment extends Fragment {
             if (activeActivity.getLocalClassName().equals("activates.MainActivity")) {
                 Log.d(TAG, "homeButton.setOnClickListener: we're on MainActivity");
             } else {
-                // ow, redirects to the main activity AND clears all running intents
+                // ow, redirects to the main activity AND clear all running intents
                 Intent main = new Intent(player.getActivity(), MainActivity.class);
                 main.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(main);
@@ -182,6 +241,12 @@ public class MediaPlayerFragment extends Fragment {
             return null;
         }
         return player.getAppData().getWikiAudioApp().getActiveActivity();
+    }
+
+    public void togglePlayPauseButton(boolean toggle) {
+        if (playButton != null) {
+            playButton.change(toggle);
+        }
     }
 
 }

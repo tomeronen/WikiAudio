@@ -52,9 +52,11 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         holder.position = position;
         holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
+        holder.titleView.setSelected(true); // for moving text if needed
         holder.descriptionView.setText(wikipage.getDescription());
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
         holder.highlight.setVisibility(View.GONE);
+
 
         //Shows and sets the location button if that wikipage has coordinates
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
@@ -67,6 +69,12 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         if (Holder.playlistsManager != null && Holder.playlistsManager.getMediaPlayer() != null) {
             holder.playButton.setOnClickListener(v ->
                     Holder.playlistsManager.getMediaPlayer().play(playlist, position));
+            // if the media player is playing this wikipage then highlight it
+            if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
+                if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
+                    holder.highlight.setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 
@@ -128,7 +136,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             });
 
             // When long clicking on an item in the playlist, it opens its wikipage
-            view.setOnLongClickListener((View.OnLongClickListener) v -> {
+            view.setOnLongClickListener(v -> {
                 if (wikipage != null && playlist != null) {
                     int index = playlist.getIndexByWikipage(wikipage);
                     if (index > -1) {
@@ -143,7 +151,6 @@ public class WikipagePlaylistRecyclerViewAdapter extends
                 } else {
                     Log.d(TAG, "onInfoWindowClick: playlist is null :(");
                 }
-
             return false;
             });
         }

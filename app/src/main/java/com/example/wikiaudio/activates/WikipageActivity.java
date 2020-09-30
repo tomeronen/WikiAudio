@@ -21,6 +21,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.loading.LoadingActivity;
@@ -30,13 +32,12 @@ import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +57,7 @@ public class WikipageActivity extends AppCompatActivity {
     private Wikipage wikipage;
     private List<PageAttributes> pageAttributes;
 
+    //MediaPlayer
     private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
 
@@ -75,20 +77,8 @@ public class WikipageActivity extends AppCompatActivity {
         getIntentExtras();
         initVars();
         initMediaPlayer();
-        if (wikipageTitle != null) {
-            setLayoutForTitleBased();
-            setLoadingScreen();
-        } else {
-            setLayoutForWikipageBased();
-        }
+        setLayout();
         initOnClickButtons();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
     }
 
     /**
@@ -98,11 +88,9 @@ public class WikipageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         playlistTitle = intent.getStringExtra("playlistTitle");
         wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
-        wikipageTitle = intent.getStringExtra("title");
-        if (!((wikipageTitle == null && playlistTitle != null && wikipageIndexInPlaylist > -1)
-            || (wikipageTitle != null && playlistTitle == null)
-            ||  (wikipageTitle != null && wikipageIndexInPlaylist < 0))) {
-            Log.d(TAG, "onCreate: null extras in previous intent");
+
+        if (playlistTitle == null || wikipageIndexInPlaylist == -1) {
+            Log.d(TAG, "onCreate: null extras from previous activity");
             finish();
         }
     }
@@ -113,15 +101,20 @@ public class WikipageActivity extends AppCompatActivity {
     private void initVars() {
         activity = this;
         appData =((WikiAudioApp) getApplication()).getAppData();
-        loadingHelper = LoadingHelper.getInstance();
 
+        recordButton = findViewById(R.id.recordButton);
+        recordButton.setVisibility(View.GONE);
+        playButton = findViewById(R.id.playButton);
+        playButton.setVisibility(View.GONE);
+        addButton = findViewById(R.id.addButton);
+        addButton.setVisibility(View.GONE);
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
-        recordButton = findViewById(R.id.recordButton);
-        playButton = findViewById(R.id.playButton);
-        addButton = findViewById(R.id.addButton);
     }
 
+    /**
+     * Creates the media player + navigation bar at the bottom.
+     */
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
@@ -131,45 +124,8 @@ public class WikipageActivity extends AppCompatActivity {
     }
 
     /**
-     * If this activity was invoked with a title of a wikipage, we must get it from the wikiserver.
+     * Initialized the record, play and add buttons.
      */
-    private void setLayoutForTitleBased() {
-        pageAttributes = new ArrayList<>();
-        pageAttributes.add(PageAttributes.title);
-        pageAttributes.add(PageAttributes.thumbnail);
-        pageAttributes.add(PageAttributes.content);
-        pageAttributes.add(PageAttributes.url);
-        wikipage = new Wikipage();
-        fetchWikipage();
-    }
-
-    /**
-     * If we already got the wikipage, then we only need to get its data by its playlist and index.
-     */
-    private void setLayoutForWikipageBased() {
-        wikipage = Holder.playlistsManager
-                .getWikipageByPlaylistTitleAndIndex(playlistTitle, wikipageIndexInPlaylist);
-        if (wikipage == null) {
-            Log.d(TAG, "initVars: got null wikipages from getWikipageByPlaylistTitleAndIndex");
-            finish();
-        }
-        setLayout();
-    }
-
-    /**
-     * Transfers to the loading screen activity while we fetch the wikipage object from the wiki server
-     */
-    private void setLoadingScreen(){
-        int index = loadingHelper.loadWikipage(wikipage);
-        if (index == -1) {
-            Log.d(TAG, "setLoadingScreen: error loading wikipage to loading helper");
-        } else {
-            Intent loadingScreen = new Intent(activity, LoadingActivity.class);
-            loadingScreen.putExtra("index", index);
-            startActivity(loadingScreen);
-        }
-    }
-
     private void initOnClickButtons() {
         recordButton.setOnClickListener(v -> {
             Intent intent = new Intent(activity, WikiRecordActivity.class);
@@ -178,11 +134,24 @@ public class WikipageActivity extends AppCompatActivity {
         });
 
         playButton.setOnClickListener(v -> {
-            // if the user wants to only play this article, we create a playlist based on it solely
-            // and play that playlist (the user might add wikipages to this playlist)
-            Playlist playlist = new Playlist(wikipage);
-            PlaylistsManager.addPlaylist(playlist);
-            mediaPlayer.play(playlist, 0);
+            // if the media player now holds this wikipage, play it if it's on pause
+            if (mediaPlayer != null){
+                if (mediaPlayer.getCurrentWikipage() != null &&
+                        mediaPlayer.getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
+                        if (!mediaPlayer.getIsPlaying()){
+                            Log.d(TAG, "initOnClickButtons - PLAY: track was paused");
+                            mediaPlayer.playCurrent();
+                        }
+                    return;
+                }
+                Log.d(TAG, "initOnClickButtons - PLAY: CurrentWikipage() == null");
+                // create a playlist based on this wikipage solely and play it
+                Playlist playlist = new Playlist(wikipage);
+                PlaylistsManager.addPlaylist(playlist);
+                mediaPlayer.play(playlist, 0);
+           } else {
+                Log.d(TAG, "initOnClickButtons - PLAY: null media player");
+            }
         });
 
         addButton.setOnClickListener(v -> {
@@ -198,30 +167,6 @@ public class WikipageActivity extends AppCompatActivity {
     }
 
     /**
-     * Fetches the wikipage object from the wiki server
-     */
-    private void fetchWikipage() {
-        Wikipedia wikipedia = Holder.wikipedia;
-        if (wikipedia == null) {
-            Log.d(TAG, "fetchWikipage, Handler.wikipedia == null");
-            wikipedia = new Wikipedia(activity);
-
-        }
-        wikipedia.getWikipage(wikipageTitle, pageAttributes, wikipage, new WorkerListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(TAG, "onSuccess, fetchWikipage");
-                setLayout();
-            }
-            @Override
-            public void onFailure() {
-                Log.d(TAG, "fetchWikipage-getWikipage-onFailure: couldn't get the Wikipage");
-                finish();
-            }
-        });
-    }
-
-    /**
      * Pretty self-explanatory, really.
      */
 //    Because WebView consumes web content that can include HTML and JavaScript, which may cause
@@ -232,53 +177,59 @@ public class WikipageActivity extends AppCompatActivity {
 //    chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
-        if (wikipage.getTitle() == null || wikipage.getUrl() == null) {
-            Log.d(TAG, "setLayout: got null title or url");
+        wikipage = Holder.playlistsManager
+                .getWikipageByPlaylistTitleAndIndex(playlistTitle, wikipageIndexInPlaylist);
+        if (wikipage == null || wikipage.getTitle() == null || wikipage.getUrl() == null) {
+            Log.d(TAG, "setLayout: got null wikipage or title or URL");
+            finish();
         }
-        articleImage.bringToFront();
 
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl(wikipage.getUrl());
-        if(wikipage.getThumbnailSrc() == null)
-        {
+
+        //Image
+        if(wikipage.getThumbnailSrc() == null) {
             articleImage.setVisibility(View.GONE);
+            recordButton.setVisibility(View.VISIBLE);
+            playButton.setVisibility(View.VISIBLE);
+            addButton.setVisibility(View.VISIBLE);
             return;
         }
+        articleImage.bringToFront();
+        displayImage();
+    }
 
-        // load Image
+    /**
+     * Displays an animation of the wikipage's image on start
+     */
+    private void displayImage() {
         Glide.with(this)
                 .asDrawable()
                 .load(wikipage.getThumbnailSrc())
                 .listener(new RequestListener<Drawable>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                articleImage.setVisibility(View.GONE);
-                return false;
-            }
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                Target<Drawable> target, boolean isFirstResource) {
+                        articleImage.setVisibility(View.GONE);
+                        return false;
+                    }
 
-            @Override
-            public boolean onResourceReady(Drawable resource, Object model,
-                                           Target<Drawable> target,
-                                           DataSource dataSource,
-                                           boolean isFirstResource) {
-                fadeOut(articleImage);
-                articleImage.setOnClickListener(v -> {
-                    articleImage.setVisibility(View.GONE);
-                });
-                return false;
-            }
-        }).into(articleImage);
-
-        // record button
-        if(wikipage.getAudioUrl() == null)
-        {
-            recordButton.setVisibility(View.VISIBLE);
-        }
-
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model,
+                                                   Target<Drawable> target, DataSource dataSource,
+                                                   boolean isFirstResource) {
+                        fadeOut(articleImage);
+                        return false;
+                    }
+                }).into(articleImage);
     }
 
+    /**
+     * Fade out animation.
+     * @param view a view such as LinearLayout, RelativeLayout, etc.
+     */
     private void fadeOut(final View view) {
         Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fade_out);
         animFadeIn.setAnimationListener(new Animation.AnimationListener(){
@@ -290,6 +241,9 @@ public class WikipageActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationEnd(Animation arg0) {
+                recordButton.setVisibility(View.VISIBLE);
+                playButton.setVisibility(View.VISIBLE);
+                addButton.setVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
             }
         });

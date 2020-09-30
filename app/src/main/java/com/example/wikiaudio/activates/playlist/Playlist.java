@@ -15,7 +15,7 @@ public class Playlist {
 
     private static final String TAG = "Playlist";
     private static final String NEARBY_PLAYLIST_TITLE = "Nearby";
-    private static final int RADIUS = 10000; // todo let user choose?
+    private static final int RADIUS = 10000;
     private static final int MAX_WIKIPAGES = 10;
 
     private String title;
@@ -54,26 +54,6 @@ public class Playlist {
         this.title = category;
         this.playlistFragment = new PlaylistFragment(this);
         initVars(isLocationBased, lat, lon);
-        // option A
-//        final List<String> titles = new ArrayList<>();
-////        // todo preferably replace this with a func that returns wikipages, not strings, if possible
-////        Holder.wikipedia.loadSpokenPagesNamesByCategories(category, titles,
-////                new WorkerListener() {
-////                    @Override
-////                    public void onSuccess() {
-////                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
-//////                        for (String title : titles) {
-//                            loadWikipageByTitle(title);
-//////                        }
-////                        loadWikipagesByTitles(titles);
-////                        playlistFragment.notifyAdapter();
-////                    }
-////                    @Override
-////                    public void onFailure() {
-////                        Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onFailure");
-////                    }
-////                });
-
         List<Wikipage> spokenPages = new ArrayList<>();
         // option B:
         Holder.wikipedia.loadSpokenPagesByCategories(category, pageAttributes, spokenPages,
@@ -82,7 +62,7 @@ public class Playlist {
             public void onSuccess() {
                 Log.d(TAG, "Playlist: loadSpokenPagesNamesByCategories-onSuccess");
                 for(Wikipage wikipage: spokenPages)
-                {// todo (t)
+                {// todo (talk)
                     if (wikipages.size() < MAX_WIKIPAGES)
                         wikipages.add(wikipage);
                     wikipage.setPlaylist(currentPlaylist);
@@ -216,9 +196,10 @@ public class Playlist {
                     public void onSuccess() {
                         Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onSuccess");
                         // TODO Add location related condition - now it adds regardless
-                        if (wikipages.size() < MAX_WIKIPAGES)
+                        if (wikipages.size() < MAX_WIKIPAGES) {
                             wikipages.add(result);
                             result.setPlaylist(currentPlaylist);
+                        }
                         playlistFragment.notifyAdapter();
                     }
                     @Override
@@ -270,5 +251,21 @@ public class Playlist {
 
     public void addWikipage(Wikipage wikipage) {
         wikipages.add(wikipage);
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 }
