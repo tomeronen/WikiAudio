@@ -435,7 +435,7 @@ public class WikiRecordActivity extends AppCompatActivity {
     private void showDialog() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         SimpleAlertDialogFragment introDialog = new SimpleAlertDialogFragment(
-                getString(R.string.tips_and_guide_lines),
+                getString(R.string.dialog_record_intro),
                 getString(R.string.tips_button),
                 getString(R.string.dont_show_tips),
                 new DialogInterface.OnClickListener() {
