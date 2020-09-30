@@ -112,6 +112,26 @@ public class MainActivity extends AppCompatActivity implements
             mediaPlayer.checkForActivePlaylist();
     }
 
+    // TODO crashed the app on resume..this is used for updating chosen categories
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == CHOOSE_CATEGORY_TAG) {
+//            if(resultCode == Activity.RESULT_OK){
+//                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
+//                if(dataSaved)
+//                {
+//                    chosenCategories = ((WikiAudioApp) getApplication())
+//                            .getAppData().getChosenCategories();
+//                    this.loadPlaylists();
+//                }
+//            }
+//            if (resultCode == Activity.RESULT_CANCELED) {
+//                // todo? why is this empty
+//            }
+//        }
+//    }
+
     /**
      * Pretty self-explanatory, really.
      */
@@ -462,26 +482,6 @@ public class MainActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
     }
-
-    // TODO crashed the app on resume..
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == CHOOSE_CATEGORY_TAG) {
-//            if(resultCode == Activity.RESULT_OK){
-//                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-//                if(dataSaved)
-//                {
-//                    chosenCategories = ((WikiAudioApp) getApplication())
-//                            .getAppData().getChosenCategories();
-//                    this.loadPlaylists();
-//                }
-//            }
-//            if (resultCode == Activity.RESULT_CANCELED) {
-//                // todo? why is this empty
-//            }
-//        }
-//    }
 
 //    private void testUploadFile() {
 //        FileManager fileManager = new FileManager(this);

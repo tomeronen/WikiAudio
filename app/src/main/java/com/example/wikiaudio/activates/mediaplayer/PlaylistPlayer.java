@@ -26,6 +26,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     private static final float VOICE_PITCH = 1;
 
     private final Context context;
+    private AppCompatActivity activity;
     private Playlist playlist = null;
     private int index = -1;
 
@@ -42,6 +43,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     private boolean isEngineReady = false;
 
     public PlaylistPlayer(AppCompatActivity activity) {
+        this.activity = activity;
         this.context = activity.getApplicationContext();
         ttsEngine = new TextToSpeech(context, this);
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
@@ -135,17 +137,17 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     }
 
     private void playNext() {
+        activity.runOnUiThread(() -> {
+            //update visuals
+            if (Holder.playlistsManager != null &&
+                    Holder.playlistsManager.getMediaPlayer() != null) {
+                Holder.playlistsManager.getMediaPlayer().updateNextWikipage();
+            } else {
+                Log.d(TAG, "playNext: next wikipage is being " +
+                        "played but getMediaPlayer() returns null so cannot update");
+            }
+        });
         index = index + 1;
-
-        //update visuals
-        if (Holder.playlistsManager != null &&
-                Holder.playlistsManager.getMediaPlayer() != null) {
-            Holder.playlistsManager.getMediaPlayer().updateNextWikipage();
-        } else {
-            Log.d(TAG, "playNext: next wikipage is being " +
-                    "played but getMediaPlayer() returns null so cannot update");
-        }
-
         playWikipageByIndex();
     }
 
@@ -192,7 +194,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
             return;
         }
         if (playingTextToSpeech && isEngineReady) {
-            // There's no option to pause on TextToSpeech, so we re-play
+            // There's no option to pause on TextToSpeech, so we re-play :(
             Log.d(TAG, "resumePlaying: TextToSpeech section");
             playWikipageByIndexWithTextToSpeech();
             paused = false;
@@ -242,9 +244,9 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
                         if (textBlocksLeft == 0) {
                             Log.d(TAG, "onDone: textBlocksLeft == 0");
                             // the tts engine finished speaking all blocks
-//                            playNext(); todo won't update visuals
-                            index = index + 1;
-                            playWikipageByIndex();
+                            playNext(); // todo won't update visuals
+//                            index = index + 1;
+//                            playWikipageByIndex();
                         }
                     }
 
