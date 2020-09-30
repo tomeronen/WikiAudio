@@ -175,7 +175,7 @@ public class MediaPlayer {
     }
 
     public Playlist getCurrentPlaylist() {
-        if (currentlyPlayed.isValid()) {
+        if (currentlyPlayed != null && currentlyPlayed.isValid()) {
             return currentlyPlayed.getPlaylist();
         }
         return null;

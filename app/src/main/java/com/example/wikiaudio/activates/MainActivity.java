@@ -100,16 +100,32 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         initVars();
         initMap();
-        loadPlaylists();
         initMediaPlayer();
+        loadPlaylists();
         setOnClickButtons();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mediaPlayer != null)
+        if (mediaPlayer != null) {
+            // update mediaPlayer
             mediaPlayer.checkForActivePlaylist();
+
+            // display the relevant tab
+            if (tabs != null) {
+                int selectedIndex = -1;
+                if (mediaPlayer.getCurrentPlaylist() != null) {
+                    Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+                    selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
+                }
+                if (tabs.getTabAt(selectedIndex) != null) {
+                    tabs.getTabAt(selectedIndex).select();
+                } else {
+                    Log.d(TAG, "onResume: null tab at playlist's index");
+                }
+            }
+        }
     }
 
     // TODO crashed the app on resume..this is used for updating chosen categories
@@ -204,11 +220,10 @@ public class MainActivity extends AppCompatActivity implements
 
             // get current played playlist index to select in
             int selectedIndex = -1;
-            if (mediaPlayer != null && mediaPlayer.getIsPlaying()) {
+            if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
+                //
                 Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
-                if (currentPlaylist != null) {
-                    selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
-                }
+                selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
             }
 
             int finalSelectedIndex = selectedIndex;
