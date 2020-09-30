@@ -31,7 +31,6 @@ import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
-import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
@@ -201,8 +200,9 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void setOnClickButtons() {
         chooseCategoriesButton.setOnClickListener(v -> {
-            Intent chooseCategoriesIntent =  new Intent(activity, ChooseCategoriesActivity.class);
-            startActivity(chooseCategoriesIntent);
+            Intent chooseCategories = new Intent(this,
+                    ChooseCategoriesActivity.class);
+            startActivityForResult(chooseCategories, CHOOSE_CATEGORY_TAG);
         });
     }
 

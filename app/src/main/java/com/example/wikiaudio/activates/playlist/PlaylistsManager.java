@@ -4,11 +4,10 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
-import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.example.wikiaudio.data.Holder;
+import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +17,12 @@ import java.util.List;
  */
 public class PlaylistsManager {
     private static final String TAG = "PlaylistsHandler";
-
     private static PlaylistsManager instance = null;
-
     private static AppCompatActivity activity;
-
-    private static PlaylistsManager instance = null;
-    private MediaPlayer mediaPlayer;
 
     private static List<Playlist> playlists = new ArrayList<>();
     private static List<PlaylistFragment> playlistFragments = new ArrayList<>();
     private static Playlist nearby;
-    private static Playlist searchPlaylists;
 
     //    private static Playlist search;
     private static Playlist searchPlaylists;
@@ -49,13 +42,7 @@ public class PlaylistsManager {
         return instance;
     }
 
-    public static void addPlaylist(Playlist playlist) {
-        if (playlist != null) {
-            playlists.add(playlist);
-        } else {
-            Log.d(TAG, "add: got null playlist");
-        }
-    }
+
 
     public void setMediaPlayer(MediaPlayer mPlayer) {
         mediaPlayer = mPlayer;
@@ -112,7 +99,8 @@ public class PlaylistsManager {
      * @return the playlist created.
      */
     public Playlist createSearchBasedPlaylist(String query) {
-        return new Playlist(query, "search");
+        searchPlaylists = new Playlist(query, "search");
+        return searchPlaylists;
 
     }
 
@@ -162,16 +150,5 @@ public class PlaylistsManager {
         return nearby;
     }
 
-
-    /**
-     * creates a playlist that is the wikipage search result of query value.
-     * @param query the value to search.
-     * @return the playlist created.
-     */
-    public Playlist createSearchBasedPlaylist(String query) {
-        // todo (S.M)
-        return new Playlist(query, "search");
-
-    }
 
 }
