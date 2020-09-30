@@ -21,27 +21,40 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.loading.LoadingActivity;
+import com.example.wikiaudio.activates.loading.LoadingHelper;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
+import com.example.wikiaudio.wikipedia.Wikipedia;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
+import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WikipageActivity extends AppCompatActivity {
+
     private static final String TAG = "WikipageActivity";
 
     private AppCompatActivity activity;
     private AppData appData;
+    private LoadingHelper loadingHelper;
 
+    private String wikipageTitle;
     private String playlistTitle;
     private int wikipageIndexInPlaylist;
+
     private Wikipage wikipage;
+    private List<PageAttributes> pageAttributes;
 
     //MediaPlayer
     private MediaPlayerFragment mediaPlayerFragment;
@@ -72,7 +85,6 @@ public class WikipageActivity extends AppCompatActivity {
      */
     private void getIntentExtras() {
         Intent intent = getIntent();
-
         playlistTitle = intent.getStringExtra("playlistTitle");
         wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
 

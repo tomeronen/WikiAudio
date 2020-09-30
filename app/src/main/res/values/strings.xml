@@ -7,4 +7,93 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="no_wikipage_title">Click on a wikipage to play it!</string>
     <string name="save">save</string>
+    <string name="dialog_record_intro">
+
+             <big><b>There are great tips and guide lines to help you make a
+                 great recording</b></big>\n\n
+
+            would you like to see them now?  \n\n
+
+    </string>
+    <string name="tips_button">Show me tips and guid lines!</string>
+    <string name="false_button">Im ready to record</string>
+
+
+    <string name="tips_and_guide_lines">
+        <big><b>Thank you for wanting to contribute a recording to wikipedia!</b></big>\n\n
+        here are a few tips to make a great recording:\n\n
+
+        <font color="#85b4ff">
+        <li /><li>Say the section title before starting to read the section content </li>\n\n
+        </font>
+
+        <li /><li>Go over the section before you record it.</li>\n\n
+
+        <font color="#85b4ff">
+        <li /><li>Treat links like text when reading.
+            Any vocal indication of every link would disrupt the flow.</li> \n\n
+        </font>
+
+        <li /><li>Speak more slowly than normal, by about 25%. You should have about
+        150–160 words per minute so people can comfortably hear an article.
+            The most conversational speech is at 200 words per minute or more.</li>\n\n
+
+        <font color="#85b4ff">
+        <li /><li>Warm up. The vagaries of the day can leave your vocal cords clogged, especially if you
+        have recently been eating or drinking milk-based foods such as cheese and chocolate.
+        Some gentle humming before starting to record can cleanse and moisten the vocal cords
+            leading to a better sound to the voice. </li>\n\n
+        </font>
+
+        <li /><li>Stay relaxed. Whenever you realize that your voice is becoming tenser than normal,
+        or you are having more and more trouble speaking fluently, take a break, and resume when you
+            feel muscular tension going away.</li> \n\n
+
+        <font color="#85b4ff">
+        <li /><li>Keep some fresh (not cold) water in reach, and drink some whenever you feel your
+            mouth drying out. </li> \n\n
+        </font>
+
+        <li /><li>Speak outward, with your chin up. Posture and facial expressions can affect voice
+            recordings.</li> \n\n
+
+        <font color="#85b4ff">
+        <li /><li> Record at a quiet place to reduce noise. </li> \n\n
+        </font>
+
+        <li /><li>Try standing up. If you think your voice sounds a little thin or lacking in
+            expression, standing while recording might help. Radio announcers and actors
+            regularly stand while speaking to lend additional depth and confidence to their
+            performance.</li> \n\n
+
+        <font color="#85b4ff">
+        <li /><li> Speak across the microphone or to the side of it, rather than directly into it,
+        to avoid pops and breath noise. A distance of several centimeters or inches away from
+            the microphone is recommended.</li> \n\n
+        </font>
+    </string>
+    <string name="dont_show_tips">im ready to record</string>
+
+    <string name="why_participate">
+        <big> <b>Why participate? </b></big>\n\n
+        Here are just some reasons why it is worthwhile creating spoken recordings of articles.
+        <li> Spoken articles make Wikipedia content available to those who can understand English but cannot
+            read it. </li> \n\n
+        <li> Users can listen to Wikipedia articles while they perform tasks that preclude reading but not
+            concentration (such as running, or housework). </li> \n\n
+        <li> Visually impaired users can use screen readers, but they may not be as
+            accurate as a human </li> \n\n
+        <li> Vocal performance. This is a valuable learning tool for those learning English.
+            If a link is given to the version of the page that was recorded then users may listen
+        to the words while reading them.</li> \n\n
+        <li> They are a valuable learning tool for auditory learners (people who learn most
+            effectively by listening to information delivered orally). </li> \n\n
+    </string>
+
+    <string name="license_string">
+        This sound file and all text in the article are licensed under the Creative Commons
+        Attribution-ShareAlike 3.0 Unported License, available at creative commons dot org slash
+        licenses slash by hyphen S A slash three point zero."
+    </string>
+    <string name="section_dialog_title">Sections:</string>
 </resources>

@@ -1,23 +1,9 @@
 TODO:
-(1)
-(2)
-(3) When loading wikipage, action buttons appear on top of image "animation".
+(1) finish MediaPlayer.
+(2) finish Recording.
+(3) fix chosen Categorise.
 (4)
-(5) When fetching articles from the wiki server by category, set maximum of 20 pages.
-(6) When the user's original location changes in fixed radius distance, update the Nearby playlist
-    unless it is being played.
 
-MainActivity:
-    (1) Navigation View:
-        (a) LogIn
-        (b) Old recordings
-        (c) give Feedback
-        (d)
-        (e)
-        (f)
-
-    (2) Make a Fragment for showing WikiPages that is shared between MainActivity and search page
-        activity.
 
 
 Wikipedia Logic:

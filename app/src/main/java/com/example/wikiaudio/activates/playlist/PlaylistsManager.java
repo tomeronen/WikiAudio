@@ -62,7 +62,7 @@ public class PlaylistsManager {
             if (categories != null && categories.size() > 0) {
                 for (String category : categories)
                     if(getPlaylistByTitle(category) == null) {
-                    // the category was not yet created.
+                        // the category was not yet created.
                         PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
                     }
             }
