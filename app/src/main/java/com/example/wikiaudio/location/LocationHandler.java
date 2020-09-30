@@ -30,8 +30,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class LocationHandler {
     //For logs
     private static final String TAG = "LocationHandler";
-    private static final int RADIUS = 10000; // let user choose?
     private static final int MAP_CAMERA_ZOOM_RADIUS = 15;
+    private static final int MINIMUM_DISTANCE_TO_CREATE_NEW_NEARBY_PLAYLIST = 5000;
 
     private static LocationHandler instance = null;
 
@@ -61,16 +61,6 @@ public class LocationHandler {
     public void setGoogleMap(GoogleMap map) {
         mMap = map;
     }
-//
-//    public LocationHandler(AppCompatActivity activityCompat, PlaylistsHandler playlistsHandler,
-//                           Wikipedia wikipedia, final GoogleMap mMap) {
-//        this.activity = activityCompat;
-//        this.playlistsHandler = playlistsHandler;
-//        this.wikipedia = wikipedia;
-//        this.mMap = mMap;
-//        locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-//        locationUpdates();
-//    }
 
     /**
      * What to do for when the location updates or the GPS provider goes on/off
@@ -83,14 +73,16 @@ public class LocationHandler {
                         @Override
                         public void onLocationChanged(Location location) {
                             Log.d(TAG, "locationUpdates: onLocationChanged");
-                            //Recenter the map at the user's location + create
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            LatLng currentLocation = new LatLng(location.getLatitude(),
+                                    location.getLongitude());
+                            double currentLat = currentLocation.latitude;
+                            double currentLng = currentLocation.longitude;
+
                             if (shouldUpdateZoomAndCreateNearby) {
                                 shouldUpdateZoomAndCreateNearby = false;
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
-                                Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
-                                Holder.playlistsManager.createLocationBasedPlaylist(
-                                        latLng.latitude, latLng.longitude, true);
+                                recenterMapAndCreateNearbyPlaylist(currentLocation, currentLat, currentLng);
+                            } else {
+                                checkForNearbyUpdate(currentLocation, currentLat, currentLng);
                             }
                         }
 
@@ -113,6 +105,32 @@ public class LocationHandler {
                                     Toast.LENGTH_LONG).show();
                         }
                     });
+        }
+    }
+
+    /**
+     * Recenter the map at the user's location and creates a nearby playlist.
+     */
+    private void recenterMapAndCreateNearbyPlaylist(LatLng currentLocation, double currentLat,
+                                                    double currentLng) {
+        Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_CAMERA_ZOOM_RADIUS));
+        Holder.playlistsManager.createLocationBasedPlaylist(currentLat, currentLng, true);
+    }
+
+    /**
+     * Checks if the new location is far enough for creating a new nearby playlist.
+     * @return true if so, false ow.
+     */
+    private void checkForNearbyUpdate(LatLng currentLocation, double currentLat,
+                                         double currentLng) {
+        if (Holder.playlistsManager.getNearby() != null) {
+            Playlist nearby = Holder.playlistsManager.getNearby();
+            float[] results = {0};
+            Location.distanceBetween(nearby.getLat(), nearby.getLon(), currentLat, currentLng, results);
+            if (results[0] > MINIMUM_DISTANCE_TO_CREATE_NEW_NEARBY_PLAYLIST) {
+                recenterMapAndCreateNearbyPlaylist(currentLocation, currentLat, currentLng);
+            }
         }
     }
 

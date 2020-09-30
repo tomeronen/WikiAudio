@@ -15,7 +15,7 @@ public class Playlist {
 
     private static final String TAG = "Playlist";
     private static final String NEARBY_PLAYLIST_TITLE = "Nearby";
-    private static final int RADIUS = 10000; // todo let user choose?
+    private static final int RADIUS = 10000;
     private static final int MAX_WIKIPAGES = 10;
 
     private String title;
@@ -249,4 +249,19 @@ public class Playlist {
         wikipages.add(wikipage);
     }
 
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public void setLon(double lon) {
+        this.lon = lon;
+    }
 }

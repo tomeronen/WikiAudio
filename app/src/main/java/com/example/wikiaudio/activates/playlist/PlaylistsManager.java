@@ -128,4 +128,8 @@ public class PlaylistsManager {
         return activity;
     }
 
+    public Playlist getNearby() {
+        return nearby;
+    }
+
 }
