@@ -17,7 +17,7 @@
         app:layout_constraintRight_toLeftOf="parent" />
 
     <TextView
-        android:id="@+id/title_view"
+        android:id="@+id/background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,6 +28,27 @@
         android:layout_marginEnd="3dp"
         android:layout_marginTop="3dp"
         android:layout_marginBottom="3dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical"
+        android:paddingStart="3dp"
+        android:textSize="18sp"
+        tools:ignore="RtlSymmetry" />
+
+    <TextView
+        android:id="@+id/title_view"
+        android:layout_width="336dp"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginBottom="3dp"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
         android:background="#FFFFFF"
         android:gravity="center_vertical"
         android:paddingStart="3dp"
@@ -68,7 +89,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/playButton"
         android:layout_marginEnd="3dp"
-        android:layout_marginStart="3dp"
         app:borderWidth="0dp"
         app:fabCustomSize="30dp"
         android:backgroundTint="#FFFFFF"

@@ -52,6 +52,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         holder.position = position;
         holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
+        holder.titleView.setSelected(true); // for moving text if needed
         holder.descriptionView.setText(wikipage.getDescription());
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
         holder.highlight.setVisibility(View.GONE);

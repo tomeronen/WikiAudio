@@ -156,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
         tabs = findViewById(R.id.tabs);
+        Holder.setTablayout(tabs);
     }
 
     /**
@@ -195,8 +196,11 @@ public class MainActivity extends AppCompatActivity implements
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
 
             //Add all playlists as fragments to the adapter
-            for (Playlist playlist: PlaylistsManager.getPlaylists())
+            for (Playlist playlist: PlaylistsManager.getPlaylists()) {
                 playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
+                playlist.getPlaylistFragment().setPlaylistsFragmentAdapter(playListsFragmentAdapter);
+            }
+
 
             // get current played playlist index to select in
             int selectedIndex = -1;
@@ -211,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements
             activity.runOnUiThread(() -> {
                 ViewPager viewPager = findViewById(R.id.view_pager);
                 viewPager.setAdapter(playListsFragmentAdapter);
-                tabs = findViewById(R.id.tabs);
                 tabs.setupWithViewPager(viewPager);
+                playListsFragmentAdapter.setTabs(tabs);
                 int counter = 0;
                 for (Playlist playlist: PlaylistsManager.getPlaylists()) {
                     if(counter >= tabs.getTabCount()){
@@ -239,6 +243,9 @@ public class MainActivity extends AppCompatActivity implements
         }).start();
     }
 
+    /**
+     * Creates the media player + navigation bar at the bottom.
+     */
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);

@@ -125,6 +125,9 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         initMediaPlayer();
     }
 
+    /**
+     * Creates the media player + navigation bar at the bottom.
+     */
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);

@@ -22,6 +22,7 @@ public class PlaylistFragment extends Fragment {
 
     private Playlist playlist;
     public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
+    private PlaylistsFragmentAdapter playlistsFragmentAdapter;
     private boolean setBorder = false;
 
     /**
@@ -90,5 +91,13 @@ public class PlaylistFragment extends Fragment {
 
     public void showBorder(boolean b) {
         this.setBorder = b;
+    }
+
+    public void setPlaylistsFragmentAdapter(PlaylistsFragmentAdapter playlistsFragmentAdapter) {
+        this.playlistsFragmentAdapter = playlistsFragmentAdapter;
+    }
+
+    public PlaylistsFragmentAdapter getPlaylistsFragmentAdapter() {
+        return playlistsFragmentAdapter;
     }
 }

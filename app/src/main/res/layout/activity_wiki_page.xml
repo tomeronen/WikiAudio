@@ -6,15 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activates.WikipageActivity">
 
-    <ImageView
-        android:id="@+id/thumbnailImageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_x="0dp"
-        android:layout_y="0dp"
-        android:background="#000000"
-        tools:srcCompat="@drawable/ic_launcher_foreground" />
-
     <WebView
         android:id="@+id/WikipageView"
         android:layout_width="match_parent"
@@ -70,5 +61,14 @@
         app:layout_constraintTop_toTopOf="parent"
         android:backgroundTint="#302A2B"
         app:srcCompat="@drawable/ic_menu_add" />
+
+    <ImageView
+        android:id="@+id/thumbnailImageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_x="0dp"
+        android:layout_y="0dp"
+        android:background="#000000"
+        tools:srcCompat="@drawable/ic_launcher_foreground" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

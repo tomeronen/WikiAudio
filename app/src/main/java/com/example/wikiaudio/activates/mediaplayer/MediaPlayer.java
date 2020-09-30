@@ -190,7 +190,7 @@ public class MediaPlayer {
     }
 
     public Wikipage getCurrentWikipage() {
-        if (currentlyPlayed.isValid()) {
+        if (currentlyPlayed != null && currentlyPlayed.isValid()) {
             return currentlyPlayed.getWikipage();
         }
         return null;
