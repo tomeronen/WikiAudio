@@ -21,24 +21,20 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.loading.LoadingActivity;
 import com.example.wikiaudio.activates.loading.LoadingHelper;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.server.WorkerListener;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WikipageActivity extends AppCompatActivity {
