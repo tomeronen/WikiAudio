@@ -21,25 +21,20 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.loading.LoadingActivity;
 import com.example.wikiaudio.activates.loading.LoadingHelper;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.server.WorkerListener;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WikipageActivity extends AppCompatActivity {
@@ -67,6 +62,7 @@ public class WikipageActivity extends AppCompatActivity {
     private FloatingActionButton recordButton;
     private FloatingActionButton playButton;
     private ImageButton addButton;
+    private static boolean firstTimeOpening = false;
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -74,6 +70,7 @@ public class WikipageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wiki_page);
+        firstTimeOpening = (savedInstanceState == null);
         getIntentExtras();
         initVars();
         initMediaPlayer();
@@ -197,8 +194,15 @@ public class WikipageActivity extends AppCompatActivity {
             addButton.setVisibility(View.VISIBLE);
             return;
         }
-        articleImage.bringToFront();
-        displayImage();
+        if(firstTimeOpening) // don't show image again on rotation.
+        {
+            articleImage.bringToFront();
+            displayImage();
+        }
+        else
+        {
+            articleImage.setVisibility(View.GONE);
+        }
     }
 
     /**

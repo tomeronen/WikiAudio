@@ -19,14 +19,21 @@ public class ARecorder {
     public String format= "wav";
     private Recorder recorder;
 
-    public void startRecording(String fileName) {
+    public void startRecording(File file) {
         recorder = OmRecorder.wav(
                 new PullTransport.Default(mic(), new PullTransport.OnAudioChunkPulledListener() {
                     @Override
                     public void onAudioChunkPulled(AudioChunk audioChunk) {
                     }
-                }), new File(fileName));
+                }), file);
         recorder.startRecording();
+    }
+
+    public void resumeRecording() {
+        if(recorder != null )
+        {
+            recorder.resumeRecording();
+        }
     }
 
     public void stopRecording() {
@@ -39,7 +46,7 @@ public class ARecorder {
         }
     }
 
-    private void pauseRecording() {
+    public void pauseRecording() {
 
         if (recorder != null) {
                 recorder.pauseRecording();

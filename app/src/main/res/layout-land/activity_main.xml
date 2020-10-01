@@ -21,28 +21,21 @@
         android:id="@+id/addCategoryButton"
         android:layout_width="44dp"
         android:layout_height="0dp"
-        android:background="@android:color/white"
-        android:backgroundTint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/view_pager"
         app:layout_constraintEnd_toStartOf="@id/fragmentMap"
         app:layout_constraintStart_toEndOf="@+id/tabs"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
-
-    <SearchView
-        android:id="@+id/search_bar"
-        android:layout_width="409dp"
-        android:layout_height="58dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintHorizontal_bias="1"
+        app:srcCompat="@drawable/plus"/>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
         app:layout_constraintEnd_toStartOf="@+id/fragmentMap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabs" />
@@ -51,25 +44,25 @@
         android:id="@+id/tabs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:tabMode="scrollable"
         android:background="@android:color/white"
         app:layout_constraintEnd_toStartOf="@id/addCategoryButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabMode="scrollable" />
 
     <fragment
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/view_pager"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        app:layout_constraintTop_toTopOf="parent"
         tools:context="com.example.wikiaudio.activates.MainActivity" />
 
     <fragment
-        android:id="@+id/audioPlayerFragment"
+        android:id="@+id/mediaPlayerFragment"
         android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="0dp"
         android:layout_height="110dp"

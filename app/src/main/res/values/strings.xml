@@ -96,4 +96,21 @@
         licenses slash by hyphen S A slash three point zero."
     </string>
     <string name="section_dialog_title">Sections:</string>
+
+    <string name="license_data">
+        This file will be uploaded under the following license: \n\n
+        This file is licensed under the Creative Commons Attribution-Share Alike
+        3.0 Unported license. \n\n
+        People are free:\n
+        to share – to copy, distribute and transmit the work, to remix – to adapt the work,
+        Under the following conditions:\n\n
+        attribution – You must give appropriate credit.\n\n
+        provide a link to the license, and indicate if changes were made. You may do so in any
+        reasonable manner, but not in any way that suggests the licensor endorses you or your
+        use.\n\n
+        share alike – If you remix, transform, or build
+        upon the material, you must distribute your contributions
+        under the same or compatible license as the original.\n\n
+    </string>
+    <string name="upload_dialog_title">Uploading File</string>
 </resources>

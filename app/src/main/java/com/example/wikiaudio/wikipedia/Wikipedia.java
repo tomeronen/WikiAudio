@@ -1,16 +1,23 @@
 package com.example.wikiaudio.wikipedia;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.wikipedia.workers.UploadFileWorker;
 import com.example.wikiaudio.wikipedia.server.WikiServerHolder;
+import com.example.wikiaudio.wikipedia.server.WikiUserData;
 import com.example.wikiaudio.wikipedia.server.WikipageDataManager;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,12 +36,29 @@ public class Wikipedia {
     private WikipageDataManager wikipageDataManager;
     private AppCompatActivity activ;
     AppData appData;
+    List<WikiUserData> aviableUsersData;
 
     public Wikipedia(AppCompatActivity activity) {
         activ = activity;
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
         appData = ((WikiAudioApp) this.activ.getApplication()).getAppData();
         wikipageDataManager = new WikipageDataManager();
+
+        aviableUsersData = new ArrayList<>();
+
+        // this is my main account. have permission to load files. todo make more
+        aviableUsersData.add(new WikiUserData( "tomer ronen",
+                "xTGHTibZAL3cBws",
+                false));
+
+        // future user names that still don't have permission to load files:
+            //        String BotName = "Tomer207";
+            //        String Password = "TomerRonen@9k7g4f8bhfmd5g1ukdan8rkr4idlgvc3";
+            //        String Password = "WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv";
+            //        String BotName  = "Tomer_ronen";
+            //        String userName = "Tomer207";
+            //        String password = "X94A2wgzHA36MQ2";
+
         threadPool.execute(()-> {
             try {
                 wikipageDataManager.initWikipageDataManager();
@@ -269,13 +293,26 @@ public class Wikipedia {
      * @param filePath path to file to be uploaded.
      */
     public void uploadFile(final String fileName, final String filePath) {
-        threadPool.execute(() -> {
-                try {
-                    WikiServerHolder.getInstance().uploadFile(fileName, filePath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        });
+        WorkRequest uploadWorkRequest =
+                new OneTimeWorkRequest.Builder(UploadFileWorker.class)
+                        .setInputData(
+                                new Data.Builder()
+                                        .putString(UploadFileWorker.FILE_NAME_TAG, fileName)
+                                        .putString(UploadFileWorker.FILE_PATH_TAG, filePath)
+                                        .build()
+                        )
+                        .build();
+        WorkManager
+                .getInstance(activ)
+                .enqueue(uploadWorkRequest);
+
+        //        threadPool.execute(() -> {
+//                try {
+//        WikiServerHolder.getInstance().uploadFile(fileName, filePath);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//        });
     }
 
 //todo finish implement.
@@ -310,4 +347,7 @@ public class Wikipedia {
         });
     }
 
+    public List<WikiUserData> getUsersData() {
+        return aviableUsersData;
+    }
 }

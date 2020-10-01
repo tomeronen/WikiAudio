@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -37,9 +38,13 @@ import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class WikiRecordActivity extends AppCompatActivity {
@@ -47,30 +52,60 @@ public class WikiRecordActivity extends AppCompatActivity {
     private static final int REQ_RECORD_PERMISSION = 12;
     public static final String WIKI_PAGE_TAG = "WikipageTag" ;
     WebView sectionView;
-    ProgressBar progressBar;
-    ProgressBar loadingContent;
-    FloatingActionButton recordButton;
     AppCompatActivity activity;
     Wikipage wikipage = new Wikipage();
     FileManager fileManager;
     private GestureDetectorCompat gestureDetectorCompat = null;
-    private ARecorder recorder;
-    boolean startRecording = true; // when button pressed record our stop recording?
     int curSection = 0;
     String format;
-    Button nextButton;
-    Button previousButton;
-    private TextView progressCounter;
     private int numberOfScreens;
     private int screenCounter;
     private TextView sectionTitle;
-    private FloatingActionButton uploadButton;
     private String introMsg = ", from Wikipedia, the free encyclopedia," +
             " at E N dot wikipedia dot org.";
-    private ImageButton playButton;
     private MediaPlayer mediaPlayer;
     private boolean currentlyPlaying = false;
+
+    // recording:
+    private List<SectionRecordingData> recordingDataList;
+    private ARecorder recorder;
+    boolean startRecording = true; // when button pressed record our stop recording
+
+    // Buttons:
     private FloatingActionButton showSectionsButton;
+    private ImageButton playButton;
+    private FloatingActionButton recordButton;
+    private Button nextButton;
+    private FloatingActionButton pauseButton;
+    private FloatingActionButton stopButton;
+    private FloatingActionButton deleteRecording;
+    private Button previousButton;
+    private FloatingActionButton uploadButton;
+
+
+    // recording Timer:
+    CountDownTimer recordingTimer;
+    TextView recordingTimerView;
+    private long milSeconds;
+
+    // progress bars:
+    ProgressBar progressBar;
+    ProgressBar loadingContent;
+    private TextView progressCounter;
+    private boolean recordingPaused = false;
+    private boolean recodedInitialized = false;
+
+
+    // unwanted sections for recording
+    static HashSet<String> unwantedSectionsForRecording;
+    static { //  these are sections we don't want our users to record:
+        unwantedSectionsForRecording = new HashSet<>();
+        unwantedSectionsForRecording.add("See also");
+        unwantedSectionsForRecording.add("References");
+        unwantedSectionsForRecording.add("External links");
+        unwantedSectionsForRecording.add("Notes");
+        unwantedSectionsForRecording.add("Bibliography");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +114,10 @@ public class WikiRecordActivity extends AppCompatActivity {
         initVars();
         loadContent();
         setOnClickButtons();
-        showDialog();
+        if(savedInstanceState == null)
+        { // first instance
+            showDialog();
+        }
 
         // todo there is a problem with swipe
 //        setSwipeDetector();
@@ -99,11 +137,20 @@ public class WikiRecordActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess() {
                         if(wikipage.getSections() != null) {
-                             numberOfScreens = 2 + wikipage.getSections().size();
-                            progressBar.setMax(numberOfScreens);
+                            cleanUnwantedSections(wikipage.getSections());
                             progressCounter.setText(String.format("%d/%d",screenCounter,
                                     numberOfScreens));
-                            loadWikiDataToView(curSection);
+                            // add default intro sections:
+                            wikipage.getSections().add(0,
+                                    new Wikipage.Section("Intro",
+                                    wikipage.getTitle() + introMsg));
+                            wikipage.getSections().add(0,
+                                    new Wikipage.Section("Licensing",
+                                    getResources().getString(R.string.license_string)));
+                            numberOfScreens = wikipage.getSections().size();
+                            initRecordingData();
+                            progressBar.setMax(numberOfScreens);
+                            updateUI(curSection);
                         }
                         loadingContent.setVisibility(View.GONE);
                     }
@@ -115,24 +162,48 @@ public class WikiRecordActivity extends AppCompatActivity {
                 });
     }
 
+    private void cleanUnwantedSections(List<Wikipage.Section> sections) {
+        List<Wikipage.Section> unwantedSections = new ArrayList<>();
+        for(Wikipage.Section section: sections)
+        {
+            if(section.getTitle() == null ||
+                    unwantedSectionsForRecording.contains(section.getTitle()))
+            {
+                unwantedSections.add(section);
+            }
+        }
+        sections.removeAll(unwantedSections);
+    }
+
+    private void initRecordingData() {
+        for(int i = 0; i < numberOfScreens; ++i)
+        {
+            String filePath = fileManager.getFilePath(wikipage.getTitle(),
+                    i)
+                    + "." + recorder.format;
+            File recordingFile = new File(filePath);
+            if(this.recordingDataList == null)
+            {
+                this.recordingDataList = new ArrayList<>();
+            }
+            this.recordingDataList.add(new SectionRecordingData(wikipage.getSection(i).getTitle(),
+                    recordingFile, 0));
+        }
+    }
+
     private void initVars() {
         sectionView = findViewById(R.id.section_view);
         progressBar = findViewById(R.id.progressBar);
-        recordButton = findViewById(R.id.recoredButton);
         loadingContent = findViewById(R.id.loadingContent);
         fileManager = new FileManager(this);
-        nextButton = findViewById(R.id.nextButton);
-        previousButton = findViewById(R.id.previousButton);
-        playButton = findViewById(R.id.playSection);
         activity = this;
         recorder = new ARecorder();
         format  = recorder.format;
         progressCounter = findViewById(R.id.progressBarCounter);
         sectionTitle = findViewById(R.id.sectionTitleView);
-        uploadButton = findViewById(R.id.uploadButton);
         showSectionsButton = findViewById(R.id.showSectionsButton);
         screenCounter = 0;
-
+        recordingDataList = new ArrayList<>();
         //WebView
         sectionView.setWebViewClient(new WebViewClient(){
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -151,6 +222,38 @@ public class WikiRecordActivity extends AppCompatActivity {
         sectionView.getSettings().setJavaScriptEnabled(true);
         sectionView.getSettings().setDomStorageEnabled(true);
         sectionView.getSettings().setLoadsImagesAutomatically(true);
+        milSeconds = 0;
+
+        // init Buttons:
+//        pauseButton = findViewById(R.id.pauseRecording);
+        stopButton = findViewById(R.id.stopRecording);
+        uploadButton = findViewById(R.id.uploadButton);
+        nextButton = findViewById(R.id.nextButton);
+        previousButton = findViewById(R.id.previousButton);
+        playButton = findViewById(R.id.playSection);
+        recordButton = findViewById(R.id.recoredButton);
+        deleteRecording = findViewById(R.id.deleteRecording);
+
+        // init timer:
+        recordingTimerView = findViewById(R.id.timerView);
+        recordingTimer = new CountDownTimer( Long.MAX_VALUE , 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                milSeconds++;
+                updateTimerText(milSeconds);
+            }
+
+            @Override
+            public void onFinish() {            }
+        };
+    }
+
+    private void updateTimerText(long milSeconds) {
+        long millis = milSeconds;
+        int seconds = (int) (millis / 60);
+        int minutes = seconds / 60;
+        seconds     = seconds % 60;
+        recordingTimerView.setText(String.format("%d:%02d:%02d", minutes, seconds,millis));
     }
 
     private void setSwipeDetector() {
@@ -161,7 +264,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                 {
                     Log.d("Swipe Detector", "right");
                     --curSection;
-                    loadWikiDataToView(curSection);
+                    updateUI(curSection);
                     progressBar.setProgress(curSection);
                 }
             }
@@ -172,7 +275,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                 {
                     Log.d("Swipe Detector", "left");
                     ++curSection;
-                    loadWikiDataToView(curSection);
+                    updateUI(curSection);
                     progressBar.setProgress(curSection);
                 }
             }
@@ -192,28 +295,61 @@ public class WikiRecordActivity extends AppCompatActivity {
         });
     }
 
-    private void updateProgressCounter() {
-        String counterText = String.valueOf(screenCounter + "/" + numberOfScreens);
+    private void updateProgressCounter(int curSection) {
+        String counterText = String.valueOf(curSection + "/" + numberOfScreens);
         progressCounter.setText(counterText);
     }
 
+    private void updateUI(int curSection) {
+        if(sectionNumberIsLegal(curSection))
+        {
+            progressBar.setProgress(curSection + 1); // we start at one
+            updateProgressCounter(curSection + 1); // we start at one
+            loadWikiDataToView(curSection);
+            if(existsRecording(curSection))
+            {
+                this.deleteRecording.setVisibility(View.VISIBLE);
+                this.playButton.setVisibility(View.VISIBLE);
+                this.recordingTimerView.setVisibility(View.GONE);
+//            this.pauseButton.setVisibility(View.GONE);
+                this.stopButton.setVisibility(View.GONE);
+                this.recordButton.setVisibility(View.GONE);
+
+            }
+            else
+            {
+                resetTimer();
+                this.recordingTimerView.setVisibility(View.VISIBLE);
+                this.deleteRecording.setVisibility(View.GONE);
+                this.playButton.setVisibility(View.GONE);
+//            this.pauseButton.setVisibility(View.VISIBLE);
+                this.stopButton.setVisibility(View.VISIBLE);
+                this.recordButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void resetTimer()
+    {
+        milSeconds = 0; // reset timer.
+        updateTimerText(milSeconds);
+    }
+
+    private boolean existsRecording(int curSection) {
+        if(sectionNumberIsLegal(curSection))
+        {
+            return recordingDataList != null
+                    && curSection < recordingDataList.size()
+                    && recordingDataList.get(curSection).fileRecording != null
+                    && recordingDataList.get(curSection).fileRecording.exists()
+                    && recordingDataList.get(curSection).fileRecording.length() > 0;
+        }
+        return false;
+    }
+
     private void loadWikiDataToView(int curSection) {
-        if(curSection == 0)
-        {
-            sectionView.loadData(getString(R.string.license_string),
-                    "text/html", "utf-8");
-            return;
-        }
-        if(curSection == 1)
-        {
-            sectionView.loadData(wikipage.getTitle() + introMsg,
-                    "text/html", "utf-8");
-            return;
-        }
-        curSection = curSection - 2; // we finished showing the intros. go back to zero.
-        if(curSection < wikipage.getSections().size())
-        {
-                sectionTitle.setText(wikipage.getSection(curSection).getTitle());
+        if (sectionNumberIsLegal(curSection)) {
+            sectionTitle.setText(wikipage.getSection(curSection).getTitle());
             String htmlText = wikipage.getSection(curSection).getContents();
             sectionView.loadDataWithBaseURL("https://en.wikipedia.org",
                     htmlText,
@@ -223,13 +359,62 @@ public class WikiRecordActivity extends AppCompatActivity {
         }
     }
 
+    private boolean sectionNumberIsLegal(int curSection) {
+        return wikipage != null
+                && wikipage.getSections() != null
+                && curSection < wikipage.getSections().size();
+    }
+
     private void setOnClickButtons() {
         setOnClickRecord();
         setOnClickNext();
         setOnClickPrevious();
         setOnClickUpload();
         setOnClickPlay();
+//        setOnClickPause();
+        setOnClickStop();
+        setOnClickDelete();
         setOnShowSectionsClick();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateUI(curSection);
+    }
+
+    private void setOnClickStop() {
+        this.stopButton.setOnClickListener(v -> stopRecording());
+    }
+
+//    private void setOnClickPause() {
+//    }
+
+    private void setOnClickDelete() {
+        deleteRecording.setOnClickListener(v -> {
+            if(this.recordingDataList != null
+                    && this.recordingDataList.size() > curSection
+                    && this.recordingDataList.get(curSection) != null)
+            {
+                SectionRecordingData sectionRecordingData = this.recordingDataList.get(curSection);
+                if(sectionRecordingData.fileRecording != null)
+                {
+                    try {
+                        PrintWriter writer = null;
+                            writer = new
+                                    PrintWriter(sectionRecordingData.fileRecording.getPath());
+                        writer.print("");
+                        // other operations
+                        writer.close();
+                        updateUI(curSection);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                        Toast.makeText(activity, "there was a problem with deleting the " +
+                                "recording file", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
     }
 
     private void setOnShowSectionsClick() {
@@ -237,12 +422,9 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                List<String> sectionsNames = new ArrayList<>();
-                sectionsNames.add("section One");
-                sectionsNames.add("section Two");
-                sectionsNames.add("section Three");
-                SectionsDialog introDialog = new SectionsDialog(sectionsNames);
+                SectionsDialog introDialog = new SectionsDialog(recordingDataList);
                 introDialog.show(fragmentManager, "introTag");
+
             }
         });
     }
@@ -292,7 +474,31 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                SimpleAlertDialogFragment introDialog = new SimpleAlertDialogFragment(
+                SimpleAlertDialogFragment beSureTwo =
+                        new SimpleAlertDialogFragment(getResources()
+                                .getString(R.string.license_data),
+                                "yes. upload recording.",
+                                "go back",
+                                (DialogInterface.OnClickListener) (dialog, which) -> {
+                                    for (int i = 0; i < numberOfScreens; i++) {
+                                        if (existsRecording(i)) {
+                                            String path = recordingDataList.get(i).fileRecording.getPath();
+                                            Holder.wikipedia.uploadFile(wikipage.getTitle() + "_" + i,
+                                                    path);
+                                        }
+                                    }
+                                    Toast.makeText(activity, "thank you! we are uploading your," +
+                                            " recording and it will be available on the app." +
+                                            " this might take some time. ", Toast.LENGTH_LONG).show();
+                                },
+                                (dialog, which) -> {
+                                   // what to do if he says no?
+
+                                },
+                                getString(R.string.upload_dialog_title),
+                                getDrawable(R.drawable.upload));
+
+                SimpleAlertDialogFragment beSureOne = new SimpleAlertDialogFragment(
                         "this action will upload your recording to wikipedia." +
                                 "are you sure you finished you recording? ",
                         "yes. upload recording.",
@@ -300,17 +506,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                for(int i = 0;  i < numberOfScreens; i++)
-                                {
-                                    String localPathToFile =
-                                            fileManager.getFilePath(wikipage.getTitle(),
-                                            curSection)  + "." + recorder.format;
-                                    Holder.wikipedia.uploadFile(wikipage.getTitle(),
-                                            localPathToFile);
-                                }
-                                Toast.makeText(activity, "thank you! we are uploading your," +
-                                        " recording and it will be available on the app." +
-                                        " this might take some time. ", Toast.LENGTH_SHORT).show();
+                                beSureTwo.show(fragmentManager, "beSureTwo");
                             }
                         },
                         new DialogInterface.OnClickListener() {
@@ -319,8 +515,10 @@ public class WikiRecordActivity extends AppCompatActivity {
 
                             }
                         }
-                );
-                introDialog.show(fragmentManager, "introTag");
+                        ,
+                        getString(R.string.upload_dialog_title),
+                        getDrawable(R.drawable.upload));
+                beSureOne.show(fragmentManager, "beSureOne");
             }
         });
     }
@@ -330,13 +528,11 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("Swipe Detector", "right");
+                stopRecording();
                 if(curSection > 0)
                 {
                     curSection--;
-                    loadWikiDataToView(curSection);
-                    screenCounter--;
-                    progressBar.setProgress(screenCounter);
-                    updateProgressCounter();
+                    updateUI(curSection);
                 }
             }
         });
@@ -347,43 +543,52 @@ public class WikiRecordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d("Swipe Detector", "left");
+                stopRecording();
                 if(wikipage.getSections() != null &&
                         curSection + 1 < wikipage.getSections().size())
                 {
                     ++curSection;
-                    loadWikiDataToView(curSection);
-                    screenCounter++;
-                    progressBar.setProgress(screenCounter);
-                    updateProgressCounter();
+                    updateUI(curSection);
                 }
             }
         });
     }
 
     private void setOnClickRecord() {
-        recordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean havePermissions = checkRecordingPermissions();
+        recordButton.setOnClickListener(v -> {
+            boolean havePermissions = checkRecordingPermissions();
 //                VoiceRecorder voiceRecorder  = new VoiceRecorder(fp, activity);
-                if (startRecording && havePermissions) {
-                    startRecording = false;
-                    startBlinkingAnimation(recordButton);
-                    String fp = fileManager.getFilePath(wikipage.getTitle(),
-                            curSection)
-                            + "." + recorder.format;
-                    recorder.startRecording(fp);
-                } else if (!havePermissions) {
-                    ActivityCompat.requestPermissions(activity,
-                            new String[]{Manifest.permission.RECORD_AUDIO,
-                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE},
-                            REQ_RECORD_PERMISSION);
-                } else {
-                    startRecording = true;
-                    stopBlinkingAnimation(recordButton);
-                    recorder.stopRecording();
+            if (startRecording && havePermissions) {
+                // we want to start recording and we have permissions
+                if(recordingPaused)
+                {
+                    recorder.resumeRecording();
                 }
+                else
+                {
+                    if(recordingDataList.get(curSection).fileRecording != null)
+                    {
+                        recorder.startRecording(recordingDataList.get(curSection).fileRecording);
+                        recodedInitialized = true;
+                    }
+                }
+                recordingPaused = false;
+                startRecording = false;
+                startBlinkingAnimation(recordButton);
+                recordingTimer.start();
+            } else if (!havePermissions) {
+                ActivityCompat.requestPermissions(activity,
+                        new String[]{Manifest.permission.RECORD_AUDIO,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQ_RECORD_PERMISSION);
+            } else {
+                // we want to pause recording.
+                recorder.pauseRecording();
+                recordingPaused = true;
+                startRecording = true;
+                recordingTimer.cancel();
+                stopBlinkingAnimation(recordButton);
             }
         });
     }
@@ -398,6 +603,19 @@ public class WikiRecordActivity extends AppCompatActivity {
         return writeToStoragePermission == PackageManager.PERMISSION_GRANTED &&
                 recordPermission == PackageManager.PERMISSION_GRANTED &&
                 readFromStoragePermission == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void stopRecording()
+    {
+        if(recodedInitialized)
+        {
+            recordingDataList.get(curSection).milSeconds = milSeconds;
+            recordingPaused = false;
+            startRecording = true;
+            recorder.stopRecording();
+            recodedInitialized = false;
+            updateUI(curSection);
+        }
     }
 
     @Override
@@ -451,8 +669,8 @@ public class WikiRecordActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
-                }
-        );
+                },
+        null, null); // we don't use title or icon
         introDialog.show(fragmentManager, "introTag");
     }
 
@@ -480,4 +698,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
     }
+
+
+
 }

@@ -110,7 +110,7 @@ public interface WikiServer {
 
     @Multipart
     @POST("/w/api.php")
-    Call<Object> uploadFileBot(@Part("action") RequestBody  action,
+    Call<UploadResponse> uploadFile(@Part("action") RequestBody  action,
                             @Part("filename") RequestBody  fiName,
                             @Part("format") RequestBody  format,
                             @Part("token") RequestBody  token,

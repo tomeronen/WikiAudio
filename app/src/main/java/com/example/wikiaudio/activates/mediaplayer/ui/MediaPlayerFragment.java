@@ -139,7 +139,7 @@ public class MediaPlayerFragment extends Fragment {
                 return;
             }
             CurrentlyPlayed currentlyPlayed = player.getCurrentlyPlayed();
-            if (currentlyPlayed.isValid()) {
+            if (currentlyPlayed != null && currentlyPlayed.isValid()) {
                 Intent WikipageIntent = new Intent(getActiveActivity(), WikipageActivity.class);
                 WikipageIntent.putExtra("playlistTitle", currentlyPlayed.getPlaylist().getTitle());
                 WikipageIntent.putExtra("index", currentlyPlayed.getIndex());

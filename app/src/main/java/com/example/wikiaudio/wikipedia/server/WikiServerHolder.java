@@ -31,7 +31,6 @@ import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -370,32 +369,28 @@ public class WikiServerHolder {
         return pageNames;
     }
     //todo implement.
-    public Call<Object> uploadFile(String fileName, String filePath) throws IOException {
+    public void uploadFile(String fileName,
+                           String filePath,
+                           WikiUserData userData)
+            throws IOException {
 
         // todo add tests if something went wrong.
         QuarryResponse tokenResponse = this.server.getToken().execute().body();
-
         String logintoken = null;
         if (tokenResponse != null) {
             logintoken = tokenResponse.query.tokens.logintoken;
             Log.d(UPLOAD_FILE_STATUS, "got login token");
         }
-//        String BotName = "Tomer207";
-//        String Password = "TomerRonen@9k7g4f8bhfmd5g1ukdan8rkr4idlgvc3";
-        String Password = "WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv";
-        String BotName  = "Tomer_ronen";
-//        String userName = "Tomer207";
-//        String password = "X94A2wgzHA36MQ2";
-        String userName = "tomer ronen";
-        String password = "xTGHTibZAL3cBws";
-        boolean thereIsUserData = true;
+        String name = userData.getUserName();
+        String password = userData.getPassword();
+        boolean isBot = userData.isBot();
         String csrfToken;
-        if(thereIsUserData)
+        if(!isBot)
         {
             Object loginResponse = server.loginUser("clientlogin",
                     "json",
                     logintoken,
-                    userName,
+                    name,
                     "https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin ",
                     password).execute().body();
             //todo add check if login failed
@@ -408,27 +403,27 @@ public class WikiServerHolder {
             QuarryResponse loginResponse = server.loginBot("login",
                     "json",
                     logintoken,
-                    BotName,
-                    Password).execute().body();
+                    name,
+                    password).execute().body();
             //todo add check if login failed
             QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
             csrfToken = csrfResponse.query.tokens.csrftoken;
             Log.d(UPLOAD_FILE_STATUS, "got csrf token");
         }
-        if (csrfToken != null) {
+        if (csrfToken != null) { //  we managed to get a csrf token.
             Log.d("file upload status", "got csrf token");
             Response<Object> contentResponseCall = server.checkUserRights().execute();
+            //todo here we can see if the user has the permission to load files.
             File file = new File(filePath);
             long length = file.length();
-            if (file.exists()) {
+            if (file.exists() && length > 0) {
                 sendFile(fileName, csrfToken, file);
-                return null;
             }
         }
-        return null;
     }
 
-    private void sendFile(String fileName, String csrfToken, File file) throws IOException {
+    private void sendFile(String fileName, String csrfToken, File file)
+            throws IOException {
         Log.d("file upload status", "opened file");
         RequestBody body = RequestBody.create(MediaType.parse("audio/ogg"),
                 file);
@@ -452,16 +447,25 @@ public class WikiServerHolder {
         RequestBody commentBody = RequestBody.create(
                 MediaType.parse("text/plain"),
                 "audio file from wiki audio");
-        Response<Object> execute =
-                server.uploadFileBot(actionBody,
+        Response<UploadResponse> uploadFileResponse =
+                server.uploadFile(actionBody,
                         fileNameBody,
                         formatBody,
                         csrfTokenBody,
                         ignoreBody,
                         commentBody,
                         fileData).execute();
-        Object body1 = execute.body();
-        Log.d("file upload status", "file uploaded");
+        if(uploadFileResponse.body().upload == null
+                || uploadFileResponse.body().upload.result == null
+                || !uploadFileResponse.body().upload.result.equals("Success"))
+        {
+            Log.d("file upload status", "file uploaded failed:" + fileName);
+            throw new IOException(); // we had a problem with loading the file.
+        }
+        else
+        {
+            Log.d("file upload status", "file uploaded succeeded:" + fileName);
+        }
     };
 
 
