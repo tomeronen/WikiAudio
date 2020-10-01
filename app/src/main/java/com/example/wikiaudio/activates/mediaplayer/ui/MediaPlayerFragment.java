@@ -49,8 +49,7 @@ public class MediaPlayerFragment extends Fragment {
     private ImageButton searchButton;
     private ImageButton categoriesButton;
 
-    public MediaPlayerFragment() {
-    }
+    public MediaPlayerFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -230,7 +229,7 @@ public class MediaPlayerFragment extends Fragment {
             } else {
                 // ow, redirects to the ChooseCategoriesActivity
                 Intent chooseCategories = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
-                startActivityForResult(chooseCategories, CHOOSE_CATEGORY_TAG);
+                startActivity(chooseCategories);
             }
         });
     }

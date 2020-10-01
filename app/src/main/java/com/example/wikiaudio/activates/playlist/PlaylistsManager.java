@@ -62,6 +62,9 @@ public class PlaylistsManager {
         }
     }
 
+    /**
+     * Creates a playlist for each given category
+     */
     public void createCategoryBasedPlaylists(List<String> categories) {
         if (!categoryBasedPlaylistsWereCreated && categories != null && categories.size() > 0) {
             categoryBasedPlaylistsWereCreated = true;
@@ -72,6 +75,26 @@ public class PlaylistsManager {
                 }
 
         }
+    }
+
+    public void updateCategoryBasedPlaylists(List<String> categories) {
+        if (categories == null) {
+            Log.d(TAG, "updateCategoryBasedPlaylists: null categories list");
+            return;
+        }
+        List<Playlist> newPlaylists = new ArrayList<>();
+        if (nearby != null) {
+            newPlaylists.add(0, getNearby());
+        }
+        for (String category: categories) {
+            Playlist playlist = getPlaylistByTitle(category);
+            if (playlist == null) {
+                newPlaylists.add(new Playlist(category, false, 0, 0));
+            } else {
+                newPlaylists.add(playlist);
+            }
+        }
+        playlists = newPlaylists;
     }
 
     /**
@@ -88,7 +111,6 @@ public class PlaylistsManager {
     public static void addPlaylist(Playlist playlist) {
         if (playlist != null) {
             playlists.add(playlist);
-            playListsFragmentAdapter.updatePlaylistFragmentList();
         } else {
             Log.d(TAG, "add: got null playlist");
         }

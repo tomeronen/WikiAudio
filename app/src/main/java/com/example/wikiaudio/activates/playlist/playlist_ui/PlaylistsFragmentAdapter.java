@@ -63,7 +63,6 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
         } else {
             mFragmentList.add(fragment);
         }
-        notifyDataSetChanged();
     }
 
     public void removePlaylistFragment(int position) {

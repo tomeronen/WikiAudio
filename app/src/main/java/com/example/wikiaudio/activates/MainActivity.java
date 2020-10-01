@@ -2,7 +2,6 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -112,42 +111,47 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
-        if (mediaPlayer != null) {
-            // update mediaPlayer
-            mediaPlayer.checkForActivePlaylist();
 
-            // display the relevant tab
-            if (tabLayout != null) {
-                int selectedIndex = -1;
-                if (mediaPlayer.getCurrentPlaylist() != null) {
-                    Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
-                    selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
-                }
-                if (tabLayout.getTabAt(selectedIndex) != null) {
-                    tabLayout.getTabAt(selectedIndex).select();
-                } else {
-                    Log.d(TAG, "onResume: null tab at playlist's index");
-                }
-            }
+        //MediaPlayer
+        if (mediaPlayer != null) {
+            mediaPlayer.checkForActivePlaylist();
+        }
+
+        //Categories
+        List<String> newChosenCategories =
+                ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
+        if (!(chosenCategories.containsAll(newChosenCategories) &&
+                newChosenCategories.containsAll(chosenCategories))) {
+            // categories changed
+            Log.d(TAG, "onResume: categories changed");
+            chosenCategories = ((WikiAudioApp) getApplication())
+                    .getAppData().getChosenCategories();
+            //Update category based playlists & update their display (=tabLayout)
+            Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
+            new Thread(this::displayPlaylists).start();
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CHOOSE_CATEGORY_TAG) {
-            if(resultCode == Activity.RESULT_OK){
-                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-                if(dataSaved)
-                {
+        try {
+            super.onActivityResult(requestCode, resultCode, data);
+            if (requestCode == CHOOSE_CATEGORY_TAG) {
+                if (resultCode == RESULT_OK) {
+                    //Categories changed
+                    Log.d(TAG, "onActivityResult: for CHOOSE_CATEGORY_TAG, got RESULT_OK");
                     chosenCategories = ((WikiAudioApp) getApplication())
                             .getAppData().getChosenCategories();
-//                    this.loadPlaylists();
+                    //Update category based playlists & update their display (=tabLayout)
+                    Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
+                    new Thread(this::displayPlaylists).start();
+                } else {
+                    //Categories unchanged
+                    Log.d(TAG, "onActivityResult: for CHOOSE_CATEGORY_TAG, got RESULT_CANCELED");
                 }
             }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                // todo? why is this empty
-            }
+        } catch (Exception ex) {
+            Log.d(TAG, "onActivityResult: got an exception - " + ex.toString());
         }
     }
 
@@ -227,9 +231,12 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void displayPlaylists() {
         //Add all relevant playlists as fragments to the adapter
-        playListsFragmentAdapter.updatePlaylistFragmentList();
+        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
 
-        // get current played playlist index to select in
+        playListsFragmentAdapter.updatePlaylistFragmentList();
+        playListsFragmentAdapter.notifyDataSetChanged();
+
+        //Get current played playlist index to select in
         int selectedIndex = -1;
         if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
             //
@@ -237,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements
             selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
         }
 
+        //Display the tabLayout
         int finalSelectedIndex = selectedIndex;
         activity.runOnUiThread(() -> {
             viewPager.setAdapter(playListsFragmentAdapter);
