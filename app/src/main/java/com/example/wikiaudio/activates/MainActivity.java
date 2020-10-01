@@ -31,6 +31,7 @@ import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements
     private List<String> chosenCategories;
 
     //Views
-    private TabLayout tabs;
+    private TabLayout tabLayout;
     private ProgressBar loadingIcon;
     private ImageButton chooseCategoriesButton;
     private ViewPager viewPager;
@@ -116,14 +117,14 @@ public class MainActivity extends AppCompatActivity implements
             mediaPlayer.checkForActivePlaylist();
 
             // display the relevant tab
-            if (tabs != null) {
+            if (tabLayout != null) {
                 int selectedIndex = -1;
                 if (mediaPlayer.getCurrentPlaylist() != null) {
                     Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
                     selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
                 }
-                if (tabs.getTabAt(selectedIndex) != null) {
-                    tabs.getTabAt(selectedIndex).select();
+                if (tabLayout.getTabAt(selectedIndex) != null) {
+                    tabLayout.getTabAt(selectedIndex).select();
                 } else {
                     Log.d(TAG, "onResume: null tab at playlist's index");
                 }
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements
                 {
                     chosenCategories = ((WikiAudioApp) getApplication())
                             .getAppData().getChosenCategories();
-                    this.loadPlaylists();
+//                    this.loadPlaylists();
                 }
             }
             if (resultCode == Activity.RESULT_CANCELED) {
@@ -160,7 +161,6 @@ public class MainActivity extends AppCompatActivity implements
         //it needs an activity
         Holder.getInstance(activity, appData);
         chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
-        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
 
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -173,8 +173,13 @@ public class MainActivity extends AppCompatActivity implements
         chooseCategoriesButton = findViewById(R.id.addCategoryButton);
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
-        tabs = findViewById(R.id.tabs);
-        Holder.setTablayout(tabs);
+        tabLayout = findViewById(R.id.tabs);
+        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
+
+
+        playListsFragmentAdapter.setTabs(tabLayout);
+        Holder.playlistsManager.setPlayListsFragmentAdapter(playListsFragmentAdapter);
+        Holder.setTablayout(tabLayout);
     }
 
     /**
@@ -213,54 +218,78 @@ public class MainActivity extends AppCompatActivity implements
             //todo comment below when checking splash upload MERGYMERG
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
 
-            //Add all playlists as fragments to the adapter
-            for (Playlist playlist: PlaylistsManager.getPlaylists()) {
-                playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
-                playlist.getPlaylistFragment().setPlaylistsFragmentAdapter(playListsFragmentAdapter);
-            }
-
-
-            // get current played playlist index to select in
-            int selectedIndex = -1;
-            if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
-                //
-                Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
-                selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
-            }
-
-            int finalSelectedIndex = selectedIndex;
-            activity.runOnUiThread(() -> {
-                ViewPager viewPager = findViewById(R.id.view_pager);
-                viewPager.setAdapter(playListsFragmentAdapter);
-                tabs.setupWithViewPager(viewPager);
-                playListsFragmentAdapter.setTabs(tabs);
-                int counter = 0;
-                for (Playlist playlist: PlaylistsManager.getPlaylists()) {
-                    if(counter >= tabs.getTabCount()){
-                        break;
-                    }
-                    Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
-                    if (counter == finalSelectedIndex) {
-                        tabs.getTabAt(counter).select();
-                    }
-                    counter++;
-                }
-
-                // when first playlist fragment has data stop loading icon.
-                if(playListsFragmentAdapter.getCount() > 0) {
-                    playListsFragmentAdapter.getItem(0).
-                            wikipagePlayListRecyclerViewAdapter.
-                            registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                                @Override
-                                public void onChanged() {
-                                    super.onChanged();
-                                    loadingIcon.setVisibility(View.GONE);
-                                }
-                            });
-                }
-            });
+            displayPlaylists();
         }).start();
     }
+
+    /**
+     * Loads the TabLayout and playlist fragments.
+     */
+    private void displayPlaylists() {
+        //Add all relevant playlists as fragments to the adapter
+        playListsFragmentAdapter.updatePlaylistFragmentList();
+
+        // get current played playlist index to select in
+        int selectedIndex = -1;
+        if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
+            //
+            Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+            selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
+        }
+
+        int finalSelectedIndex = selectedIndex;
+        activity.runOnUiThread(() -> {
+            viewPager.setAdapter(playListsFragmentAdapter);
+            tabLayout.setupWithViewPager(viewPager);
+            playListsFragmentAdapter.setTabs(tabLayout);
+            int counter = 0;
+            for (Playlist playlist: PlaylistsManager.getPlaylists()) {
+                if(counter >= tabLayout.getTabCount()){
+                    break;
+                }
+                Objects.requireNonNull(tabLayout.getTabAt(counter)).setText(playlist.getTitle());
+                if (counter == finalSelectedIndex) {
+                    tabLayout.getTabAt(counter).select();
+                }
+                counter++;
+            }
+
+            // when first playlist fragment has data stop loading icon.
+            if(playListsFragmentAdapter.getCount() > 0) {
+                playListsFragmentAdapter.getItem(0).
+                        wikipagePlayListRecyclerViewAdapter.
+                        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                            @Override
+                            public void onChanged() {
+                                super.onChanged();
+                                loadingIcon.setVisibility(View.GONE);
+                            }
+                        });
+            }
+        });
+    }
+
+    private void addTab(PlaylistFragment tab) {
+        Log.d(TAG, "addTab: got here");
+        if (tabLayout != null && tab != null && tab.getPlaylist() != null) {
+            playListsFragmentAdapter.addPlaylistFragment(tab);
+            tabLayout.addTab(tabLayout.newTab().setText(tab.getPlaylist().getTitle()));
+        } else {
+            Log.d(TAG, "addTab: got null tabs/playlist fragment/playlist");
+        }
+    }
+
+    public void removeTab(int position) {
+        if (tabLayout != null) {
+            if (tabLayout.getTabCount() >= 1 && position< tabLayout.getTabCount()) {
+                playListsFragmentAdapter.removePlaylistFragment(position);
+                tabLayout.removeTabAt(position);
+            }
+        } else {
+            Log.d(TAG, "removeTab: got null tabs, can't add a tab");
+        }
+    }
+
 
     /**
      * Creates the media player + navigation bar at the bottom.
@@ -380,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements
         if (mMap != null && mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
             isLocationEnabled();
-            // id there's something being played:
+            //If there's something being played:
             // mark the playlist and zoom in on the wikipage being played
             if (mediaPlayer != null && mediaPlayer.getIsPlaying()) {
                 Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
@@ -391,22 +420,27 @@ public class MainActivity extends AppCompatActivity implements
                     Log.d(TAG, "initUserLocationOnTheMap: got null currentPlaylist");
                 }
             } else {
-                // ow, zoom in on user's location
-                if (isGPSEnabled) {
-                    LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
-                    if (currentLatLng != null) {
-                        //Zoom in to user's location
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                        //Create (and display) the nearby playlist
-                        Holder.playlistsManager.createLocationBasedPlaylist(
-                                currentLatLng.latitude, currentLatLng.longitude, true);
-                    }
-                } else {
-                    Log.d(TAG, "initUserLocationOnTheMap: no GPS");
-                }
+                zoomInOnUserAndCreateNearbyPlaylist();
             }
         } else {
             Log.d(TAG, "initUserLocationOnTheMap: either google map is null or we have no perm");
+        }
+    }
+
+    private void zoomInOnUserAndCreateNearbyPlaylist() {
+        if (isGPSEnabled && Holder.playlistsManager.getNearby() == null) {
+            LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
+            if (currentLatLng != null) {
+                //Zoom in to user's location
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                //Create (and display on the map) the nearby playlist
+                Holder.playlistsManager.createLocationBasedPlaylist(
+                        currentLatLng.latitude, currentLatLng.longitude, true);
+                //Update the tabs after creating it
+                addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+            }
+        } else {
+            Log.d(TAG, "initUserLocationOnTheMap: no GPS");
         }
     }
 
@@ -492,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private boolean needToReloadTabs() {
         // todo change to set? what happens if we take down and add again. order changes.
-        int tabCount = tabs.getTabCount();
+        int tabCount = tabLayout.getTabCount();
         return tabCount != chosenCategories.size();
     }
 

@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
+import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
@@ -23,6 +24,7 @@ public class PlaylistsManager {
     private static List<Playlist> playlists = new ArrayList<>();
     private static Playlist nearby;
     private static Playlist searchPlaylists;
+    private static PlaylistsFragmentAdapter playListsFragmentAdapter;
 
     private MediaPlayer mediaPlayer;
 
@@ -47,9 +49,13 @@ public class PlaylistsManager {
     public void createLocationBasedPlaylist(double lat, double lon, boolean isNearby) {
         Playlist playlist = new Playlist(true, lat, lon);
         if (isNearby) {
-            if (nearby != null)
-                playlists.remove(0);
-            playlists.add(0, playlist);
+            //replace the nearby playlist if it exists
+            if (playlists.size() > 0 && playlists.get(0).getTitle().equals("Nearby")) {
+                playlists.set(0, playlist);
+            } else {
+                //ow, just add it to the beginning
+                playlists.add(0, playlist);
+            }
             nearby = playlist;
         } else {
             addPlaylist(playlist);
@@ -57,15 +63,14 @@ public class PlaylistsManager {
     }
 
     public void createCategoryBasedPlaylists(List<String> categories) {
-        if (!categoryBasedPlaylistsWereCreated) {
+        if (!categoryBasedPlaylistsWereCreated && categories != null && categories.size() > 0) {
             categoryBasedPlaylistsWereCreated = true;
-            if (categories != null && categories.size() > 0) {
-                for (String category : categories)
-                    if(getPlaylistByTitle(category) == null) {
-                        // the category was not yet created.
-                        PlaylistsManager.addPlaylist(new Playlist(category, false, 0, 0));
-                    }
-            }
+            for (String category: categories)
+                if (getPlaylistByTitle(category) == null) {
+                    //The category was yet to be created
+                    addPlaylist(new Playlist(category, false, 0, 0));
+                }
+
         }
     }
 
@@ -83,6 +88,7 @@ public class PlaylistsManager {
     public static void addPlaylist(Playlist playlist) {
         if (playlist != null) {
             playlists.add(playlist);
+            playListsFragmentAdapter.updatePlaylistFragmentList();
         } else {
             Log.d(TAG, "add: got null playlist");
         }
@@ -136,4 +142,18 @@ public class PlaylistsManager {
         return nearby;
     }
 
+    public Playlist getPlaylistByIndex(int index) {
+        if (index > -1 && index < playlists.size()) {
+            return playlists.get(index);
+        }
+        return null;
+    }
+
+    public PlaylistsFragmentAdapter getPlayListsFragmentAdapter() {
+        return playListsFragmentAdapter;
+    }
+
+    public void setPlayListsFragmentAdapter(PlaylistsFragmentAdapter playListsFragmentAdapter) {
+        this.playListsFragmentAdapter = playListsFragmentAdapter;
+    }
 }

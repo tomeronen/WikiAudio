@@ -118,13 +118,14 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
             });
         } else {
             Log.d(TAG, "playWikipageByIndexWithAudioURL: null playlist, bad index or bad wikipage");
+            playingUrl = false;
         }
     }
 
     private void playWikipageByIndexWithTextToSpeech() {
         if (isValidPlaylistAndIndex(playlist, index)
                 && playlist.getWikipageByIndex(index).getFullText() != null
-                && !playlist.getWikipageByIndex(index).getFullText().equals("")){
+                && !playlist.getWikipageByIndex(index).getFullText().equals("")) {
             Log.d(TAG, "playWikipageByIndexWithTextToSpeech: playing from text to speech");
             threadPool.execute(() -> {
                 textToSpeak = playlist.getWikipageByIndex(index).getFullText();
@@ -133,12 +134,13 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
             });
         } else {
             Log.d(TAG, "playWikipageByIndexWithTextToSpeech: null playlist, bad index or bad wikipage");
+            playingTextToSpeech = false;
         }
     }
 
     private void playNext() {
+        //update visuals
         activity.runOnUiThread(() -> {
-            //update visuals
             if (Holder.playlistsManager != null &&
                     Holder.playlistsManager.getMediaPlayer() != null) {
                 Holder.playlistsManager.getMediaPlayer().updateNextWikipage();
@@ -244,9 +246,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
                         if (textBlocksLeft == 0) {
                             Log.d(TAG, "onDone: textBlocksLeft == 0");
                             // the tts engine finished speaking all blocks
-                            playNext(); // todo won't update visuals
-//                            index = index + 1;
-//                            playWikipageByIndex();
+                            playNext();
                         }
                     }
 
