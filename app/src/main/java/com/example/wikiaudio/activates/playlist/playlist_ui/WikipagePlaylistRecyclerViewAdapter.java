@@ -70,7 +70,6 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             holder.playButton.setOnClickListener(v -> {
                 Holder.playlistsManager.getMediaPlayer().play(playlist, position);
             });
-
             // if the media player is playing this wikipage then highlight it
             if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
                 if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {

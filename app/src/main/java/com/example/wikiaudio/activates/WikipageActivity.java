@@ -69,6 +69,16 @@ public class WikipageActivity extends AppCompatActivity {
         initOnClickButtons();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (shouldDisplayPlayButton()) {
+            playButton.setVisibility(View.VISIBLE);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Pretty self-explanatory, really. Will finish the activity if bad intents were given.
      */
@@ -89,13 +99,10 @@ public class WikipageActivity extends AppCompatActivity {
     private void initVars() {
         activity = this;
         appData =((WikiAudioApp) getApplication()).getAppData();
-
+        //Views
         recordButton = findViewById(R.id.recordButton);
-        recordButton.setVisibility(View.GONE);
         playButton = findViewById(R.id.playButton);
-        playButton.setVisibility(View.GONE);
         addButton = findViewById(R.id.addButton);
-        addButton.setVisibility(View.GONE);
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
     }
@@ -172,6 +179,9 @@ public class WikipageActivity extends AppCompatActivity {
             finish();
         }
 
+        //PlayButton
+        setFloatingButtonsVisibility(View.GONE);
+
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
@@ -180,13 +190,11 @@ public class WikipageActivity extends AppCompatActivity {
         //Image
         if(wikipage.getThumbnailSrc() == null) {
             articleImage.setVisibility(View.GONE);
-            recordButton.setVisibility(View.VISIBLE);
-            playButton.setVisibility(View.VISIBLE);
-            addButton.setVisibility(View.VISIBLE);
-            return;
+            setFloatingButtonsVisibility(View.VISIBLE);
+        } else {
+            articleImage.bringToFront();
+            displayImage();
         }
-        articleImage.bringToFront();
-        displayImage();
     }
 
     /**
@@ -229,13 +237,32 @@ public class WikipageActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationEnd(Animation arg0) {
-                recordButton.setVisibility(View.VISIBLE);
-                playButton.setVisibility(View.VISIBLE);
-                addButton.setVisibility(View.VISIBLE);
+                setFloatingButtonsVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
             }
         });
         view.startAnimation(animFadeIn);
+    }
+
+    /**
+     * A simple solution to displaying the play button
+     */
+    private boolean shouldDisplayPlayButton() {
+        //Play button, if the MediaPlayer plays this wikipage, hide the play button
+        return !(mediaPlayer == null || mediaPlayer.getCurrentWikipage() == null ||
+                mediaPlayer.getCurrentWikipage().getTitle().equals(wikipage.getTitle()));
+    }
+
+    private void setFloatingButtonsVisibility(int visibility) {
+        recordButton.setVisibility(visibility);
+        addButton.setVisibility(visibility);
+
+        //Display the play button only if it is not played && got View.VISIBLE
+        if (shouldDisplayPlayButton() && visibility == View.VISIBLE) {
+            playButton.setVisibility(View.VISIBLE);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
     }
 
 }
