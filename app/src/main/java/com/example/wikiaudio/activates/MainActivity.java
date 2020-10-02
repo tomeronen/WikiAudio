@@ -111,12 +111,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onResume() {
         super.onResume();
-
-        //MediaPlayer
-        if (mediaPlayer != null) {
-            mediaPlayer.checkForActivePlaylist();
-        }
-
         //Categories
         List<String> newChosenCategories =
                 ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
@@ -130,6 +124,9 @@ public class MainActivity extends AppCompatActivity implements
             Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
             new Thread(this::displayPlaylists).start();
         }
+
+        //MediaPlayer
+        initMediaPlayer();
     }
 
     @Override
@@ -236,10 +233,9 @@ public class MainActivity extends AppCompatActivity implements
         playListsFragmentAdapter.updatePlaylistFragmentList();
         playListsFragmentAdapter.notifyDataSetChanged();
 
-        //Get current played playlist index to select in
+        //Get currently played playlist's index to select in
         int selectedIndex = -1;
         if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
-            //
             Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
             selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
         }
@@ -286,18 +282,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "addTab: got null tabs/playlist fragment/playlist");
         }
     }
-
-    public void removeTab(int position) {
-        if (tabLayout != null) {
-            if (tabLayout.getTabCount() >= 1 && position< tabLayout.getTabCount()) {
-                playListsFragmentAdapter.removePlaylistFragment(position);
-                tabLayout.removeTabAt(position);
-            }
-        } else {
-            Log.d(TAG, "removeTab: got null tabs, can't add a tab");
-        }
-    }
-
 
     /**
      * Creates the media player + navigation bar at the bottom.

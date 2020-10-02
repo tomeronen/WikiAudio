@@ -91,7 +91,7 @@ public class MediaPlayer {
     }
 
     public void playPrevious() {
-        if (!currentlyPlayed.isValid()) {
+        if (currentlyPlayed == null || !currentlyPlayed.isValid()) {
             Log.d(TAG, "playPrevious: current wikipage/playlist/index is null/invalid");
             return;
         }
@@ -103,7 +103,7 @@ public class MediaPlayer {
     }
 
     public void playNext() {
-        if (!currentlyPlayed.isValid()) {
+        if (currentlyPlayed == null || !currentlyPlayed.isValid()) {
             Log.d(TAG, "playNext: current wikipage/playlist/index is null/invalid");
             return;
         }
@@ -167,10 +167,12 @@ public class MediaPlayer {
         }
         // display on the media player fragment
         if (mpFragment != null) {
-            mpFragment.togglePlayPauseButton(false);
-            mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
+            activity.runOnUiThread(() -> {
+                mpFragment.togglePlayPauseButton(false);
+                mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
+            });
         } else {
-            Log.d(TAG, "updateMediaPlayerVars: got null mpFragment");
+            Log.d(TAG, "displayWhatIsBeingPlayed: got null mpFragment");
         }
     }
 

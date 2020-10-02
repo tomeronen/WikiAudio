@@ -57,7 +57,6 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
         holder.highlight.setVisibility(View.GONE);
 
-
         //Shows and sets the location button if that wikipage has coordinates
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
             holder.locationButton.setVisibility(View.GONE);
@@ -66,9 +65,12 @@ public class WikipagePlaylistRecyclerViewAdapter extends
                     Holder.locationHandler.markAndZoom(wikipage));
         }
 
+        //Play button
         if (Holder.playlistsManager != null && Holder.playlistsManager.getMediaPlayer() != null) {
-            holder.playButton.setOnClickListener(v ->
-                    Holder.playlistsManager.getMediaPlayer().play(playlist, position));
+            holder.playButton.setOnClickListener(v -> {
+                Holder.playlistsManager.getMediaPlayer().play(playlist, position);
+            });
+
             // if the media player is playing this wikipage then highlight it
             if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
                 if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
