@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements
         initMediaPlayer();
     }
 
+    // todo: this may be irrelevent due to onResume
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         try {
@@ -177,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements
         tabLayout = findViewById(R.id.tabs);
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
 
-
+        // todo: delete?
         playListsFragmentAdapter.setTabs(tabLayout);
         Holder.playlistsManager.setPlayListsFragmentAdapter(playListsFragmentAdapter);
         Holder.setTablayout(tabLayout);
@@ -287,8 +288,10 @@ public class MainActivity extends AppCompatActivity implements
      * Creates the media player + navigation bar at the bottom.
      */
     private void initMediaPlayer() {
-        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.mediaPlayerFragment);
+        mediaPlayerFragment = new MediaPlayerFragment();
+        mediaPlayerFragment.setArguments(getIntent().getExtras());
+        getSupportFragmentManager().beginTransaction().replace(R.id.mediaPlayerFragment,
+                mediaPlayerFragment, "mediaPlayerFragment").commit();
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);

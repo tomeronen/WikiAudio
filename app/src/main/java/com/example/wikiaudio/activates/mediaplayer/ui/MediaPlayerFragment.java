@@ -31,7 +31,6 @@ import java.util.Objects;
  */
 public class MediaPlayerFragment extends Fragment {
     private static final String TAG = "MediaPlayerFragment";
-    private static final float READING_SPEED = 1f;
     public static final int CHOOSE_CATEGORY_TAG = 1072;
 
     //Vars
@@ -62,12 +61,14 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     private void initVars() {
+        //Player
         previousButton = fragmentInflated.findViewById(R.id.previousButton);
         playButton = fragmentInflated.findViewById(R.id.playPauseButton);
         nextButton = fragmentInflated.findViewById(R.id.nextButton);
-        wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
-        wikipageTitleView.setSelected(true);  // for moving text if needed
-        playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
+
+        setTitles();
+
+        //Navigation
         homeButton = fragmentInflated.findViewById(R.id.homeButton);
         searchButton = fragmentInflated.findViewById(R.id.searchButton);
         categoriesButton = fragmentInflated.findViewById(R.id.categoriesButton);
@@ -89,7 +90,17 @@ public class MediaPlayerFragment extends Fragment {
         }
     }
 
+    public void setTitles() {
+        wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
+        wikipageTitleView.setSelected(true);  // for moving text if needed
+        playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
+    }
+
     public void updateWhatIsPlayingTitles(String playlistTitle, String wikipageTitle) {
+        if (playlistTitleView == null || wikipageTitleView == null) {
+//            setTitles();
+            return; //todo
+        }
         playlistTitleView.setText(playlistTitle);
         wikipageTitleView.setText(wikipageTitle);
     }

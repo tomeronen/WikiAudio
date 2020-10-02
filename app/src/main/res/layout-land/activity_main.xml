@@ -16,33 +16,26 @@
         app:layout_constraintStart_toStartOf="@id/view_pager"
         app:layout_constraintTop_toTopOf="@+id/view_pager" />
 
-
     <ImageButton
         android:id="@+id/addCategoryButton"
-        android:layout_width="44dp"
-        android:layout_height="0dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:layout_constraintStart_toEndOf="@+id/tabs"
+        app:layout_constraintEnd_toStartOf="@id/fragmentMap"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/view_pager"
+        app:layout_constraintHorizontal_bias="1"
         android:background="@android:color/white"
         android:backgroundTint="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/view_pager"
-        app:layout_constraintEnd_toStartOf="@id/fragmentMap"
-        app:layout_constraintStart_toEndOf="@+id/tabs"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        app:srcCompat="@drawable/plus" />
 
-    <SearchView
-        android:id="@+id/search_bar"
-        android:layout_width="409dp"
-        android:layout_height="58dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
         app:layout_constraintEnd_toStartOf="@+id/fragmentMap"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tabs" />
@@ -53,28 +46,41 @@
         android:layout_height="wrap_content"
         app:tabMode="scrollable"
         android:background="@android:color/white"
-        app:layout_constraintEnd_toStartOf="@id/addCategoryButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar" />
+        app:layout_constraintEnd_toStartOf="@id/addCategoryButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/mapBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="368dp"
+        android:background="#4d4d4d"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/mediaPlayerFragment"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <fragment
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/audioPlayerFragment"
+        android:layout_marginStart="370dp"
+        app:layout_constraintStart_toEndOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/view_pager"
-        app:layout_constraintTop_toBottomOf="@+id/search_bar"
+        app:layout_constraintBottom_toTopOf="@id/mediaPlayerFragment"
+        app:layout_constraintTop_toTopOf="parent"
         tools:context="com.example.wikiaudio.activates.MainActivity" />
 
     <fragment
-        android:id="@+id/audioPlayerFragment"
+        android:id="@+id/mediaPlayerFragment"
         android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
-        android:layout_width="0dp"
-        android:layout_height="110dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
