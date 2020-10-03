@@ -29,7 +29,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:backgroundTint="#302A2B"
+        android:backgroundTint="@color/chosenItem"
         android:clickable="true"
         android:visibility="visible"
         app:borderWidth="0dp"
@@ -37,7 +37,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_voice_search" />
+        app:srcCompat="@drawable/recorder_icon" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/playButton"

@@ -105,7 +105,8 @@ public interface WikiServer {
             "&format=json")
     Call<QuarryResponse> searchPage(@Query("gsrsearch") String pageName,
                                     @Query("prop") String prop,
-                                    @Query("inprop") String inprop );
+                                    @Query("inprop") String inprop,
+                                    @Query("piprop") String imageToBring);
 
 
     @Multipart

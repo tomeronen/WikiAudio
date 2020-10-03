@@ -30,7 +30,9 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.wikiaudio.R;
+import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.audio_recoder.ARecorder;
+import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.file_manager.FileManager;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
@@ -65,6 +67,7 @@ public class WikiRecordActivity extends AppCompatActivity {
             " at E N dot wikipedia dot org.";
     private MediaPlayer mediaPlayer;
     private boolean currentlyPlaying = false;
+    private AppData appData;
 
     // recording:
     private List<SectionRecordingData> recordingDataList;
@@ -106,6 +109,7 @@ public class WikiRecordActivity extends AppCompatActivity {
         unwantedSectionsForRecording.add("Notes");
         unwantedSectionsForRecording.add("Bibliography");
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,6 +221,7 @@ public class WikiRecordActivity extends AppCompatActivity {
         progressCounter = findViewById(R.id.progressBarCounter);
         sectionTitle = findViewById(R.id.sectionTitleView);
         showSectionsButton = findViewById(R.id.showSectionsButton);
+        appData = ((WikiAudioApp) activity.getApplication()).getAppData();
         screenCounter = 0;
         recordingDataList = new ArrayList<>();
         //WebView
@@ -316,6 +321,18 @@ public class WikiRecordActivity extends AppCompatActivity {
     }
 
     private void updateUI(int curSection) {
+        if(startRecording) // next press we want to start recording
+        {
+            recordButton.setImageDrawable(ContextCompat.getDrawable(activity,
+                    R.drawable.recorder_icon));
+            stopBlinkingAnimation(recordButton);
+            recordingTimer.cancel();
+        }
+        else // we are currently recording
+        {
+
+        }
+
         if(sectionNumberIsLegal(curSection))
         {
             progressBar.setProgress(curSection + 1); // we start at one
@@ -402,10 +419,7 @@ public class WikiRecordActivity extends AppCompatActivity {
             stopRecording();
 
             // update recording UI. todo move into updateUI() method
-            recordButton.setImageDrawable(ContextCompat.getDrawable(activity,
-                    R.drawable.recorder_icon));
-            stopBlinkingAnimation(recordButton);
-            recordingTimer.cancel();
+            updateUI(curSection);
         });
     }
 
@@ -502,10 +516,16 @@ public class WikiRecordActivity extends AppCompatActivity {
                                 "yes. upload recording.",
                                 "go back",
                                 (DialogInterface.OnClickListener) (dialog, which) -> {
+//                                    appData.addToMyUploadedRecordings(wikipage.getTitle()); todo finish
                                     for (int i = 0; i < numberOfScreens; i++) {
                                         if (existsRecording(i)) {
-                                            String path = recordingDataList.get(i).fileRecording.getPath();
-                                            Holder.wikipedia.uploadFile(wikipage.getTitle() + "_" + i,
+                                            String path =
+                                                    recordingDataList.get(i)
+                                                            .fileRecording.getPath();
+                                            Holder
+                                                    .wikipedia
+                                                    .uploadFile(wikipage.getTitle()
+                                                                    + "_" + i,
                                                     path);
                                         }
                                     }
@@ -525,12 +545,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                                 "are you sure you finished you recording? ",
                         "yes. upload recording.",
                         "no i want to continue working",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                beSureTwo.show(fragmentManager, "beSureTwo");
-                            }
-                        },
+                        (dialog, which) -> beSureTwo.show(fragmentManager, "beSureTwo"),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

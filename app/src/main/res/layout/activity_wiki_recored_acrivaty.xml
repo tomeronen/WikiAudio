@@ -23,11 +23,11 @@
         android:layout_marginBottom="8dp"
         android:layout_x="201dp"
         android:layout_y="156dp"
+        android:backgroundTint="@color/chosenItem"
         android:clickable="true"
-        android:backgroundTint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/showSectionsButton"
         app:layout_constraintEnd_toStartOf="@+id/stopRecording"
+        app:layout_constraintStart_toEndOf="@+id/showSectionsButton"
         app:srcCompat="@android:drawable/ic_btn_speak_now" />
 
     <ProgressBar
@@ -165,6 +165,7 @@
         android:layout_height="wrap_content"
         android:backgroundTint="@android:color/white"
         android:clickable="true"
+        app:backgroundTint="#FBFBFB"
         app:layout_constraintBottom_toBottomOf="@+id/uploadButton"
         app:layout_constraintEnd_toStartOf="@+id/playSection"
         app:layout_constraintStart_toEndOf="@+id/showSectionsButton"

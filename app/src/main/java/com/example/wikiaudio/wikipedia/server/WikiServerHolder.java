@@ -96,7 +96,7 @@ public class WikiServerHolder {
             throws IOException {
         String prop = getQueryProp(pageAttr);
         String inprop = getQueryInProp(pageAttr);
-        Response<QuarryResponse> response = server.searchPage(pageName, prop, inprop).execute();
+        Response<QuarryResponse> response = server.searchPage(pageName, prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<Wikipage> wikipages = parseQuarryResponse(response.body());
@@ -146,30 +146,34 @@ public class WikiServerHolder {
         }
     }
 
-    private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse)
-    {
-        List<Wikipage.Section> result = new ArrayList<>();
-        ContentResponse.LeadData lead  = contentResponse.lead;
-        String leadTitle = lead.displaytitle;
-        ContentResponse.SectionData leadSectionData = lead.sections.get(0);
-        if(leadSectionData != null)
-        {
-            String htmlText  = lead.sections.get(0).text;
-            Wikipage.Section leadSection = new Wikipage.Section(leadTitle, htmlText);
-            result.add(leadSection);
-        }
-        if(contentResponse.remaining != null
-                && contentResponse.remaining.sections != null
-                && !contentResponse.remaining.sections.isEmpty())
-        {
-            for(ContentResponse.SectionData sectionData: contentResponse.remaining.sections)
-            {
-                Wikipage.Section curSection = new Wikipage.Section(sectionData.line,
-                                                                    sectionData.text);
-                result.add(curSection);
+    private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse) throws IOException {
+        if(contentResponse != null) {
+
+
+            List<Wikipage.Section> result = new ArrayList<>();
+            ContentResponse.LeadData lead = contentResponse.lead;
+            String leadTitle = lead.displaytitle;
+            ContentResponse.SectionData leadSectionData = lead.sections.get(0);
+            if (leadSectionData != null) {
+                String htmlText = lead.sections.get(0).text;
+                Wikipage.Section leadSection = new Wikipage.Section(leadTitle, htmlText);
+                result.add(leadSection);
             }
+            if (contentResponse.remaining != null
+                    && contentResponse.remaining.sections != null
+                    && !contentResponse.remaining.sections.isEmpty()) {
+                for (ContentResponse.SectionData sectionData : contentResponse.remaining.sections) {
+                    Wikipage.Section curSection = new Wikipage.Section(sectionData.line,
+                            sectionData.text);
+                    result.add(curSection);
+                }
+            }
+            return result;
         }
-        return result;
+        else
+        {
+            throw new IOException(); // we got a invalid value as a response.
+        }
     }
 
     /**

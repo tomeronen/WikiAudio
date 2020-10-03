@@ -91,15 +91,18 @@ public class MediaPlayer {
     }
 
     public void playPrevious() {
-        if (!currentlyPlayed.isValid()) {
-            Log.d(TAG, "playPrevious: current wikipage/playlist/index is null/invalid");
-            return;
+        if(currentlyPlayed != null)
+        {
+            if (!currentlyPlayed.isValid()) {
+                Log.d(TAG, "playPrevious: current wikipage/playlist/index is null/invalid");
+                return;
+            }
+            if (currentlyPlayed.getIndex() == 0) {
+                Log.d(TAG, "playPrevious: there's no previous wikipage for the first one :)");
+                return;
+            }
+            play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex() - 1);
         }
-        if (currentlyPlayed.getIndex() == 0) {
-            Log.d(TAG, "playPrevious: there's no previous wikipage for the first one :)");
-            return;
-        }
-        play(currentlyPlayed.getPlaylist(), currentlyPlayed.getIndex() - 1);
     }
 
     public void playNext() {

@@ -30,6 +30,7 @@ public class AppData {
 
     //playlist related
     public CurrentlyPlayed currentlyPlayed;
+    private List<String> pagesUpload;
 
     public AppData(WikiAudioApp wikiAudioApp) {
         this.wikiAudioApp = wikiAudioApp;
@@ -110,5 +111,17 @@ public class AppData {
 
     public CurrentlyPlayed getCurrentlyPlayed() {
         return currentlyPlayed;
+    }
+
+    public void addToMyUploadedRecordings(String title) { // todo finish
+        if(title == null)
+        {
+            return;
+        }
+        if(pagesUpload == null)
+        {
+            pagesUpload = new ArrayList<>();
+        }
+        String categoriesString = gson.toJson(pagesUpload);
     }
 }

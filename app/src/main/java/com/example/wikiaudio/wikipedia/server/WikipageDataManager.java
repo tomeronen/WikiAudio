@@ -20,6 +20,8 @@ import java.util.List;
  * a helper class for Wikipedia facade. manages wikipages data.
  */
 public class WikipageDataManager {
+    // right now we cant ask for more then 50 pages at once.
+    private static final int MAX_QUERY_AT_ONCE = 40;
     private Document spokenDoc;
     private HashMap<String, Wikipage> wikipagesData = new HashMap<>(); // todo make singelton
     private HashMap<String, List<String>> spokenCategoriesMetaData = new HashMap<>();
@@ -219,7 +221,11 @@ public class WikipageDataManager {
         {
             throw new IOException();
         }
-
+        if(pagesNames.size() > MAX_QUERY_AT_ONCE)
+        {
+            List<String> subPagesNames = pagesNames.subList(0, MAX_QUERY_AT_ONCE);
+            pagesNames = subPagesNames; // todo can this be done in one line?
+        }
         // load basic Attributes:
         WikiServerHolder.getInstance().loadPagesByName(wikipagesData,
                                                         pagesNames,

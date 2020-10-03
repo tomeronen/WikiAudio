@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -39,7 +38,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
     private CategoryAdapter categoryAdapter;
 
     //Views
-    private SearchView searchCategoriesView;
+//    private SearchView searchCategoriesView;
     private RecyclerView categoriesView;
     private Button saveButton;
     private ProgressBar loadingIcon;
@@ -76,7 +75,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         this.originalCategories = ((WikiAudioApp)activity.getApplication())
                 .getAppData().getChosenCategories();
         categoriesView = findViewById(R.id.categoriesView);
-        searchCategoriesView = findViewById(R.id.searchCategorysView);
+//        searchCategoriesView = findViewById(R.id.searchCategorysView);
         saveButton = findViewById(R.id.saveChoice);
         loadingIcon = findViewById(R.id.progressBar5);
     }
