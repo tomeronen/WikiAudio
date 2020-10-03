@@ -711,7 +711,8 @@ public class WikiRecordActivity extends AppCompatActivity {
 
                     }
                 },
-        null, null); // we don't use title or icon
+        "Welcome to the recording area!",
+                getDrawable(R.drawable.recorder_icon)); 
         introDialog.show(fragmentManager, "introTag");
     }
 
