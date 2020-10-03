@@ -1,6 +1,5 @@
 package com.example.wikiaudio.activates.mediaplayer;
 
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.speech.tts.TextToSpeech;
@@ -18,41 +17,48 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * The wrapper of Google's MediaPlayer & TextToSpeech for actual playing playlists
+ */
 public class PlaylistPlayer implements TextToSpeech.OnInitListener{
-
+    //For logs
     private static final String TAG = "PlaylistPlayer";
+
+    //Constant Vars
     private static final Locale ENGLISH = Locale.ENGLISH;
     private static final float READING_SPEED = 1f;
     private static final float VOICE_PITCH = 1;
 
-    private final Context context;
+    //Vars
     private AppCompatActivity activity;
+    private final ExecutorService threadPool;
+
+    //Playlist Vars
     private Playlist playlist = null;
     private int index = -1;
+    private boolean paused = false;
 
-    private final ExecutorService threadPool;
+    //MediaPlayer Vars
     private MediaPlayer mp;
+    private boolean playingUrl = false;
+
+    //TextToSpeech Vars
     private TextToSpeech ttsEngine;
+    private boolean playingTextToSpeech = false;
+    private boolean isEngineReady = false;
+    private String textToSpeak;
     private int textBlocksLeft = 0;
 
-    private boolean playingUrl = false;
-    private boolean playingTextToSpeech = false;
-
-    private boolean paused = false;
-    private String textToSpeak;
-    private boolean isEngineReady = false;
 
     public PlaylistPlayer(AppCompatActivity activity) {
         this.activity = activity;
-        this.context = activity.getApplicationContext();
-        ttsEngine = new TextToSpeech(context, this);
+        ttsEngine = new TextToSpeech(activity.getApplicationContext(), this);
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
     }
 
     /**
      * Use this function for playing a wikipage or a playlist. We always need to select from which
      * index to start playing the playlist.
-     * //todo perhaps void is better than returning a bool
      */
     public boolean playPlaylistFromIndex(Playlist playlist, int index) {
         if (!isValidPlaylistAndIndex(playlist, index)) {
@@ -69,6 +75,10 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
         return true;
     }
 
+    /**
+     * Plays a wikipage given a playlist and an index
+     * Checks whether it has audio URL, if yes: uses MediaPlayer; ow, uses TextToSpeech
+     */
     private void playWikipageByIndex() {
         if (isValidPlaylistAndIndex(playlist, index)) {
             if (canPlayWikipageAudio(playlist.getWikipageByIndex(index))) {
@@ -96,7 +106,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
                 );
 
                 // Called when the end of a media source is reached during playback.
-                // we want to release resources and play the next wikipage in the playlist
+                // we want to release resources and play the next wikipage on the playlist
                 mp.setOnCompletionListener(mp -> {
                     if (mp != null) {
                         mp.release();
@@ -111,7 +121,6 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
                     mp.start();
                     playingUrl = true;
                 } catch (IOException | IllegalStateException e) {
-                    // IllegalStateException happens when play button is pressed fast.
                     e.printStackTrace();
                     playingUrl = false;
                 }
@@ -138,6 +147,10 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
         }
     }
 
+    /**
+     * Used for when we finished playing the current wikipage and we want to play the next one
+     * on the playlist
+     */
     private void playNext() {
         //update visuals
         activity.runOnUiThread(() -> {
@@ -186,7 +199,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     }
 
     /**
-     * resumes playing after paused.
+     * Resumes playing after paused.
      */
     public void resumePlaying() {
         if(playingUrl && mp != null && paused) {
@@ -270,25 +283,6 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
 
     private boolean canPlayWikipageAudio(Wikipage wikipage) {
         return wikipage != null && wikipage.getAudioUrl() != null && !wikipage.getAudioUrl().equals("");
-    }
-
-    /**
-     * The java.lang.Object.finalize() is called by the garbage collector on an object when
-     * garbage collection determines that there are no more references to the object. A subclass
-     * overrides the finalize method to dispose of system resources or to perform other cleanup.
-     *
-     * We want to make sure we remove the MediaPlayer and the ttsEngine.
-     */
-    protected void finalize() {
-        Log.d(TAG, "finalize: am I really being destroyed?");
-        if (ttsEngine != null) {
-            ttsEngine.stop();
-            ttsEngine.shutdown();
-        }
-        if (mp != null) {
-            mp.release();
-            mp = null;
-        }
     }
 
     public void setPlaylist(Playlist playlist) {

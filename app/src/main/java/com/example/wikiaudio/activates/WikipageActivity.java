@@ -45,15 +45,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WikipageActivity extends AppCompatActivity {
-
+    //For logs
     private static final String TAG = "WikipageActivity";
 
+    //Vars
     private AppCompatActivity activity;
     private AppData appData;
-
     private String playlistTitle;
     private int wikipageIndexInPlaylist;
-
     private Wikipage wikipage;
 
     //MediaPlayer
@@ -82,6 +81,16 @@ public class WikipageActivity extends AppCompatActivity {
         initOnClickButtons();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (shouldDisplayPlayButton()) {
+            playButton.setVisibility(View.VISIBLE);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Pretty self-explanatory, really. Will finish the activity if bad intents were given.
      */
@@ -89,7 +98,6 @@ public class WikipageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         playlistTitle = intent.getStringExtra("playlistTitle");
         wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
-
         if (playlistTitle == null || wikipageIndexInPlaylist == -1) {
             Log.d(TAG, "onCreate: null extras from previous activity");
             finish();
@@ -102,13 +110,10 @@ public class WikipageActivity extends AppCompatActivity {
     private void initVars() {
         activity = this;
         appData =((WikiAudioApp) getApplication()).getAppData();
-
+        //Views
         recordButton = findViewById(R.id.recordButton);
-        recordButton.setVisibility(View.GONE);
         playButton = findViewById(R.id.playButton);
-        playButton.setVisibility(View.GONE);
         addButton = findViewById(R.id.addButton);
-        addButton.setVisibility(View.GONE);
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
     }
@@ -119,13 +124,19 @@ public class WikipageActivity extends AppCompatActivity {
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
+        if (mediaPlayerFragment == null) {
+            mediaPlayerFragment = new MediaPlayerFragment();
+            mediaPlayerFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction().replace(R.id.mediaPlayerFragment,
+                    mediaPlayerFragment, "mediaPlayerFragment").commit();
+        }
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
     }
 
     /**
-     * Initialized the record, play and add buttons.
+     * Creates the click listeners for the record, play and add buttons.
      */
     private void initOnClickButtons() {
         recordButton.setOnClickListener(v -> {
@@ -170,12 +181,6 @@ public class WikipageActivity extends AppCompatActivity {
     /**
      * Pretty self-explanatory, really.
      */
-//    Because WebView consumes web content that can include HTML and JavaScript, which may cause
-//    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
-//    which is a form of hacking and by enabling client-side script into WebView which user is
-//    accessing from application and this way you are opening up your application to such attacks.
-//    I enabled it so the user can actually view the page and not be redirected to the google
-//    chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
         wikipage = Holder.playlistsManager
@@ -185,6 +190,9 @@ public class WikipageActivity extends AppCompatActivity {
             finish();
         }
 
+        //PlayButton
+        setFloatingButtonsVisibility(View.GONE);
+
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
@@ -193,19 +201,17 @@ public class WikipageActivity extends AppCompatActivity {
         //Image
         if(wikipage.getThumbnailSrc() == null) {
             articleImage.setVisibility(View.GONE);
-            recordButton.setVisibility(View.VISIBLE);
-            playButton.setVisibility(View.VISIBLE);
-            addButton.setVisibility(View.VISIBLE);
-            return;
-        }
-        if(firstTimeOpening) // don't show image again on rotation.
-        {
-            articleImage.bringToFront();
-            displayImage();
-        }
-        else
-        {
-            articleImage.setVisibility(View.GONE);
+            setFloatingButtonsVisibility(View.VISIBLE);
+        } else {
+            if(firstTimeOpening) // don't show image again on rotation.
+            {
+                articleImage.bringToFront();
+                displayImage();
+            }
+            else
+            {
+                articleImage.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -249,13 +255,34 @@ public class WikipageActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationEnd(Animation arg0) {
-                recordButton.setVisibility(View.VISIBLE);
-                playButton.setVisibility(View.VISIBLE);
-                addButton.setVisibility(View.VISIBLE);
+                setFloatingButtonsVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
             }
         });
         view.startAnimation(animFadeIn);
+    }
+
+    /**
+     * A simple solution to displaying the play button
+     */
+    private boolean shouldDisplayPlayButton() {
+        //If the MediaPlayer plays this wikipage, hide the play button
+        return !(mediaPlayer == null || mediaPlayer.getCurrentWikipage() == null ||
+                mediaPlayer.getCurrentWikipage().getTitle().equals(wikipage.getTitle()));
+    }
+
+    /**
+     * Pretty self-explanatory, really.
+     */
+    private void setFloatingButtonsVisibility(int visibility) {
+        recordButton.setVisibility(visibility);
+        addButton.setVisibility(visibility);
+        //Display the play button only if it is not played && got View.VISIBLE
+        if (shouldDisplayPlayButton() && visibility == View.VISIBLE) {
+            playButton.setVisibility(View.VISIBLE);
+        } else {
+            playButton.setVisibility(View.GONE);
+        }
     }
 
 }

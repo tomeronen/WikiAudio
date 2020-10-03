@@ -18,11 +18,12 @@ import com.example.wikiaudio.activates.playlist.Playlist;
  * A fragment for displaying the wikipages playlist
  */
 public class PlaylistFragment extends Fragment {
+    //For logs
     private static final String TAG = "PlaylistFragment";
 
     private Playlist playlist;
-    public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
     private PlaylistsFragmentAdapter playlistsFragmentAdapter;
+    public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
     private boolean setBorder = false;
 
 
@@ -51,8 +52,7 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
-        if(setBorder)
-        {
+        if(setBorder) {
             view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
             view.setPadding(0,8,0,8);
         }

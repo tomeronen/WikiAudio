@@ -11,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.MainActivity;
@@ -31,12 +30,10 @@ import java.util.Objects;
  */
 public class MediaPlayerFragment extends Fragment {
     private static final String TAG = "MediaPlayerFragment";
-    private static final float READING_SPEED = 1f;
     public static final int CHOOSE_CATEGORY_TAG = 1072;
 
     //Vars
-    private View fragmentInflated;
-    private FragmentActivity fragmentActivity;
+    private View view;
     private MediaPlayer player;
 
     //Views
@@ -54,29 +51,28 @@ public class MediaPlayerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        fragmentInflated = inflater.inflate(R.layout.fragment_media_player, container, false);
+        view = inflater.inflate(R.layout.fragment_media_player, container, false);
         initVars();
         setOnClickButtonsForPlayer();
         setOnClickButtonsForNavigationBar();
-        return fragmentInflated;
+        return view;
     }
 
     private void initVars() {
-        previousButton = fragmentInflated.findViewById(R.id.previousButton);
-        playButton = fragmentInflated.findViewById(R.id.playPauseButton);
-        nextButton = fragmentInflated.findViewById(R.id.nextButton);
-        wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
-        wikipageTitleView.setSelected(true);  // for moving text if needed
-        playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
-        homeButton = fragmentInflated.findViewById(R.id.homeButton);
-        searchButton = fragmentInflated.findViewById(R.id.searchButton);
-        categoriesButton = fragmentInflated.findViewById(R.id.categoriesButton);
-
-        fragmentActivity = this.getActivity();
-        if (fragmentActivity == null) {
-            Log.d(TAG, "initVars: null activity error");
-        }
+        //Player
+        previousButton = view.findViewById(R.id.previousButton);
+        playButton = view.findViewById(R.id.playPauseButton);
+        nextButton = view.findViewById(R.id.nextButton);
         playButton.change(false);
+
+        //Titles
+        wikipageTitleView = view.findViewById(R.id.wikipageTitle);
+        playlistTitleView = view.findViewById(R.id.playlistTitle);
+
+        //Navigation
+        homeButton = view.findViewById(R.id.homeButton);
+        searchButton = view.findViewById(R.id.searchButton);
+        categoriesButton = view.findViewById(R.id.categoriesButton);
     }
 
     /**
@@ -89,7 +85,14 @@ public class MediaPlayerFragment extends Fragment {
         }
     }
 
-    public void updateWhatIsPlayingTitles(String playlistTitle, String wikipageTitle) {
+    /**
+     * Updates the playlistTitleView & wikipageTitleView with what is being currently played
+     */
+    public void updateTitlesWithCurrentlyPlayed(String playlistTitle, String wikipageTitle) {
+        if (playlistTitleView == null || wikipageTitleView == null) {
+            Log.d(TAG, "updateWhatIsPlayingTitles: null TextViews");
+            return;
+        }
         playlistTitleView.setText(playlistTitle);
         wikipageTitleView.setText(wikipageTitle);
     }
@@ -162,14 +165,13 @@ public class MediaPlayerFragment extends Fragment {
                 // gets the TabLayout object and selects the current playlist
                 if (playlistIndex > -1 && playlist.getPlaylistFragment() != null &&
                         playlist.getPlaylistFragment().getPlaylistsFragmentAdapter() != null &&
-                        playlist.getPlaylistFragment().getPlaylistsFragmentAdapter().getTabs() != null ) {
+                        playlist.getPlaylistFragment().getPlaylistsFragmentAdapter().getTabLayout() != null ) {
                     Activity activeActivity = getActiveActivity();
                     if (activeActivity != null) {
-                        activeActivity.runOnUiThread(() -> {
-                            Objects.requireNonNull(playlist.getPlaylistFragment()
-                                    .getPlaylistsFragmentAdapter().getTabs().getTabAt(playlistIndex))
-                                    .select();
-                        });
+                        activeActivity.runOnUiThread(() ->
+                                Objects.requireNonNull(playlist.getPlaylistFragment()
+                                        .getPlaylistsFragmentAdapter().getTabLayout().getTabAt(playlistIndex))
+                                        .select());
                     }
                 } else {
                     Log.d(TAG, "setOnClickButtonsForPlayer - playlistTitleView: got bad index");
@@ -243,7 +245,10 @@ public class MediaPlayerFragment extends Fragment {
         return player.getAppData().getWikiAudioApp().getActiveActivity();
     }
 
-    public void togglePlayPauseButton(boolean toggle) {
+    /**
+     * Sets the play/pause button. If true, sets play; ow, sets pause.
+     */
+    public void setPlayPauseButton(boolean toggle) {
         if (playButton != null) {
             playButton.change(toggle);
         }

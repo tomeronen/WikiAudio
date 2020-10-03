@@ -6,13 +6,11 @@ import com.example.wikiaudio.activates.mediaplayer.PlaylistPlayer;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.location.LocationHandler;
 import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.google.android.material.tabs.TabLayout;
 
 /**
  * Here is where all of the app's facades and singletons are stored for easy init and access.
  */
 public class Holder {
-
     private static Holder instance = null;
 
     public static Wikipedia wikipedia;
@@ -34,6 +32,4 @@ public class Holder {
         return instance;
     }
 
-    public static void setTablayout(TabLayout tabs) {
-    }
 }

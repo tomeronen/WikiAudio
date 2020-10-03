@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activates.choose_categories.ChooseCategoriesActivity">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoriesView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        app:layout_constraintBottom_toTopOf="@id/saveChoice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchCategorysView" />
+
+    <SearchView
+        android:id="@+id/searchCategorysView"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/saveChoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/save" />
+
+    <ProgressBar
+        android:id="@+id/progressBar5"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/mediaPlayerFragment"
+        app:layout_constraintEnd_toEndOf="@+id/categoriesView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/categoriesView" />
+
+    <fragment
+        android:id="@+id/mediaPlayerFragment"
+        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

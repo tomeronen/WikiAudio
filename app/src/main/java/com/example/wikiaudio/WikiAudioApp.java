@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
  */
 public class WikiAudioApp extends Application {
     private static final int TOTAL_THREADS = 20; //todo test what is best amount of threads.
+    // todo-sm: maybe test different numbers for performance
     private ExecutorService executorService; // the thread pool of the app.
 
     private AppData appData;

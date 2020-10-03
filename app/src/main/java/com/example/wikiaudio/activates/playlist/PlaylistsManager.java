@@ -5,7 +5,6 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
-import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
@@ -25,15 +24,13 @@ public class PlaylistsManager {
     private static List<Playlist> playlists = new ArrayList<>();
     private static Playlist nearby;
     private static Playlist searchPlaylists;
-    private static PlaylistsFragmentAdapter playListsFragmentAdapter;
 
     private MediaPlayer mediaPlayer;
 
     private static boolean categoryBasedPlaylistsWereCreated = false;
 
-
     private PlaylistsManager(AppCompatActivity activity) {
-        this.activity = activity;
+        PlaylistsManager.activity = activity;
     }
 
     public static PlaylistsManager getInstance(AppCompatActivity activity) {
@@ -74,10 +71,13 @@ public class PlaylistsManager {
                     //The category was yet to be created
                     addPlaylist(new Playlist(category, false, 0, 0));
                 }
-
         }
     }
 
+    /**
+     * Given a new list of categories, updates the current playlist list by adding the ones on
+     * both the old and the new list & creating the new ones - when needed.
+     */
     public void updateCategoryBasedPlaylists(List<String> categories) {
         if (categories == null) {
             Log.d(TAG, "updateCategoryBasedPlaylists: null categories list");
@@ -165,18 +165,4 @@ public class PlaylistsManager {
         return nearby;
     }
 
-    public Playlist getPlaylistByIndex(int index) {
-        if (index > -1 && index < playlists.size()) {
-            return playlists.get(index);
-        }
-        return null;
-    }
-
-    public PlaylistsFragmentAdapter getPlayListsFragmentAdapter() {
-        return playListsFragmentAdapter;
-    }
-
-    public void setPlayListsFragmentAdapter(PlaylistsFragmentAdapter playListsFragmentAdapter) {
-        this.playListsFragmentAdapter = playListsFragmentAdapter;
-    }
 }

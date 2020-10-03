@@ -13,12 +13,15 @@ import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Adapter to browse the different PlaylistFragments
+ */
 public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
-
+    //For logs
     private static final String TAG = "PlaylistsFragmentAdapter";
 
-    private List<PlaylistFragment> mFragmentList = new ArrayList<>();
-    private TabLayout tabs;
+    private List<PlaylistFragment> playlistFragments = new ArrayList<>();
+    private TabLayout tabLayout;
 
     public PlaylistsFragmentAdapter(FragmentManager manager) {
         super(manager);
@@ -27,28 +30,30 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
     @NonNull
     @Override
     public PlaylistFragment getItem(int position) {
-        return mFragmentList.get(position);
+        return playlistFragments.get(position);
     }
 
     @Override
     public int getCount() {
-        return mFragmentList.size();
+        return playlistFragments.size();
     }
 
     @Override
-    public int getItemPosition(Object item) {
+    public int getItemPosition(@NonNull Object item) {
         PlaylistFragment fragment = (PlaylistFragment)item;
-        int position = mFragmentList.indexOf(fragment);
+        int position = playlistFragments.indexOf(fragment);
         if (position >= 0) {
             return position;
         } else {
             return POSITION_NONE;
         }
-
     }
 
+    /**
+     * Clears existing list and adds PlaylistFragments for every existing playlist
+     */
     public void updatePlaylistFragmentList() {
-        resetFragmentList();
+        playlistFragments = new ArrayList<>();
         for (Playlist playlist: PlaylistsManager.getPlaylists()) {
             Log.d(TAG, "updatePlaylistFragmentList: add the fragment of playlist titled - " + playlist.getTitle());
             addPlaylistFragment(playlist.getPlaylistFragment());
@@ -56,32 +61,25 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
         }
     }
 
+    /**
+     * Adds the given fragment to the list; if it's the Nearby playlist's fragment then adds it
+     * in the beginning
+     */
     public void addPlaylistFragment(PlaylistFragment fragment) {
         if (fragment != null && fragment.getPlaylist() != null &&
                 fragment.getPlaylist().getTitle().equals("Nearby")) {
-            mFragmentList.add(0, fragment);
+            playlistFragments.add(0, fragment);
         } else {
-            mFragmentList.add(fragment);
+            playlistFragments.add(fragment);
         }
     }
 
-    public void removePlaylistFragment(int position) {
-        if (!mFragmentList.isEmpty() && position > -1 && position < mFragmentList.size()) {
-            mFragmentList.remove(position);
-            notifyDataSetChanged();
-        }
+    public void setTabLayout(TabLayout tabLayout) {
+        this.tabLayout = tabLayout;
     }
 
-    private void resetFragmentList() {
-        mFragmentList = new ArrayList<>();
-    }
-
-    public void setTabs(TabLayout tabs) {
-        this.tabs = tabs;
-    }
-
-    public TabLayout getTabs() {
-        return tabs;
+    public TabLayout getTabLayout() {
+        return tabLayout;
     }
 
 }

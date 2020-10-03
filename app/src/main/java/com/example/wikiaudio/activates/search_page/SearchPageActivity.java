@@ -114,6 +114,12 @@ public class SearchPageActivity extends AppCompatActivity {
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
+        if (mediaPlayerFragment == null) {
+            mediaPlayerFragment = new MediaPlayerFragment();
+            mediaPlayerFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction().replace(R.id.mediaPlayerFragment,
+                    mediaPlayerFragment, "mediaPlayerFragment").commit();
+        }
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
