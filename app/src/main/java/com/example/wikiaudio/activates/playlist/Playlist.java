@@ -12,23 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Playlist {
-
+    //For logs
     private static final String TAG = "Playlist";
+
+    //Constants
     private static final String NEARBY_PLAYLIST_TITLE = "Nearby";
     private static final int RADIUS = 10000;
     private static final int MAX_WIKIPAGES = 10;
 
+    //Vars
     private String title;
     private Playlist currentPlaylist;
-
     private List<Wikipage> wikipages = new ArrayList<>();
-    private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
     private PlaylistFragment playlistFragment;
+    private ArrayList<PageAttributes> pageAttributes = new ArrayList<>();
 
-    // Location related
-    private boolean isLocationBased;
+    //Location related
     private double lat;
     private double lon;
+
 
     public Playlist() {}
 
@@ -51,7 +53,7 @@ public class Playlist {
      */
     public Playlist(String category, final boolean isLocationBased, double lat, double lon) {
         this.title = category;
-        initVars(isLocationBased, lat, lon);
+        initVars(lat, lon);
 
         List<Wikipage> results = new ArrayList<>();
         Holder.wikipedia.loadSpokenPagesByCategories(category, pageAttributes, results,
@@ -81,7 +83,6 @@ public class Playlist {
                 });
     }
 
-    //todo documentation? can use initVars for attributes...
     public Playlist(String query, String action) {
         if(action.equals("search")) {
             this.title = query;
@@ -113,7 +114,7 @@ public class Playlist {
      */
     public Playlist(final boolean isLocationBased, double lat, double lon) {
         this.title = NEARBY_PLAYLIST_TITLE;
-        initVars(isLocationBased, lat, lon);
+        initVars(lat, lon);
 
         List<Wikipage> results = new ArrayList<>();
         Holder.wikipedia.getPagesNearby(lat, lon, RADIUS, results, pageAttributes,
@@ -146,9 +147,8 @@ public class Playlist {
                 });
     }
 
-    private void initVars(final boolean isLocationBased, double lat, double lon) {
+    private void initVars(double lat, double lon) {
         currentPlaylist = this;
-        this.isLocationBased = isLocationBased;
         this.lat = lat;
         this.lon = lon;
         this.playlistFragment = new PlaylistFragment(this);
@@ -160,60 +160,16 @@ public class Playlist {
         pageAttributes.add(PageAttributes.description);
     }
 
-    /**
-     * When we load wikipages by category we only get their title
-     * So we use this func to get the wikipage itself (with the defined attributes)
-     */
-    private void loadWikipageByTitle(String title) {
-        if (Holder.wikipedia == null) {
-            Log.d(TAG, "getWikipageByTitle: error, wikipedia object is null");
-        }
-        final Wikipage result = new Wikipage();
-        Holder.wikipedia.getWikipage(title, pageAttributes, result,
-                new WorkerListener() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onSuccess");
-                        // TODO Add location related condition - now it adds regardless
-                        if (wikipages.size() < MAX_WIKIPAGES) {
-                            wikipages.add(result);
-                            result.setPlaylist(currentPlaylist);
-                        }
-                        playlistFragment.notifyAdapter();
-                    }
-                    @Override
-                    public void onFailure() {
-                        Log.d(TAG, "getWikipageByTitle-searchForPage-WorkerListener-onFailure: something went wrong");
-                    }
-                });
+    public String getTitle() {
+        return title;
     }
 
     public List<Wikipage> getWikipages(){
         return wikipages;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public PlaylistFragment getPlaylistFragment() {
-        return playlistFragment;
-    }
-
-    public Wikipage get(int position){
-        if(position >= 0 && position < wikipages.size())
-        {
-            return wikipages.get(position);
-        }
-        return null;
-    }
-
     public int size() {
         return wikipages.size();
-    }
-
-    public boolean isEmpty() {
-        return wikipages.isEmpty();
     }
 
     public int getIndexByWikipage(Wikipage wikipage) {
@@ -228,6 +184,10 @@ public class Playlist {
         this.playlistFragment = playlistFragment;
     }
 
+    public PlaylistFragment getPlaylistFragment() {
+        return playlistFragment;
+    }
+
     public void addWikipage(Wikipage wikipage) {
         wikipages.add(wikipage);
     }
@@ -236,15 +196,8 @@ public class Playlist {
         return lat;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
     public double getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
-        this.lon = lon;
-    }
 }

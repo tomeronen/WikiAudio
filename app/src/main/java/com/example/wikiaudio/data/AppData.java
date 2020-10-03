@@ -13,7 +13,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Cross application data
+ * Holds cross application data
  * This class is init when the app loads
  */
 public class AppData {
@@ -49,8 +49,7 @@ public class AppData {
         return wikiAudioApp;
     }
 
-    //TODO why are there 3 different set/get categories func? please add some documentation
-    //Category related: we want to save user's favorite categories
+    //Category
     public void saveChosenCategories(List<String> newChosenCategories)
     {
         if(newChosenCategories != null)
@@ -103,7 +102,7 @@ public class AppData {
         }
     }
 
-    //Playlist related: we only keep what is currently being played
+    //Playlist
     public void setCurrentlyPlayed(CurrentlyPlayed currentlyPlayed) {
         this.currentlyPlayed = currentlyPlayed;
     }

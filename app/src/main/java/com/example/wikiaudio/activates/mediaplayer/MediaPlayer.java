@@ -10,23 +10,24 @@ import com.example.wikiaudio.data.CurrentlyPlayed;
 import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
+/**
+ * The manager of what is being played and when to (use MediaPlayerFragment to) display it
+ */
 public class MediaPlayer {
+    //For logs
     private static final String TAG = "MediaPlayer";
 
+    //Vars
     private Activity activity;
-    private PlaylistPlayer player;
     private AppData appData;
+    private PlaylistPlayer player;
     private MediaPlayerFragment mpFragment;
-
     private CurrentlyPlayed currentlyPlayed;
     private boolean isPlaying = false;
     private boolean isPaused = false;
 
-    private int counter = 0;
-
 
     public MediaPlayer(Activity activity, AppData appData, MediaPlayerFragment mediaPlayerFragment) {
-        Log.d(TAG, "MediaPlayer: counter = " + counter + " | at " + TAG);
         this.activity = activity;
         this.appData = appData;
         mpFragment = mediaPlayerFragment;
@@ -49,7 +50,6 @@ public class MediaPlayer {
     public void pause() {
         player.pausePlaying();
         isPaused = true;
-//        appData.getCurrentlyPlayed().setIsPlaying(false); todo maybe add a paused func
     }
 
     public void resume() {
@@ -125,7 +125,6 @@ public class MediaPlayer {
             Log.d(TAG, "updateNextWikipage: currentlyPlayed is null, nothing to display");
             return;
         }
-
         Playlist playlist = currentlyPlayed.getPlaylist();
         int index = currentlyPlayed.getIndex() + 1;
         if (index <= 0  || index >= playlist.size()) {
@@ -133,11 +132,13 @@ public class MediaPlayer {
             return;
         }
         Wikipage wikipage = playlist.getWikipageByIndex(index);
-
         updateMediaPlayerVars(playlist, index, wikipage);
         displayWhatIsBeingPlayed(null);
     }
 
+    /**
+     * Updates the currentlyPlayed object
+     */
     private void updateMediaPlayerVars(Playlist playlist, int index, Wikipage wikipage) {
         currentlyPlayed = new CurrentlyPlayed(playlist, wikipage, index, true);
         if (appData != null) {
@@ -147,6 +148,9 @@ public class MediaPlayer {
         }
     }
 
+    /**
+     * If possible: zoom in, highlight & display on the MediaPlayerFragment the new played wikipage
+     */
     private void displayWhatIsBeingPlayed(Playlist previousPlaylist) {
         if (currentlyPlayed == null || !currentlyPlayed.isValid()) {
             Log.d(TAG, "displayWhatIsBeingPlayed: currentlyPlayed is null, nothing to display");
@@ -170,8 +174,8 @@ public class MediaPlayer {
         }
         // display on the media player fragment
         if (mpFragment != null) {
-            mpFragment.togglePlayPauseButton(false);
-            mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
+            mpFragment.setPlayPauseButton(false);
+            mpFragment.updateTitlesWithCurrentlyPlayed(playlist.getTitle(), wikipage.getTitle());
         } else {
             Log.d(TAG, "updateMediaPlayerVars: got null mpFragment");
         }

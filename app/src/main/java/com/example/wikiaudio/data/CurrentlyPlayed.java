@@ -3,6 +3,10 @@ package com.example.wikiaudio.data;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
+/**
+ * An object that holds every relevant data for what is being played
+ * (playlist, wikipage, index & if it is currently playing or not).
+ */
 public class CurrentlyPlayed {
     private Playlist playlist = null;
     private Wikipage wikipage = null;

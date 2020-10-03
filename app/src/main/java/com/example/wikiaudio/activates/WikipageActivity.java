@@ -34,19 +34,17 @@ import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class WikipageActivity extends AppCompatActivity {
-
+    //For logs
     private static final String TAG = "WikipageActivity";
 
+    //Vars
     private AppCompatActivity activity;
     private AppData appData;
-
     private String playlistTitle;
     private int wikipageIndexInPlaylist;
-
     private Wikipage wikipage;
 
     //MediaPlayer
-    private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
 
     //Views
@@ -86,7 +84,6 @@ public class WikipageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         playlistTitle = intent.getStringExtra("playlistTitle");
         wikipageIndexInPlaylist = intent.getIntExtra("index", -1);
-
         if (playlistTitle == null || wikipageIndexInPlaylist == -1) {
             Log.d(TAG, "onCreate: null extras from previous activity");
             finish();
@@ -111,7 +108,7 @@ public class WikipageActivity extends AppCompatActivity {
      * Creates the media player + navigation bar at the bottom.
      */
     private void initMediaPlayer() {
-        mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
+        MediaPlayerFragment mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
         if (mediaPlayerFragment == null) {
             mediaPlayerFragment = new MediaPlayerFragment();
@@ -125,7 +122,7 @@ public class WikipageActivity extends AppCompatActivity {
     }
 
     /**
-     * Initialized the record, play and add buttons.
+     * Creates the click listeners for the record, play and add buttons.
      */
     private void initOnClickButtons() {
         recordButton.setOnClickListener(v -> {
@@ -170,12 +167,6 @@ public class WikipageActivity extends AppCompatActivity {
     /**
      * Pretty self-explanatory, really.
      */
-//    Because WebView consumes web content that can include HTML and JavaScript, which may cause
-//    security issues if you haven’t used it properly. Here, XSS stands for “cross-site scripting”
-//    which is a form of hacking and by enabling client-side script into WebView which user is
-//    accessing from application and this way you are opening up your application to such attacks.
-//    I enabled it so the user can actually view the page and not be redirected to the google
-//    chrome app. We should consider changing this.
     @SuppressLint("SetJavaScriptEnabled")
     private void setLayout() {
         wikipage = Holder.playlistsManager
@@ -254,15 +245,17 @@ public class WikipageActivity extends AppCompatActivity {
      * A simple solution to displaying the play button
      */
     private boolean shouldDisplayPlayButton() {
-        //Play button, if the MediaPlayer plays this wikipage, hide the play button
+        //If the MediaPlayer plays this wikipage, hide the play button
         return !(mediaPlayer == null || mediaPlayer.getCurrentWikipage() == null ||
                 mediaPlayer.getCurrentWikipage().getTitle().equals(wikipage.getTitle()));
     }
 
+    /**
+     * Pretty self-explanatory, really.
+     */
     private void setFloatingButtonsVisibility(int visibility) {
         recordButton.setVisibility(visibility);
         addButton.setVisibility(visibility);
-
         //Display the play button only if it is not played && got View.VISIBLE
         if (shouldDisplayPlayButton() && visibility == View.VISIBLE) {
             playButton.setVisibility(View.VISIBLE);

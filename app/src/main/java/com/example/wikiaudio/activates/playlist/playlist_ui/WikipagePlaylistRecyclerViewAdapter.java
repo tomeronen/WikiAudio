@@ -21,18 +21,23 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The adapter for the representation of a wikipage on a playlist.
+ */
 public class WikipagePlaylistRecyclerViewAdapter extends
         RecyclerView.Adapter<WikipagePlaylistRecyclerViewAdapter.WikiPageViewHolder> {
+    //For logs
     private static final String TAG = "WikipagePlaylistRecyclerViewAdapter";
 
+    //Vars
     private Playlist playlist;
-    private List<Wikipage> mValues;
+    private List<Wikipage> wikipages;
     private List<WikiPageViewHolder> wikiPageViewHolders = new ArrayList<>();
 
     public WikipagePlaylistRecyclerViewAdapter(Playlist playlist) {
         this.playlist = playlist;
         if (playlist != null) {
-            mValues = playlist.getWikipages();
+            wikipages = playlist.getWikipages();
         }
     }
 
@@ -48,7 +53,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
     @Override
     public void onBindViewHolder(final WikiPageViewHolder holder, int position) {
-        Wikipage wikipage = mValues.get(position);
+        Wikipage wikipage = wikipages.get(position);
         holder.position = position;
         holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
@@ -67,9 +72,8 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
         //Play button
         if (Holder.playlistsManager != null && Holder.playlistsManager.getMediaPlayer() != null) {
-            holder.playButton.setOnClickListener(v -> {
-                Holder.playlistsManager.getMediaPlayer().play(playlist, position);
-            });
+            holder.playButton.setOnClickListener(v ->
+                    Holder.playlistsManager.getMediaPlayer().play(playlist, position));
             // if the media player is playing this wikipage then highlight it
             if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
                 if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
@@ -81,11 +85,14 @@ public class WikipagePlaylistRecyclerViewAdapter extends
 
     @Override
     public int getItemCount() {
-        if(mValues != null)
-            return mValues.size();
+        if(wikipages != null)
+            return wikipages.size();
         return 0;
     }
 
+    /**
+     * Highlights the wikipage (on the given position) with a green frame
+     */
     public void highlightWikipage(int position) {
         for (WikiPageViewHolder wikiPageViewHolder: wikiPageViewHolders) {
             if (wikiPageViewHolder.position == position) {
@@ -112,10 +119,10 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         private FloatingActionButton locationButton;
         private FloatingActionButton playButton;
 
-
         public Wikipage wikipage;
         public int position;
         private boolean expanded = false;
+
 
         public WikiPageViewHolder(View view) {
             super(view);
