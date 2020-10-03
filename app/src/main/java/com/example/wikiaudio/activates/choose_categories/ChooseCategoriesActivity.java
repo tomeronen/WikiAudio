@@ -21,22 +21,22 @@ import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
-import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChooseCategoriesActivity extends AppCompatActivity {
+
+    private static final String TAG = "ChooseCategoriesActivity";
+
     private AppCompatActivity activity;
     private AppData appData;
 
+    private List<String> originalCategories = new ArrayList<>();
     private List<String> categories = new ArrayList<>();
     private int columnAmount;
-
-//    private ArrayList<String> chosenCategories;
     private CategoryAdapter categoryAdapter;
-
 
     //Views
     private SearchView searchCategoriesView;
@@ -52,14 +52,14 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_categories);
-        activity = this;
-        appData =((WikiAudioApp) getApplication()).getAppData();
-        categoriesView = findViewById(R.id.categoriesView);
-        searchCategoriesView = findViewById(R.id.searchCategorysView);
-        saveButton = findViewById(R.id.saveChoice);
-        loadingIcon = findViewById(R.id.progressBar5);
-        Holder.wikipedia = new Wikipedia(this);
+        initVars();
+        initOnClickButtons();
+        setOrientation();
+        loadCategories();
+        initMediaPlayer();
+    }
 
+    private void setOrientation() {
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
@@ -68,61 +68,60 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
             // In portrait
             columnAmount = 3;
         }
+    }
 
-        final CategoryClickListeners categoryClickListeners = new CategoryClickListeners() {
-            @Override
-            public void onClick(String string) {
-                // what to do when a category is pressed.
-            }
-        };
+    private void initVars() {
+        activity = this;
+        appData =((WikiAudioApp) getApplication()).getAppData();
+        this.originalCategories = ((WikiAudioApp)activity.getApplication())
+                .getAppData().getChosenCategories();
+        categoriesView = findViewById(R.id.categoriesView);
+        searchCategoriesView = findViewById(R.id.searchCategorysView);
+        saveButton = findViewById(R.id.saveChoice);
+        loadingIcon = findViewById(R.id.progressBar5);
+    }
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(categoryAdapter != null)
-                {
-                    ((WikiAudioApp) getApplication())
-                            .getAppData()
-                            .saveChosenCategories(categoryAdapter._categoriesChosen);
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra("dataSaved", true);
-                    setResult(Activity.RESULT_OK,returnIntent);
-                    finish();
-                }
-                Intent returnIntent = new Intent();
-                setResult(Activity.RESULT_CANCELED, returnIntent);
+    private void initOnClickButtons() {
+        saveButton.setOnClickListener(v -> {
+            if (!(originalCategories.containsAll(categories) &&
+                    categories.containsAll(originalCategories))) {
+                // categories changed
+                ((WikiAudioApp) getApplication()).getAppData()
+                        .saveChosenCategories(categoryAdapter._categoriesChosen);
+                Intent intent = getIntent();
+                setResult(Activity.RESULT_OK, intent);
                 finish();
             }
+            // categories unchanged
+            Intent intent = getIntent();
+            setResult(Activity.RESULT_CANCELED, intent);
+            finish();
         });
+    }
 
-
+    private void loadCategories() {
+        final CategoryClickListeners categoryClickListeners = string -> {};
         loadingIcon.setVisibility(View.VISIBLE);
         Holder.wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {
-             @Override
-             public void onSuccess() {
-                 Log.d("load status", "loaded categories");
-                 categoryAdapter =
-                         new CategoryAdapter(activity, categories, categoryClickListeners);
-                 categoriesView.setLayoutManager(new GridLayoutManager(activity, columnAmount));
-                 RecyclerView.ItemDecoration itemDecoration = new
-                         DividerItemDecoration(activity, DividerItemDecoration.HORIZONTAL);
-                 categoriesView.addItemDecoration(new SpacesItemDecoration(10));
-//                 int resId = R.anim.grid_layout_animation_from_bottom;
-//                 LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(app, resId);
-//                 categoriesView.setLayoutAnimation(animation);
-                 categoriesView.setAdapter(categoryAdapter);
-                 loadingIcon.setVisibility(View.GONE);
-             }
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "load status: loaded categories");
+                categoryAdapter =
+                        new CategoryAdapter(activity, categories, categoryClickListeners);
+                categoriesView.setLayoutManager(new GridLayoutManager(activity, columnAmount));
+                RecyclerView.ItemDecoration itemDecoration = new
+                        DividerItemDecoration(activity, DividerItemDecoration.HORIZONTAL);
+                categoriesView.addItemDecoration(new SpacesItemDecoration(10));
+                categoriesView.setAdapter(categoryAdapter);
+                loadingIcon.setVisibility(View.GONE);
+            }
 
-             @Override
-             public void onFailure() {
-                 Log.d("load status", "loading categories failed");
-                 loadingIcon.setVisibility(View.GONE);
-
-             }
-         });
-
-        initMediaPlayer();
+            @Override
+            public void onFailure() {
+                Log.d(TAG, "load status: loading categories failed");
+                loadingIcon.setVisibility(View.GONE);
+            }
+        });
     }
 
     /**
