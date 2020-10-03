@@ -58,9 +58,8 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         holder.wikipage = wikipage;
         holder.titleView.setText(wikipage.getTitle());
         holder.titleView.setSelected(true); // for moving text if needed
-        holder.descriptionView.setText(wikipage.getDescription());
-        holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
-        holder.highlight.setVisibility(View.GONE);
+//        holder.descriptionView.setVisibility(View.GONE); // we start without seeing content.
+//        holder.highlight.setVisibility(View.GONE);
 
         //Shows and sets the location button if that wikipage has coordinates
         if (wikipage.getLat() == null || wikipage.getLon() == null) {
@@ -77,9 +76,16 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             // if the media player is playing this wikipage then highlight it
             if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
                 if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
-                    holder.highlight.setVisibility(View.VISIBLE);
+//                    holder.highlight.setVisibility(View.VISIBLE);
+
                 }
             }
+        }
+
+        if(wikipage.getDescription() != null)
+        {
+            holder.descriptionView.setText(wikipage.getDescription());
+            holder.descriptionView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -96,16 +102,22 @@ public class WikipagePlaylistRecyclerViewAdapter extends
     public void highlightWikipage(int position) {
         for (WikiPageViewHolder wikiPageViewHolder: wikiPageViewHolders) {
             if (wikiPageViewHolder.position == position) {
-                wikiPageViewHolder.highlight.setVisibility( View.VISIBLE);
+//                wikiPageViewHolder.highlight.setVisibility( View.VISIBLE);
+                wikiPageViewHolder.mView
+                        .setBackground
+                                (wikiPageViewHolder.mView.getResources()
+                                        .getDrawable(R.drawable.border_highlight));
             } else {
-                wikiPageViewHolder.highlight.setVisibility( View.GONE);
+                wikiPageViewHolder.mView.setBackgroundResource(0);
+//                wikiPageViewHolder.highlight.setVisibility( View.GONE);
             }
         }
     }
 
     public void clearHighlights() {
         for (WikiPageViewHolder wikiPageViewHolder: wikiPageViewHolders) {
-            wikiPageViewHolder.highlight.setVisibility( View.GONE);
+            wikiPageViewHolder.mView.setBackgroundResource(0);
+//            wikiPageViewHolder.highlight.setVisibility( View.GONE);
         }
     }
 
@@ -115,7 +127,7 @@ public class WikipagePlaylistRecyclerViewAdapter extends
         public final View mView;
         public final TextView titleView;
         public final TextView descriptionView;
-        public TextView highlight;
+//        public TextView highlight;
         private FloatingActionButton locationButton;
         private FloatingActionButton playButton;
 
@@ -131,17 +143,34 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             descriptionView = view.findViewById(R.id.description_view);
             locationButton = view.findViewById(R.id.locationButton);
             playButton = view.findViewById(R.id.playButton);
-            highlight = view.findViewById(R.id.highlight);
+
+//            highlight = view.findViewById(R.id.highlight);
 
             view.setOnClickListener(v -> {
-                expanded = !expanded;
-                if (expanded && wikipage.getDescription() != null) {
-                    descriptionView.setText(wikipage.getDescription());
-                    descriptionView.setVisibility(View.VISIBLE);
+                if (wikipage != null && playlist != null) {
+                    int index = playlist.getIndexByWikipage(wikipage);
+                    if (index > -1) {
+                        Intent WikipageIntent = new Intent(PlaylistsManager.getActivity(),
+                                WikipageActivity.class);
+                        WikipageIntent.putExtra("playlistTitle", playlist.getTitle());
+                        WikipageIntent.putExtra("index", index);
+                        PlaylistsManager.getActivity().startActivity(WikipageIntent);
+                    } else {
+                        Log.d(TAG, "onInfoWindowClick: index is bad");
+                    }
                 } else {
-                    descriptionView.setVisibility(View.GONE);
+                    Log.d(TAG, "onInfoWindowClick: playlist is null :(");
                 }
             });
+
+            // CHANGE
+//                expanded = !expanded;
+//                if (expanded && wikipage.getDescription() != null) {
+//                    descriptionView.setText(wikipage.getDescription());
+//                    descriptionView.setVisibility(View.VISIBLE);
+//                } else {
+//                    descriptionView.setVisibility(View.GONE);
+
 
             // When long clicking on an item in the playlist, it opens its wikipage
             view.setOnLongClickListener(v -> {
