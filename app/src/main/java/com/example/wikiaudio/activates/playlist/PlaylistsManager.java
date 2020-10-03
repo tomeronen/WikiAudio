@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistsFragmentAdapter;
 import com.example.wikiaudio.data.Holder;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 
 import java.util.ArrayList;
@@ -102,8 +103,8 @@ public class PlaylistsManager {
      * @param query the value to search.
      * @return the playlist created.
      */
-    public Playlist createSearchBasedPlaylist(String query) {
-        searchPlaylists = new Playlist(query, "search");
+    public Playlist createSearchBasedPlaylist(String query, WorkerListener workerListener) {
+        searchPlaylists = new Playlist(query, "search", workerListener);
         return searchPlaylists;
 
     }

@@ -113,4 +113,5 @@
         under the same or compatible license as the original.\n\n
     </string>
     <string name="upload_dialog_title">Uploading File</string>
+    <string name="search_result_error">there was a problem with getting search results</string>
 </resources>

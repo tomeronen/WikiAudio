@@ -100,7 +100,7 @@ public interface WikiServer {
 
 
     @GET("/w/api.php?action=query" +
-            "&gsrlimit=30" +
+            "&gsrlimit=10" +
             "&generator=search" +
             "&format=json")
     Call<QuarryResponse> searchPage(@Query("gsrsearch") String pageName,

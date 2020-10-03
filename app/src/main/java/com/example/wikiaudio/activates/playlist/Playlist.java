@@ -82,7 +82,7 @@ public class Playlist {
     }
 
     //todo documentation? can use initVars for attributes...
-    public Playlist(String query, String action) {
+    public Playlist(String query, String action, WorkerListener workerListener) {
         if(action.equals("search")) {
             this.title = query;
             List<PageAttributes> pageAttributes = new ArrayList<>();
@@ -90,6 +90,8 @@ public class Playlist {
             pageAttributes.add(PageAttributes.url);
             pageAttributes.add(PageAttributes.thumbnail);
             pageAttributes.add(PageAttributes.description);
+            pageAttributes.add(PageAttributes.content);
+            pageAttributes.add(PageAttributes.audioUrl);
             this.playlistFragment = new PlaylistFragment(this);
             Holder.wikipedia.searchForPage(query, pageAttributes, this.getWikipages(),
                     new WorkerListener() {
@@ -97,12 +99,12 @@ public class Playlist {
                         public void onSuccess() {
                             Log.d(TAG, "");
                             playlistFragment.notifyAdapter();
+                            workerListener.onSuccess();
                         }
 
                         @Override
                         public void onFailure() {
                             Log.d(TAG, "");
-
                         }
                     });
         }

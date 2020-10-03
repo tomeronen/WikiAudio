@@ -102,8 +102,10 @@ public class Wikipedia {
             {
                 try
                 {
-                    listToFill.addAll(WikiServerHolder
-                            .getInstance().searchPage(pageName, attributes));
+                    listToFill
+                            .addAll(wikipageDataManager
+                                    .searchWikiPageByName(pageName,
+                                                            attributes));
                     activ.runOnUiThread(workerListener::onSuccess);
                     return;
                 } catch (IOException e) {

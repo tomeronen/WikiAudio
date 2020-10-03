@@ -92,21 +92,17 @@ public class WikiServerHolder {
      * @throws IOException if got a bad format response throws a IOException or something went wrong
      * with the communication with wikipedia servers altogether. (can also be our fault)
      */
-    public List<Wikipage> searchPage(String pageName,  List<PageAttributes> pageAttr )
+    public static List<Wikipage> searchPage(String pageName,  List<PageAttributes> pageAttr )
             throws IOException {
         String prop = getQueryProp(pageAttr);
         String inprop = getQueryInProp(pageAttr);
-        Response<QuarryResponse> response = server.searchPage(pageName, prop, inprop, "original|thumbnail").execute();
+        Response<QuarryResponse> response = getInstance().server.searchPage(pageName,
+                prop,
+                inprop,
+                "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
             List<Wikipage> wikipages = parseQuarryResponse(response.body());
-            if(pageAttr.contains(content) ||
-                    pageAttr.contains(audioUrl)) {
-                for (Wikipage wikipage : wikipages) {
-
-                    WikiHtmlParser.parseAdvanceAttr(wikipage);
-                }
-            }
             return wikipages;
         } else {
             // task failed.
@@ -132,12 +128,8 @@ public class WikiServerHolder {
 //todo add load audio.
             if(pageAttr.contains(content))
             {
-                Response<ContentResponse> responsePageContents = server.callPageContents(name).execute();
-                if (response.code() == 200 && response.isSuccessful()) {
-                    List<Wikipage.Section> sections
-                            = parseContentResponse(responsePageContents.body());
-                    WikipageList.get(0).setSections(sections);
-                }
+                Wikipage wikipage = WikipageList.get(0);
+                wikipage.setSections(getPageContent(wikipage.getTitle()));
             }
             return WikipageList.get(0);
         } else {
@@ -146,12 +138,24 @@ public class WikiServerHolder {
         }
     }
 
-    private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse) throws IOException {
+    public List<Wikipage.Section> getPageContent(String title)
+            throws IOException {
+        Response<ContentResponse> responsePageContents = server.callPageContents(title).execute();
+        if (responsePageContents.code() == 200 && responsePageContents.isSuccessful()) {
+            return parseContentResponse(responsePageContents.body());
+        }
+        throw new IOException();
+    }
+
+    private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse)
+            throws IOException {
         if(contentResponse != null) {
-
-
             List<Wikipage.Section> result = new ArrayList<>();
             ContentResponse.LeadData lead = contentResponse.lead;
+            if(lead == null) // got bad response.
+            {
+                throw new IOException();
+            }
             String leadTitle = lead.displaytitle;
             ContentResponse.SectionData leadSectionData = lead.sections.get(0);
             if (leadSectionData != null) {
@@ -654,31 +658,27 @@ public class WikiServerHolder {
 
     public void loadAudioSource(HashMap<String, Wikipage> wikipagesData,
                             HashMap<String, String> spokenWikipagesMetaData,
-                            List<String> pagesNames) throws IOException {
+                            List<String> pagesNames)
+            throws IOException {
         String fileNames = getFileNames(spokenWikipagesMetaData, pagesNames);
-        Response<QuarryResponse> fileResponse = server.callGetAudioFile(fileNames).execute();
-        if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
-            HashMap<String, String> fileSourcesResults =
-                    parseAudioSourceResponse(fileResponse.body());
-            for (String pageName : pagesNames) {
-                String fileName = spokenWikipagesMetaData.get(pageName);
-                String fileSource = fileSourcesResults.get(fileName);
-                Wikipage wikipage = wikipagesData.get(pageName);
-                if (wikipage != null) {
-                    wikipage.setAudioUrl(fileSource);
+        if(!fileNames.equals("")) // there are audio files for our pages
+        {
+            Response<QuarryResponse> fileResponse = server.callGetAudioFile(fileNames).execute();
+            if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
+                HashMap<String, String> fileSourcesResults =
+                        parseAudioSourceResponse(fileResponse.body());
+                for (String pageName : pagesNames) {
+                    String fileName = spokenWikipagesMetaData.get(pageName);
+                    String fileSource = fileSourcesResults.get(fileName);
+                    Wikipage wikipage = wikipagesData.get(pageName);
+                    if (wikipage != null) {
+                        wikipage.setAudioUrl(fileSource);
+                    }
                 }
             }
         }
     }
 
-
-    public void getPageContents(String pageTitle)
-            throws IOException {
-        Response<ContentResponse> response = this.server.callPageContents(pageTitle).execute();
-        if (response.code() == 200 && response.isSuccessful()) {
-
-        }
-    }
 }
 
 

@@ -2,9 +2,19 @@ package com.example.wikiaudio.wikipedia.wikipage;
 
 import com.example.wikiaudio.activates.playlist.Playlist;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Wikipage {
+    private static Set<String> unwantedTags = new HashSet<>();
+    static {
+        unwantedTags.add(".mw-ref");
+    }
 
 
     public static class Section{
@@ -71,13 +81,16 @@ public class Wikipage {
     }
 
     public String getFullText() {
-        String fullText = "";
+        StringBuilder fullText = new StringBuilder();
         if(sections != null) {
             for (Section s : sections) {
-                fullText += s.title + "." + s.htmlText; //todo do
+                Document doc = Jsoup.parse(s.htmlText);
+                Elements select = doc.select(".mw-ref");
+                select.remove();
+                fullText.append(s.title).append(". ").append(doc.select("p").text());
             }
         }
-        return fullText;
+        return fullText.toString();
     }
 
     public void setComputerUrl(String computerUrl) {

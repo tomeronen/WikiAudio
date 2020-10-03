@@ -210,6 +210,46 @@ public class WikipageDataManager {
     }
 
 
+    public List<Wikipage> searchWikiPageByName(String pageName,
+                                               List<PageAttributes> pageAttributes)
+            throws IOException
+    {
+        if(pageName == null || pageAttributes == null || pageAttributes.isEmpty())
+        { // nothing to return.
+            return new ArrayList<>();
+        }
+        // gets basic attributes:
+        List<Wikipage> wikipages = WikiServerHolder.searchPage(pageName, pageAttributes);
+        List<String> pagesNames = new ArrayList<>();
+        for(Wikipage wikipage: wikipages)
+        {
+            pagesNames.add(wikipage.getTitle());
+            wikipagesData.put(wikipage.getTitle(), wikipage);
+        }
+
+        // get content if asked:
+        if(pageAttributes.contains(PageAttributes.content))
+        {
+            for(String name:pagesNames) // page contents needs to be one by one.
+            {
+                Wikipage wikipage = wikipagesData.get(name);
+                if(wikipage != null) {
+                    wikipage.setSections(WikiServerHolder.getInstance().getPageContent(name));
+                }
+            }
+        }
+
+        // get audio source if asked:
+        if(pageAttributes.contains(PageAttributes.audioUrl))
+        {
+                WikiServerHolder.getInstance().loadAudioSource(wikipagesData,
+                getSpokenWikipagesMetaData(),
+                pagesNames);
+
+        }
+        return wikipages;
+    }
+
 
     public List<Wikipage> getSpokenPagesByCategories(String category,
                                                      List<PageAttributes> pageAttributes)
@@ -219,13 +259,14 @@ public class WikipageDataManager {
                 .getOrDefault(category, null);
         if(pagesNames == null)
         {
-            throw new IOException();
+            return new ArrayList<>();
         }
         if(pagesNames.size() > MAX_QUERY_AT_ONCE)
         {
             List<String> subPagesNames = pagesNames.subList(0, MAX_QUERY_AT_ONCE);
             pagesNames = subPagesNames; // todo can this be done in one line?
         }
+
         // load basic Attributes:
         WikiServerHolder.getInstance().loadPagesByName(wikipagesData,
                                                         pagesNames,
@@ -239,7 +280,18 @@ public class WikipageDataManager {
                     getSpokenWikipagesMetaData(),
                     pagesNames);
         }
-        // todo add option for content.
+
+        // load contents:
+        if(pageAttributes.contains(PageAttributes.content))
+        {
+            for(String name:pagesNames) // page contents needs to be one by one.
+            {
+                Wikipage wikipage = wikipagesData.get(name);
+                if(wikipage != null) {
+                    wikipage.setSections(WikiServerHolder.getInstance().getPageContent(name));
+                }
+            }
+        }
 
         // load the created wikipages into the result.
         for(String pageName:pagesNames)

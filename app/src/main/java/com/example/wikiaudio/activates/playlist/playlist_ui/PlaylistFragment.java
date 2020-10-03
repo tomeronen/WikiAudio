@@ -25,6 +25,10 @@ public class PlaylistFragment extends Fragment {
     private PlaylistsFragmentAdapter playlistsFragmentAdapter;
     private boolean setBorder = false;
 
+
+    private RecyclerView recyclerView;
+
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -56,7 +60,7 @@ public class PlaylistFragment extends Fragment {
         //Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
             recyclerView.setLayoutManager(linearLayoutManager);
             DividerItemDecoration dividerItemDecoration
@@ -100,4 +104,9 @@ public class PlaylistFragment extends Fragment {
     public PlaylistsFragmentAdapter getPlaylistsFragmentAdapter() {
         return playlistsFragmentAdapter;
     }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
 }

@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +18,7 @@ import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.playlist_ui.PlaylistFragment;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
+import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 public class SearchPageActivity extends AppCompatActivity {
 
@@ -51,11 +53,27 @@ public class SearchPageActivity extends AppCompatActivity {
         searchBar.onActionViewExpanded();
         searchTitle = findViewById(R.id.search_title);
         searchTitle.setVisibility(View.GONE);
+        loadingIcon = findViewById(R.id.loadingSearchResults);
+        loadingIcon.setVisibility(View.GONE);
         app = getApplicationContext();
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Playlist searchResult = Holder.playlistsManager.createSearchBasedPlaylist(query);
+                loadingIcon.setVisibility(View.VISIBLE);
+                Playlist searchResult = Holder.playlistsManager.createSearchBasedPlaylist(query,
+                new WorkerListener() {
+                    @Override
+                    public void onSuccess() {
+                        loadingIcon.setVisibility(View.GONE);
+                    }
+                    @Override
+                    public void onFailure() {
+                        loadingIcon.setVisibility(View.GONE);
+                        Toast.makeText(activity,
+                                R.string.search_result_error,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
                 searchResultFragment = searchResult.getPlaylistFragment();
                 searchResultFragment.showBorder(true);
                 searchResultVisibility();
