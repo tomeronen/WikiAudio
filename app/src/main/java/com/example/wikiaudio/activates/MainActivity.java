@@ -188,11 +188,19 @@ public class MainActivity extends AppCompatActivity implements
      * Creates category based playlists and displays all playlists
      */
     private void loadPlaylists() {
-        loadingIcon.setVisibility(View.VISIBLE);
+        if(PlaylistsManager.getPlaylists().size() != chosenCategories.size())
+        {
+            // we still have things to load;
+            loadingIcon.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            // All data was loaded in splash;
+            loadingIcon.setVisibility(View.GONE);
+        }
         new Thread(() -> {
             //todo-sm comment below when checking splash upload
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
-
             displayPlaylists();
         }).start();
     }
