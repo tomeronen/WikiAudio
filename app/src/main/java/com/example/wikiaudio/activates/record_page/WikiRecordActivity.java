@@ -138,18 +138,19 @@ public class WikiRecordActivity extends AppCompatActivity {
                     public void onSuccess() {
                         if(wikipage.getSections() != null) {
                             cleanUnwantedSections(wikipage.getSections());
-                            progressCounter.setText(String.format("%d/%d",screenCounter,
-                                    numberOfScreens));
+
                             // add default intro sections:
-                            wikipage.getSections().add(0,
-                                    new Wikipage.Section("Intro",
-                                    wikipage.getTitle() + introMsg));
-                            wikipage.getSections().add(0,
-                                    new Wikipage.Section("Licensing",
-                                    getResources().getString(R.string.license_string)));
+                            addDefaultSections();
+
+                            // init counters:
                             numberOfScreens = wikipage.getSections().size();
                             initRecordingData();
+
+                            // initialize progress counters:
+                            progressCounter.setText(String.format("%d/%d",screenCounter,
+                                    numberOfScreens));
                             progressBar.setMax(numberOfScreens);
+
                             updateUI(curSection);
                         }
                         loadingContent.setVisibility(View.GONE);
@@ -160,6 +161,20 @@ public class WikiRecordActivity extends AppCompatActivity {
 
                     }
                 });
+    }
+
+    private void addDefaultSections() {
+        if(wikipage != null
+                && wikipage.getSections() != null
+                && !wikipage.getSection(0).getTitle().equals("Licensing")) // there is no intro
+        {
+            wikipage.getSections().add(0,
+                    new Wikipage.Section("Intro",
+                    wikipage.getTitle() + introMsg));
+            wikipage.getSections().add(0,
+                    new Wikipage.Section("Licensing",
+                    getResources().getString(R.string.license_string)));
+        }
     }
 
     private void cleanUnwantedSections(List<Wikipage.Section> sections) {
@@ -371,7 +386,6 @@ public class WikiRecordActivity extends AppCompatActivity {
         setOnClickPrevious();
         setOnClickUpload();
         setOnClickPlay();
-//        setOnClickPause();
         setOnClickStop();
         setOnClickDelete();
         setOnShowSectionsClick();
@@ -384,7 +398,15 @@ public class WikiRecordActivity extends AppCompatActivity {
     }
 
     private void setOnClickStop() {
-        this.stopButton.setOnClickListener(v -> stopRecording());
+        this.stopButton.setOnClickListener(v -> {
+            stopRecording();
+
+            // update recording UI. todo move into updateUI() method
+            recordButton.setImageDrawable(ContextCompat.getDrawable(activity,
+                    R.drawable.recorder_icon));
+            stopBlinkingAnimation(recordButton);
+            recordingTimer.cancel();
+        });
     }
 
 //    private void setOnClickPause() {
@@ -574,6 +596,8 @@ public class WikiRecordActivity extends AppCompatActivity {
                 }
                 recordingPaused = false;
                 startRecording = false;
+                recordButton.setImageDrawable(ContextCompat.getDrawable(activity,
+                        R.drawable.pause_icon));
                 startBlinkingAnimation(recordButton);
                 recordingTimer.start();
             } else if (!havePermissions) {
@@ -587,7 +611,9 @@ public class WikiRecordActivity extends AppCompatActivity {
                 recorder.pauseRecording();
                 recordingPaused = true;
                 startRecording = true;
-                recordingTimer.cancel();
+                recordingTimer.cancel();  // stop increasing timer
+                recordButton.setImageDrawable(ContextCompat.getDrawable(activity,
+                        R.drawable.recorder_icon));
                 stopBlinkingAnimation(recordButton);
             }
         });

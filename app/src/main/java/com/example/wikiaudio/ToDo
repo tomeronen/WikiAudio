@@ -7,12 +7,9 @@ TODO:
 
 
 Wikipedia Logic:
-    (1) relative - function that lets you see next wiki page based on the page you are in now.
-    S.M ^ I don't think we should
-    (2) get wiki pages from list of wiki titles.
-    S.M ^ already done in Playlist, I agree it should be a Wikipedia function.
-    (3) make url returned be one for mobile.
-    S.M ^ why does it matter now
+    (1) Make a couple of attempts before running on failure.
+    (2) Let the user know when his file was uploaded.
+
 
 
 TODO s that should be done last (after the rest of the app works):
@@ -22,6 +19,8 @@ TODO s that should be done last (after the rest of the app works):
 (4) Anything record related:
     (a) TIPS dialog appear on first instance.
     (b) option for uploading when finished.
+(5) Make on Failure functions. usually we do not change UI if wikipedia internet requests
+  function fails.
 
 
 Changing Fetching Mechanism?:
