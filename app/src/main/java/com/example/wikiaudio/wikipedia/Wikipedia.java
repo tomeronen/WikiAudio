@@ -1,5 +1,7 @@
 package com.example.wikiaudio.wikipedia;
 
+import android.util.Log;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -32,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class Wikipedia {
 
     private static final int DAYS_BETWEEN_LOADING_CATEGORIES = 7;
+    private static final int ATTEMPTS_BEFORE_FAILURE = 3;  // todo check what is best number
     private final ExecutorService threadPool;
     private WikipageDataManager wikipageDataManager;
     private AppCompatActivity activ;
@@ -60,14 +63,23 @@ public class Wikipedia {
             //        String password = "X94A2wgzHA36MQ2";
 
         threadPool.execute(()-> {
-            try {
-                wikipageDataManager.initWikipageDataManager();
-            } catch (IOException e) {
-                e.printStackTrace();
+                int numberOfTries = 0;
+                while (numberOfTries < ATTEMPTS_BEFORE_FAILURE)
+                {
+                    try
+                    {
+                        wikipageDataManager.initWikipageDataManager();
+                        return;
+                    } catch (IOException e) {
+                        Log.e("internet attempt status:",
+                                "attempt failure number:" + numberOfTries);
+                        numberOfTries++;
+                    }
+                }
                 // todo what to do if wikipageDataManager fails to init?
-            }
         });
     }
+
 
     /**
      * Search a name for relevant wiki pages.
@@ -85,25 +97,22 @@ public class Wikipedia {
                               final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
-            try {
-                listToFill.addAll(WikiServerHolder
-                        .getInstance().searchPage(pageName, attributes));
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onSuccess();
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onFailure();
-                    }
-                });
+            int numberOfTries = 0;
+            while (numberOfTries < ATTEMPTS_BEFORE_FAILURE)
+            {
+                try
+                {
+                    listToFill.addAll(WikiServerHolder
+                            .getInstance().searchPage(pageName, attributes));
+                    activ.runOnUiThread(workerListener::onSuccess);
+                    return;
+                } catch (IOException e) {
+                    Log.e("internet attempt status:",
+                            "attempt failure number:" + numberOfTries);
+                    numberOfTries++;
+                }
             }
-
+            activ.runOnUiThread(workerListener::onFailure);
         });
     }
 
@@ -122,32 +131,26 @@ public class Wikipedia {
                                final int radius,
                                final List<Wikipage> listToFill,
                                final List<PageAttributes> pageAttributes,
-                               final WorkerListener workerListener)
-    {
+                               final WorkerListener workerListener) {
         threadPool.execute(() -> {
-            try {
-                List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
-                        longitude,
-                        radius,
-                        pageAttributes);
-                // task was successful.
-                listToFill.addAll(pagesNearby);
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onSuccess();
-                    }
-                });
-            } catch (IOException e) {
-                // task failed with a exception.
-                activ.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        workerListener.onFailure();
-                    }
-                });
-                e.printStackTrace();
+            int numberOfTries = 0;
+            while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
+                try {
+                    List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
+                            longitude,
+                            radius,
+                            pageAttributes);
+                    // task was successful.
+                    listToFill.addAll(pagesNearby);
+                    activ.runOnUiThread(workerListener::onSuccess);
+                    return;
+                } catch (IOException e) {
+                    Log.e("internet attempt status:",
+                            "attempt failure number:" + numberOfTries);
+                    numberOfTries++;
+                }
             }
+            activ.runOnUiThread(workerListener::onFailure);
         });
     }
 
@@ -159,31 +162,27 @@ public class Wikipedia {
                                           final WorkerListener workerListener) {
         if (needToLoadCategories()) { // need to reload Categories -> load from wiki.
             threadPool.execute(() -> {
-                try {
-                    listToFill.addAll(wikipageDataManager.getSpokenCategories());
-                    listToFill
-                            .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
-                    Date currentTime = Calendar.getInstance().getTime();
-                    appData.setCategories(listToFill);
-                    appData.setLastLoadedCategories(currentTime);
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onSuccess();
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    activ.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            workerListener.onFailure();
-                        }
-                    });
+                int numberOfTries = 0;
+                while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
+                    try {
+                        listToFill.addAll(wikipageDataManager.getSpokenCategories());
+                        listToFill
+                                .addAll(WikiServerHolder.getInstance().callGetSpokenPagesCategories());
+                        Date currentTime = Calendar.getInstance().getTime();
+                        appData.setCategories(listToFill);
+                        appData.setLastLoadedCategories(currentTime);
+                        activ.runOnUiThread(workerListener::onSuccess);
+                        return;
+                    } catch (IOException e) {
+                        Log.e("internet attempt status:",
+                                "attempt failure number:" + numberOfTries);
+                        numberOfTries++;
+                    }
                 }
+                activ.runOnUiThread(workerListener::onFailure);
             });
-        }
-        else { // do not need to load Categories -> load from saved.
+
+        } else { // do not need to load Categories -> load from saved.
             List<String> categories = appData.getCategories();
             if(categories != null) {
                 listToFill.addAll(appData.getCategories());
@@ -248,13 +247,19 @@ public class Wikipedia {
                             final WorkerListener workerListener)
     {
         threadPool.execute(() -> {
-            try {
-                pageToFill.copy(wikipageDataManager.getWikipage(name, pageAttributes));
-                activ.runOnUiThread(workerListener::onSuccess);
-            } catch (IOException e) {
-                // task failed with a exception.
-                activ.runOnUiThread(workerListener::onFailure);
+            int numberOfTries = 0;
+            while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
+                try {
+                    pageToFill.copy(wikipageDataManager.getWikipage(name, pageAttributes));
+                    activ.runOnUiThread(workerListener::onSuccess);
+                    return;
+                } catch (IOException e) {
+                    Log.e("internet attempt status:",
+                            "attempt failure number:" + numberOfTries);
+                    numberOfTries++;
+                }
             }
+            activ.runOnUiThread(workerListener::onFailure);
         });
     }
 
@@ -271,18 +276,23 @@ public class Wikipedia {
     public void getWikipagesByName(final List<String> names,
                                    final List<PageAttributes> pageAttributes,
                                    final List<Wikipage> listToFill,
-                                   final WorkerListener workerListener)
-    {
+                                   final WorkerListener workerListener) {
         threadPool.execute(() -> {
-            try {
-                List<Wikipage> pages = WikiServerHolder
-                        .getInstance().getPagesByName(names, pageAttributes);
-                listToFill.addAll(pages);
-                activ.runOnUiThread(workerListener::onSuccess);
-            } catch (IOException e) {
-                // task failed with a exception.
-                activ.runOnUiThread(workerListener::onFailure);
+            int numberOfTries = 0;
+            while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
+                try {
+                    List<Wikipage> pages = WikiServerHolder
+                            .getInstance().getPagesByName(names, pageAttributes);
+                    listToFill.addAll(pages);
+                    activ.runOnUiThread(workerListener::onSuccess);
+                    return;
+                } catch (IOException e) {
+                    Log.e("internet attempt status:",
+                            "attempt failure number:" + numberOfTries);
+                    numberOfTries++;
+                }
             }
+            activ.runOnUiThread(workerListener::onFailure);
         });
     }
 
@@ -305,14 +315,6 @@ public class Wikipedia {
         WorkManager
                 .getInstance(activ)
                 .enqueue(uploadWorkRequest);
-
-        //        threadPool.execute(() -> {
-//                try {
-//        WikiServerHolder.getInstance().uploadFile(fileName, filePath);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//        });
     }
 
 //todo finish implement.
@@ -334,18 +336,26 @@ public class Wikipedia {
                                                  final List<Wikipage> result,
                                                  final WorkerListener workerListener)
     {
+
         threadPool.execute(() -> {
-            try {
-                List<Wikipage> spokenPages = this.wikipageDataManager
-                        .getSpokenPagesByCategories(category, pageAttributes);
-                result.addAll(spokenPages);
-                activ.runOnUiThread(workerListener::onSuccess);
-            } catch (IOException e) {
-                // task failed with a exception.
-                activ.runOnUiThread(workerListener::onFailure);
+            int numberOfTries = 0;
+            while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
+                try {
+                    List<Wikipage> spokenPages = this.wikipageDataManager
+                            .getSpokenPagesByCategories(category, pageAttributes);
+                    result.addAll(spokenPages);
+                    activ.runOnUiThread(workerListener::onSuccess);
+                    return;
+                } catch (IOException e) {
+                    Log.e("internet attempt status:",
+                            "attempt failure number:" + numberOfTries);
+                    numberOfTries++;
+                }
             }
+            activ.runOnUiThread(workerListener::onFailure);
         });
     }
+
 
     public List<WikiUserData> getUsersData() {
         return aviableUsersData;
