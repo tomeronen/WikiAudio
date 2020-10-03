@@ -22,8 +22,11 @@ public class MediaPlayer {
     private boolean isPlaying = false;
     private boolean isPaused = false;
 
+    private int counter = 0;
+
 
     public MediaPlayer(Activity activity, AppData appData, MediaPlayerFragment mediaPlayerFragment) {
+        Log.d(TAG, "MediaPlayer: counter = " + counter + " | at " + TAG);
         this.activity = activity;
         this.appData = appData;
         mpFragment = mediaPlayerFragment;
@@ -167,12 +170,10 @@ public class MediaPlayer {
         }
         // display on the media player fragment
         if (mpFragment != null) {
-            activity.runOnUiThread(() -> {
-                mpFragment.togglePlayPauseButton(false);
-                mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
-            });
+            mpFragment.togglePlayPauseButton(false);
+            mpFragment.updateWhatIsPlayingTitles(playlist.getTitle(), wikipage.getTitle());
         } else {
-            Log.d(TAG, "displayWhatIsBeingPlayed: got null mpFragment");
+            Log.d(TAG, "updateMediaPlayerVars: got null mpFragment");
         }
     }
 

@@ -34,7 +34,7 @@ public class MediaPlayerFragment extends Fragment {
     public static final int CHOOSE_CATEGORY_TAG = 1072;
 
     //Vars
-    private View fragmentInflated;
+    private View view;
     private FragmentActivity fragmentActivity;
     private MediaPlayer player;
 
@@ -48,30 +48,33 @@ public class MediaPlayerFragment extends Fragment {
     private ImageButton searchButton;
     private ImageButton categoriesButton;
 
+    private int counter = 0;
+
     public MediaPlayerFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        fragmentInflated = inflater.inflate(R.layout.fragment_media_player, container, false);
+        Log.d(TAG, "onCreateView: counter = " + counter + " | at " + TAG);
+        view = inflater.inflate(R.layout.fragment_media_player, container, false);
         initVars();
         setOnClickButtonsForPlayer();
         setOnClickButtonsForNavigationBar();
-        return fragmentInflated;
+        return view;
     }
 
     private void initVars() {
         //Player
-        previousButton = fragmentInflated.findViewById(R.id.previousButton);
-        playButton = fragmentInflated.findViewById(R.id.playPauseButton);
-        nextButton = fragmentInflated.findViewById(R.id.nextButton);
+        previousButton = view.findViewById(R.id.previousButton);
+        playButton = view.findViewById(R.id.playPauseButton);
+        nextButton = view.findViewById(R.id.nextButton);
 
         setTitles();
 
         //Navigation
-        homeButton = fragmentInflated.findViewById(R.id.homeButton);
-        searchButton = fragmentInflated.findViewById(R.id.searchButton);
-        categoriesButton = fragmentInflated.findViewById(R.id.categoriesButton);
+        homeButton = view.findViewById(R.id.homeButton);
+        searchButton = view.findViewById(R.id.searchButton);
+        categoriesButton = view.findViewById(R.id.categoriesButton);
 
         fragmentActivity = this.getActivity();
         if (fragmentActivity == null) {
@@ -84,6 +87,8 @@ public class MediaPlayerFragment extends Fragment {
      * Connects the fragment to the audio player logic
      */
     public void setAudioPlayer(MediaPlayer mediaPlayer) {
+        counter++;
+        Log.d(TAG, "setAudioPlayer: counter = " + counter + " | at " + TAG);
         player = mediaPlayer;
         if (player == null) {
             Log.d(TAG, "setAudioPlayer: got null audioPlayer");
@@ -91,14 +96,20 @@ public class MediaPlayerFragment extends Fragment {
     }
 
     public void setTitles() {
-        wikipageTitleView = fragmentInflated.findViewById(R.id.wikipageTitle);
+        counter++;
+        Log.d(TAG, "setTitles: counter = " + counter + " | at " + TAG);
+        wikipageTitleView = (TextView) view.findViewById(R.id.wikipageTitle);
         wikipageTitleView.setSelected(true);  // for moving text if needed
-        playlistTitleView = fragmentInflated.findViewById(R.id.playlistTitle);
+        playlistTitleView = (TextView) view.findViewById(R.id.playlistTitle);
+
+        // get mediaplayer here todo
     }
 
     public void updateWhatIsPlayingTitles(String playlistTitle, String wikipageTitle) {
+        counter++;
+        Log.d(TAG, "setTitles: counter = " + counter + " | at " + TAG);
         if (playlistTitleView == null || wikipageTitleView == null) {
-//            setTitles();
+            Log.d(TAG, "updateWhatIsPlayingTitles: null TextViews");
             return; //todo
         }
         playlistTitleView.setText(playlistTitle);
@@ -260,4 +271,7 @@ public class MediaPlayerFragment extends Fragment {
         }
     }
 
+    public TextView getWikipageTitle() {
+        return wikipageTitleView;
+    }
 }
