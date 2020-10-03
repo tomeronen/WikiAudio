@@ -35,7 +35,7 @@ public class WikiHtmlParser {
                 paragraphsInSection.add(paragraph.text());
             }
             else {
-                sections.add(new Wikipage.Section(curSectionName, paragraphsInSection));
+//                sections.add(new Wikipage.Section(curSectionName, paragraphsInSection));
                 curSectionName = curElement.text();
                 paragraphsInSection = new ArrayList<>();
             }

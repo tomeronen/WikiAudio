@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.playlist.Playlist;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -14,16 +13,13 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Cross application data
+ * Holds cross application data
  * This class is init when the app loads
  */
 public class AppData {
     private static final String CHOSEN_CATEGORIES_SP_TAG = "chosenCategories";
     private static final String LAST_LOADED_CATEGORIES_SP_TAG = "lastLoadedCategories";
     private static final String CATEGORIES_SP_TAG = "categories";
-    private static final String PLAYLIST_TITLE_SP_TAG = "playlist";
-    private static final String WIKIPAGE_TITLE_SP_TAG = "wikipage";
-    private static final String TRACK_INDEX_SP_TAG = "trackIndex";
 
     private WikiAudioApp wikiAudioApp;
     private SharedPreferences sp;
@@ -34,7 +30,6 @@ public class AppData {
 
     //playlist related
     public CurrentlyPlayed currentlyPlayed;
-    private Playlist lastPlayedPlaylist;
 
     public AppData(WikiAudioApp wikiAudioApp) {
         this.wikiAudioApp = wikiAudioApp;
@@ -43,28 +38,18 @@ public class AppData {
 
     private void loadData() {
         sp = PreferenceManager.getDefaultSharedPreferences(wikiAudioApp);
-
-        //Categories
         String chosenCategoriesString = sp.getString(CHOSEN_CATEGORIES_SP_TAG, "");
         chosenCategories = gson.fromJson(chosenCategoriesString, SortedSet.class);
         if(chosenCategories == null) {
             chosenCategories = new TreeSet<>();
         }
-
-        //Playlist
-        currentlyPlayed = new CurrentlyPlayed();
-        String playlistTitle = sp.getString(PLAYLIST_TITLE_SP_TAG, "");
-        String wikipageTitle = sp.getString(WIKIPAGE_TITLE_SP_TAG, "");
-        int trackIndex = sp.getInt(TRACK_INDEX_SP_TAG, -1);
-        //todo continue
     }
 
     public WikiAudioApp getWikiAudioApp() {
         return wikiAudioApp;
     }
 
-    //TODO why are there 3 different set/get categories func? please add some documentation
-    //Category related: we want to save user's favorite categories
+    //Category
     public void saveChosenCategories(List<String> newChosenCategories)
     {
         if(newChosenCategories != null)
@@ -117,17 +102,7 @@ public class AppData {
         }
     }
 
-
-    //Playlist related: we want to save user's last played playlist
-    public void setLastPlayedPlaylist(Playlist currentlyPlaying) {
-        this.lastPlayedPlaylist = currentlyPlaying;
-    }
-
-    public Playlist lastPlayedPlaylist() {
-        return lastPlayedPlaylist;
-    }
-
-
+    //Playlist
     public void setCurrentlyPlayed(CurrentlyPlayed currentlyPlayed) {
         this.currentlyPlayed = currentlyPlayed;
     }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,7 @@ import static com.example.wikiaudio.wikipedia.wikipage.PageAttributes.watchers;
 
 public class WikiServerHolder {
     private static final String BASE_URL = "https://en.wikipedia.org";
+    private static final String UPLOAD_FILE_STATUS = "file upload status";
     private static WikiServerHolder instance = null;
     private final WikiServer server;
 
@@ -121,18 +123,54 @@ public class WikiServerHolder {
         Response<QuarryResponse> response = server.callGetPageByName(name, prop, inprop, "original|thumbnail").execute();
         if (response.code() == 200 && response.isSuccessful()) {
             // task was successful.
-            List<Wikipage> WikipageList = parseQuarryResponse(response.body());
+            List<Wikipage> WikipageList = parseQuarryResponse( response.body());
 //            List<Wikipage> WikipageList = new ArrayList<>();
-            if(pageAttr.contains(content) ||
-                    pageAttr.contains(audioUrl))
+//            if(pageAttr.contains(content) ||
+//                    pageAttr.contains(audioUrl))
+//            {
+//                WikiHtmlParser.parseAdvanceAttr(WikipageList.get(0));
+//            }
+//todo add load audio.
+            if(pageAttr.contains(content))
             {
-                WikiHtmlParser.parseAdvanceAttr(WikipageList.get(0));
+                Response<ContentResponse> responsePageContents = server.callPageContents(name).execute();
+                if (response.code() == 200 && response.isSuccessful()) {
+                    List<Wikipage.Section> sections
+                            = parseContentResponse(responsePageContents.body());
+                    WikipageList.get(0).setSections(sections);
+                }
             }
             return WikipageList.get(0);
         } else {
             // task failed.
             throw new IOException();
         }
+    }
+
+    private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse)
+    {
+        List<Wikipage.Section> result = new ArrayList<>();
+        ContentResponse.LeadData lead  = contentResponse.lead;
+        String leadTitle = lead.displaytitle;
+        ContentResponse.SectionData leadSectionData = lead.sections.get(0);
+        if(leadSectionData != null)
+        {
+            String htmlText  = lead.sections.get(0).text;
+            Wikipage.Section leadSection = new Wikipage.Section(leadTitle, htmlText);
+            result.add(leadSection);
+        }
+        if(contentResponse.remaining != null
+                && contentResponse.remaining.sections != null
+                && !contentResponse.remaining.sections.isEmpty())
+        {
+            for(ContentResponse.SectionData sectionData: contentResponse.remaining.sections)
+            {
+                Wikipage.Section curSection = new Wikipage.Section(sectionData.line,
+                                                                    sectionData.text);
+                result.add(curSection);
+            }
+        }
+        return result;
     }
 
     /**
@@ -172,6 +210,35 @@ public class WikiServerHolder {
             return wikipagesRuslt;
         } else {
             // task failed.
+            throw new IOException();
+        }
+    }
+
+
+
+    private static boolean quarryResponseIsLegal(QuarryResponse quarryResponse) {
+        return quarryResponse != null
+                && quarryResponse.query != null
+                && quarryResponse.query.pages != null;
+    }
+
+    private String parseAudioFileResponse(QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            StringBuilder fileNames = new StringBuilder();
+            if(    quarryResponse.query.pages.values().size() == 1)
+            {
+                return quarryResponse.query.pages.get(0).title;
+            }
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                fileNames.insert(0, pageData.title + "|");
+            }
+            return fileNames.toString();
+        }
+        else
+        {
             throw new IOException();
         }
     }
@@ -243,9 +310,7 @@ public class WikiServerHolder {
 
     private static List<Wikipage> parseQuarryResponse(QuarryResponse quarryResponse)
             throws IOException {
-        if (quarryResponse != null
-                && quarryResponse.query != null
-                && quarryResponse.query.pages != null) {
+        if (quarryResponseIsLegal(quarryResponse)) {
             List<Wikipage> resultList = new ArrayList<>();
             for(QuarryResponse.PageData pageData:
                     quarryResponse.query.pages.values())
@@ -313,47 +378,91 @@ public class WikiServerHolder {
         String logintoken = null;
         if (tokenResponse != null) {
             logintoken = tokenResponse.query.tokens.logintoken;
-            Log.d("file upload status", "got login token");
+            Log.d(UPLOAD_FILE_STATUS, "got login token");
         }
-        QuarryResponse loginResponse = server.login("login",
-                "json",
-                logintoken,
-                "Tomer_ronen@WikiAudio",
-                "tkpemajv20jm4t1ofm2amr5mb7p1v9cv").execute().body();
-        //todo add check if login failed
-        QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
-        if (csrfResponse != null) {
-            String csrfToken = csrfResponse.query.tokens.csrftoken;
+//        String BotName = "Tomer207";
+//        String Password = "TomerRonen@9k7g4f8bhfmd5g1ukdan8rkr4idlgvc3";
+        String Password = "WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv";
+        String BotName  = "Tomer_ronen";
+//        String userName = "Tomer207";
+//        String password = "X94A2wgzHA36MQ2";
+        String userName = "tomer ronen";
+        String password = "xTGHTibZAL3cBws";
+        boolean thereIsUserData = true;
+        String csrfToken;
+        if(thereIsUserData)
+        {
+            Object loginResponse = server.loginUser("clientlogin",
+                    "json",
+                    logintoken,
+                    userName,
+                    "https://www.mediawiki.org/w/api.php?action=help&modules=clientlogin ",
+                    password).execute().body();
+            //todo add check if login failed
+            QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
+            csrfToken = csrfResponse.query.tokens.csrftoken;
+            Log.d(UPLOAD_FILE_STATUS, "got csrf token");
+        }
+        else
+        {
+            QuarryResponse loginResponse = server.loginBot("login",
+                    "json",
+                    logintoken,
+                    BotName,
+                    Password).execute().body();
+            //todo add check if login failed
+            QuarryResponse csrfResponse = server.getCsrfToken().execute().body();
+            csrfToken = csrfResponse.query.tokens.csrftoken;
+            Log.d(UPLOAD_FILE_STATUS, "got csrf token");
+        }
+        if (csrfToken != null) {
             Log.d("file upload status", "got csrf token");
+            Response<Object> contentResponseCall = server.checkUserRights().execute();
             File file = new File(filePath);
             long length = file.length();
             if (file.exists()) {
-                RequestBody requestFile =
-                        RequestBody.create(
-                                MediaType.parse("3gp"),
-                                file
-                        );
-                MultipartBody.Part body =
-                        MultipartBody.Part.createFormData("file",
-                                fileName,
-                                requestFile);
-                Log.d("file upload status", "opened file");
-                Response<Object> execute =
-                        server.uploadFile("upload",
-                                fileName,
-                                "json",
-                                csrfToken,
-                                1,
-                                body).execute();
-                Object body1 = execute.body();
-                Log.d("file upload status", "file uploaded");
-
-
+                sendFile(fileName, csrfToken, file);
                 return null;
             }
         }
         return null;
     }
+
+    private void sendFile(String fileName, String csrfToken, File file) throws IOException {
+        Log.d("file upload status", "opened file");
+        RequestBody body = RequestBody.create(MediaType.parse("audio/ogg"),
+                file);
+        MultipartBody.Part fileData =
+                MultipartBody.Part.createFormData("file", fileName, body);
+        RequestBody actionBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                "upload");
+        RequestBody fileNameBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                fileName);
+        RequestBody formatBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                "json");
+        RequestBody csrfTokenBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                csrfToken);
+        RequestBody ignoreBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                "1");
+        RequestBody commentBody = RequestBody.create(
+                MediaType.parse("text/plain"),
+                "audio file from wiki audio");
+        Response<Object> execute =
+                server.uploadFileBot(actionBody,
+                        fileNameBody,
+                        formatBody,
+                        csrfTokenBody,
+                        ignoreBody,
+                        commentBody,
+                        fileData).execute();
+        Object body1 = execute.body();
+        Log.d("file upload status", "file uploaded");
+    };
 
 
     private static Wikipage parseWikiData(QuarryResponse.PageData pageData) {
@@ -442,4 +551,206 @@ public class WikiServerHolder {
         return inprop.toString();
     }
 
+
+    private String getNames(List<Wikipage> wikipages) {
+        StringBuilder result = new StringBuilder();
+        for(Wikipage wikipage:wikipages)
+        {
+            result.append(wikipage.getTitle()).append("|");
+        }
+        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
+        {
+            result = new StringBuilder(result.substring(0, result.length() - 1));
+        }
+        return result.toString();
+    }
+
+
+    public void loadPagesByName(HashMap<String, Wikipage> wikipagesData,
+                                List<String> pagesNames,
+                                List<PageAttributes> pageAttr)
+            throws IOException {
+        String prop = getQueryProp(pageAttr) + "|" + "images" ;
+        String inprop = getQueryInProp(pageAttr);
+        String namesToSearch = getNamesToSearch(pagesNames);
+        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+                prop, inprop, "original|thumbnail").execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+            // task was successful.
+            loadQuarryResponse(wikipagesData,response.body());
+        } else {
+            // task failed.
+            throw new IOException();
+        }
+    }
+
+    private void loadQuarryResponse(HashMap<String, Wikipage> wikipagesData,
+                                    QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                Wikipage wikipage = parseWikiData(pageData);
+                wikipagesData.put(wikipage.getTitle(), wikipage);
+            }
+        }
+        else
+        {
+            throw new IOException();
+        }
+
+    }
+
+
+
+    private HashMap<String, String> parseAudioSourceResponse(QuarryResponse quarryResponse)
+            throws IOException {
+        if (quarryResponseIsLegal(quarryResponse)) {
+            HashMap<String, String> fileSourcesResults = new HashMap<>();
+            for(QuarryResponse.PageData pageData:
+                    quarryResponse.query.pages.values())
+            {
+                if(pageData.imageinfo != null && pageData.imageinfo.get(0) != null)
+                {
+                    fileSourcesResults.put(pageData.title, pageData.imageinfo.get(0).url);
+                }
+            }
+            return fileSourcesResults;
+        }
+        else
+        {
+            throw new IOException();
+        }
+
+
+    }
+
+    private String getFileNames(HashMap<String, String> spokenWikipagesMetaData,
+                                List<String> pagesNames) {
+        StringBuilder fileNames = new StringBuilder();
+        boolean first = true;
+        for (String name : pagesNames) {
+            String curFileName = spokenWikipagesMetaData.get(name);
+            if (curFileName != null) {
+                if (first) {
+                    fileNames = new StringBuilder(curFileName);
+                    first = false;
+                } else {
+                    fileNames.append("|").append(spokenWikipagesMetaData.get(name));
+                }
+            }
+        }
+        return fileNames.toString();
+    }
+
+    public void loadAudioSource(HashMap<String, Wikipage> wikipagesData,
+                            HashMap<String, String> spokenWikipagesMetaData,
+                            List<String> pagesNames) throws IOException {
+        String fileNames = getFileNames(spokenWikipagesMetaData, pagesNames);
+        Response<QuarryResponse> fileResponse = server.callGetAudioFile(fileNames).execute();
+        if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
+            HashMap<String, String> fileSourcesResults =
+                    parseAudioSourceResponse(fileResponse.body());
+            for (String pageName : pagesNames) {
+                String fileName = spokenWikipagesMetaData.get(pageName);
+                String fileSource = fileSourcesResults.get(fileName);
+                Wikipage wikipage = wikipagesData.get(pageName);
+                if (wikipage != null) {
+                    wikipage.setAudioUrl(fileSource);
+                }
+            }
+        }
+    }
+
+
+    public void getPageContents(String pageTitle)
+            throws IOException {
+        Response<ContentResponse> response = this.server.callPageContents(pageTitle).execute();
+        if (response.code() == 200 && response.isSuccessful()) {
+
+        }
+    }
 }
+
+
+
+// unused options for functions:
+
+
+//    private void parseAudioSourceResponse(QuarryResponse quarryResponse,
+//                                                  List<Wikipage> wikipages) throws IOException {
+//        if (quarryResponseIsLegal(quarryResponse)) {
+//            List<String> result = new ArrayList<>();
+//            int counter = 0;
+//            for(QuarryResponse.PageData pageData:
+//                    quarryResponse.query.pages.values())
+//            {
+//                if(pageData.imageinfo != null && pageData.imageinfo.get(0) != null)
+//                {
+//                    wikipages.get(counter).setAudioUrl(pageData.imageinfo.get(0).url);
+////                    result.add(pageData.imageinfo.get(0).url);
+//                }
+//                counter++;
+//            }
+////            return result;
+//        }
+//        else
+//        {
+//            throw new IOException();
+//        }
+//
+//    }
+
+
+
+//    private void loadAudioSources(String names, List<Wikipage> wikipages) throws IOException {
+//        Response<QuarryResponse> response = server.callGetAudioFilesNames(names).execute();
+//        // todo for a weird reason brings back values in reverse order.
+//        if (response.code() == 200 && response.isSuccessful()) {
+//            // call to get audio files name was Successful
+//            String audioFileNames =  parseAudioFileResponse(response.body());
+//            Response<QuarryResponse> fileResponse = server.callGetAudioFile(audioFileNames).execute();
+//            if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
+//                // we got the files source.
+//                parseAudioSourceResponse(fileResponse.body(), wikipages);
+//            }
+//        }
+//    }
+
+
+//    public void fillWikipages(List<Wikipage> wikipages, List<PageAttributes> pageAttr)
+//            throws IOException {
+//        String prop = getQueryProp(pageAttr) + "|" + "images" ;
+//        String inprop = getQueryInProp(pageAttr);
+//        String namesToSearch = getNames(wikipages);
+//        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
+//                prop, inprop, "original|thumbnail").execute();
+//        if (response.code() == 200 && response.isSuccessful()) {
+//            // task was successful.
+//            HashMap<String, Wikipage> wikipageMap = new HashMap<>();
+//            List<Wikipage> wikipagesResult = parseQuarryResponse(response.body());
+//
+//            if(pageAttr.contains(audioUrl))
+//            {
+//                loadAudioSources(namesToSearch, wikipagesResult);
+//            }
+//            if(pageAttr.contains(content) ) {
+//                List<Wikipage> badPages = new ArrayList<>();
+//                for (Wikipage wikipage : wikipagesResult) {
+//                    try {
+//                        WikiHtmlParser.parseAdvanceAttr(wikipage);
+//                    } catch (HttpStatusException e) {
+//                        Log.e("http error",
+//                                "something went wrong with bringing " +
+//                                        "advance Attributes of page:" + wikipage.getTitle());
+//                        badPages.add(wikipage);
+//                    }
+//                }
+//                wikipagesResult.removeAll(badPages); // todo do we want to remove if failed?
+//            }
+//        } else {
+//            // task failed.
+//            throw new IOException();
+//        }
+//    }

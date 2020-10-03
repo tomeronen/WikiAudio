@@ -70,7 +70,7 @@
         android:background="@android:color/white"
         android:backgroundTint="@android:color/white"
         app:layout_constraintHorizontal_bias="1"
-        app:srcCompat="@android:drawable/ic_menu_edit" />
+        app:srcCompat="@drawable/plus" />
 
     <fragment
         android:id="@+id/mediaPlayerFragment"

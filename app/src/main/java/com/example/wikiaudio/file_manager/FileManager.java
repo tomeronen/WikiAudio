@@ -14,7 +14,7 @@ public class FileManager {
         this.activity = activity;
     }
 
-    public String getFilePath(String wikiName, int section, int paragraph)
+    public String getFilePath(String wikiName, int section)
     {
         File file = new File(activity.getExternalFilesDir(
                 Environment.DIRECTORY_MUSIC),
@@ -29,18 +29,7 @@ public class FileManager {
                 Log.e("file problem:", "Directory not created");
             }
         }
-        return file.getAbsolutePath() + "/" + wikiName + "_" + section + "_" + paragraph;
-
-//        File f = new File(filePath);
-//        if(f.exists())
-//        {
-//            return filePath;
-//        }
-//        else
-//        {
-//            f.mkdir();
-//            return filePath;
-//        }
+        return file.getAbsolutePath() + "/" + wikiName + "_" + section;
     }
 }
 

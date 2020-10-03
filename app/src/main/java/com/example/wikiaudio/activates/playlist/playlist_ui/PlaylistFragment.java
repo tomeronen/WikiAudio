@@ -18,9 +18,11 @@ import com.example.wikiaudio.activates.playlist.Playlist;
  * A fragment for displaying the wikipages playlist
  */
 public class PlaylistFragment extends Fragment {
+    //For logs
     private static final String TAG = "PlaylistFragment";
 
     private Playlist playlist;
+    private PlaylistsFragmentAdapter playlistsFragmentAdapter;
     public WikipagePlaylistRecyclerViewAdapter wikipagePlayListRecyclerViewAdapter;
     private boolean setBorder = false;
 
@@ -36,15 +38,6 @@ public class PlaylistFragment extends Fragment {
                 new WikipagePlaylistRecyclerViewAdapter(playlist);
     }
 
-    //    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static PlaylistFragment newInstance() {
-        PlaylistFragment fragment = new PlaylistFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +48,6 @@ public class PlaylistFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_wikipage_item_list, viewGroup, false);
-
         if(setBorder) {
             view.setBackground(getActivity().getDrawable(R.drawable.upper_and_lower_border));
             view.setPadding(0,8,0,8);
@@ -99,5 +91,13 @@ public class PlaylistFragment extends Fragment {
 
     public void showBorder(boolean b) {
         this.setBorder = b;
+    }
+
+    public void setPlaylistsFragmentAdapter(PlaylistsFragmentAdapter playlistsFragmentAdapter) {
+        this.playlistsFragmentAdapter = playlistsFragmentAdapter;
+    }
+
+    public PlaylistsFragmentAdapter getPlaylistsFragmentAdapter() {
+        return playlistsFragmentAdapter;
     }
 }

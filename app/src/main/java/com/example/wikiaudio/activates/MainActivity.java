@@ -2,7 +2,6 @@ package com.example.wikiaudio.activates;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -22,10 +21,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
-import androidx.work.WorkManager;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.WikiAudioApp;
+import com.example.wikiaudio.activates.choose_categories.ChooseCategoriesActivity;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
@@ -45,12 +44,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
@@ -66,13 +60,12 @@ public class MainActivity extends AppCompatActivity implements
     //For logs
     private static final String TAG = "MainActivity";
 
+    //Vars
     private AppCompatActivity activity;
     private AppData appData;
 
-    //Google services related (error for handling when the google service version is incorrect)
+    //Location
     private static final int ERROR_DIALOG_REQUEST = 9002;
-
-    //Location related
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Boolean mLocationPermissionGranted = false;
     private Boolean isGPSEnabled = false;
@@ -80,46 +73,62 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
 
-    //Playlist related
+    //Playlist
     private PlaylistsFragmentAdapter playListsFragmentAdapter;
 
-    //MediaPlayer related
+    //MediaPlayer
     private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
 
+    //Categories
+    private List<String> chosenCategories;
+
     //Views
-    private ImageButton chooseCategoriesButton;
-    private TabLayout tabs;
+    private TabLayout tabLayout;
     private ProgressBar loadingIcon;
+    private ImageButton chooseCategoriesButton;
     private ViewPager viewPager;
 
-    // idk
-    private ArrayList<PlaylistFragment> playLists = new ArrayList<>();
-    private List<String> chosenCategories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        cleanData(); //todo if wanted for debugging.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initVars();
-        setOnClickButtons();
         initMap();
-        loadPlaylists();
         initMediaPlayer();
+        loadPlaylists();
+        setOnClickButtons();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //todo what would we like to add? prob mediaplayer related
+        restoreCategories();
+        initMediaPlayer();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null)
-            mediaPlayer.pauseForActivityChange();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        try {
+            super.onActivityResult(requestCode, resultCode, data);
+            if (requestCode == CHOOSE_CATEGORY_TAG) {
+                if (resultCode == RESULT_OK) {
+                    //Categories changed
+                    Log.d(TAG, "onActivityResult: for CHOOSE_CATEGORY_TAG, got RESULT_OK");
+                    chosenCategories = ((WikiAudioApp) getApplication())
+                            .getAppData().getChosenCategories();
+                    //Update category based playlists & update their display (=tabLayout)
+                    Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
+                    new Thread(this::displayPlaylists).start();
+                } else {
+                    //Categories unchanged
+                    Log.d(TAG, "onActivityResult: for CHOOSE_CATEGORY_TAG, got RESULT_CANCELED");
+                }
+            }
+        } catch (Exception ex) {
+            Log.d(TAG, "onActivityResult: got an exception - " + ex.toString());
+        }
     }
 
     /**
@@ -130,9 +139,8 @@ public class MainActivity extends AppCompatActivity implements
         appData =((WikiAudioApp) getApplication()).getAppData();
         //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
         //it needs an activity
-        Holder.getInstance(activity);
+        Holder.getInstance(activity, appData);
         chosenCategories = ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
-        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
 
         //Check for location perms
         mLocationPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -142,10 +150,11 @@ public class MainActivity extends AppCompatActivity implements
                 ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
                         == PackageManager.PERMISSION_GRANTED;
         //Views
-        chooseCategoriesButton = findViewById(R.id.chooseCategories);
+        chooseCategoriesButton = findViewById(R.id.addCategoryButton);
         loadingIcon = findViewById(R.id.progressBar4);
         viewPager = findViewById(R.id.view_pager);
-        tabs = findViewById(R.id.tabs);
+        tabLayout = findViewById(R.id.tabs);
+        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
     }
 
     /**
@@ -166,44 +175,64 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * For setting the buttons (choose categories, search bar, etc.)
+     * Sets the chooseCategoriesButton listener
      */
     private void setOnClickButtons() {
-//        chooseCategoriesButton.setOnClickListener(v -> {
-//            Intent chooseCategoriesIntent =  new Intent(activity,
-//                    ChooseCategoriesActivity.class);
-//            startActivity(chooseCategoriesIntent);
-//        });
+        chooseCategoriesButton.setOnClickListener(v -> {
+            Intent chooseCategories = new Intent(this, ChooseCategoriesActivity.class);
+            startActivityForResult(chooseCategories, CHOOSE_CATEGORY_TAG);
+        });
     }
 
     /**
-     * Creates category based playlists and Loads the playlists fragment
+     * Creates category based playlists and displays all playlists
      */
     private void loadPlaylists() {
         loadingIcon.setVisibility(View.VISIBLE);
         new Thread(() -> {
-            //todo comment below when checking splash upload MERGYMERG
+            //todo-sm comment below when checking splash upload
             Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories);
 
-            //Add all playlists as fragments to the adapter
-            for (Playlist playlist: PlaylistsManager.getPlaylists())
-                playListsFragmentAdapter.addPlaylistFragment(playlist.getPlaylistFragment());
+            displayPlaylists();
+        }).start();
+    }
 
-            activity.runOnUiThread(() -> {
-                ViewPager viewPager = findViewById(R.id.view_pager);
-                viewPager.setAdapter(playListsFragmentAdapter);
-                tabs = findViewById(R.id.tabs);
-                tabs.setupWithViewPager(viewPager);
-                int counter = 0;
-                for (Playlist playlist: PlaylistsManager.getPlaylists()) {
-                    if(counter >= tabs.getTabCount()){
-                        break;
-                    }
-                    Objects.requireNonNull(tabs.getTabAt(counter)).setText(playlist.getTitle());
-                    counter++;
+    /**
+     * Loads the TabLayout using all playlist fragments.
+     */
+    private void displayPlaylists() {
+        //Add all relevant playlists as fragments to the adapter
+        playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
+        playListsFragmentAdapter.updatePlaylistFragmentList();
+        playListsFragmentAdapter.notifyDataSetChanged();
+
+        //Get currently played playlist's index to select it
+        int selectedIndex = -1;
+        if (mediaPlayer != null && mediaPlayer.getCurrentPlaylist() != null) {
+            Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+            selectedIndex = Holder.playlistsManager.getIndexByPlaylist(currentPlaylist);
+        }
+
+        //Display the tabLayout
+        int finalSelectedIndex = selectedIndex;
+        activity.runOnUiThread(() -> {
+            viewPager.setAdapter(playListsFragmentAdapter);
+            tabLayout.setupWithViewPager(viewPager);
+            playListsFragmentAdapter.setTabLayout(tabLayout);
+            int counter = 0;
+            for (Playlist playlist: PlaylistsManager.getPlaylists()) {
+                if(counter >= tabLayout.getTabCount()){
+                    break;
                 }
+                Objects.requireNonNull(tabLayout.getTabAt(counter)).setText(playlist.getTitle());
+                if (counter == finalSelectedIndex) {
+                    Objects.requireNonNull(tabLayout.getTabAt(counter)).select();
+                }
+                counter++;
+            }
 
-                // when first playlist fragment has data stop loading icon.
+            //When first playlist fragment has data stop loading icon.
+            if(playListsFragmentAdapter.getCount() > 0) {
                 playListsFragmentAdapter.getItem(0).
                         wikipagePlayListRecyclerViewAdapter.
                         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -213,13 +242,36 @@ public class MainActivity extends AppCompatActivity implements
                                 loadingIcon.setVisibility(View.GONE);
                             }
                         });
-            });
-        }).start();
+            }
+        });
     }
 
+    /**
+     * Adds (=displays) a matching tab for the given PlaylistFragment
+     */
+    private void addTab(PlaylistFragment playlistFragment) {
+        Log.d(TAG, "addTab: got here");
+        if (tabLayout != null && playlistFragment != null &&
+                playlistFragment.getPlaylist() != null) {
+            playListsFragmentAdapter.addPlaylistFragment(playlistFragment);
+            tabLayout.addTab(tabLayout.newTab().setText(playlistFragment.getPlaylist().getTitle()));
+        } else {
+            Log.d(TAG, "addTab: got null tabLayout/playlistFragment/playlist");
+        }
+    }
+
+    /**
+     * Creates the media player + navigation bar at the bottom.
+     */
     private void initMediaPlayer() {
         mediaPlayerFragment = (MediaPlayerFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mediaPlayerFragment);
+        if (mediaPlayerFragment == null) {
+            mediaPlayerFragment = new MediaPlayerFragment();
+            mediaPlayerFragment.setArguments(getIntent().getExtras());
+            getSupportFragmentManager().beginTransaction().replace(R.id.mediaPlayerFragment,
+                    mediaPlayerFragment, "mediaPlayerFragment").commit();
+        }
         mediaPlayer = new MediaPlayer(activity, appData, mediaPlayerFragment);
         mediaPlayerFragment.setAudioPlayer(mediaPlayer);
         Holder.playlistsManager.setMediaPlayer(mediaPlayer);
@@ -269,9 +321,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        //TODO this will change when we'll add audio and storing permissions
         mLocationPermissionGranted = false;
-//        Log.d(TAG, "onRequestPermissionsResult: ");
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0) {
                 for (int grantResult : grantResults) {
@@ -334,20 +384,60 @@ public class MainActivity extends AppCompatActivity implements
         if (mMap != null && mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
             isLocationEnabled();
-            if (isGPSEnabled) {
-                LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
-                if (currentLatLng != null) {
-                    //Zoom in to user's location
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                    //Create (and display) the nearby playlist
-                    Holder.playlistsManager.createLocationBasedPlaylist(
-                            currentLatLng.latitude, currentLatLng.longitude, true);
+            //If there's something being played:
+            // mark the playlist and zoom in on the wikipage being played
+            if (mediaPlayer != null && mediaPlayer.getIsPlaying()) {
+                Playlist currentPlaylist = mediaPlayer.getCurrentPlaylist();
+                if (currentPlaylist != null) {
+                    Holder.locationHandler.markPlaylist(currentPlaylist);
+                    Holder.locationHandler.markAndZoom(mediaPlayer.getCurrentWikipage());
+                } else {
+                    Log.d(TAG, "initUserLocationOnTheMap: got null currentPlaylist");
                 }
             } else {
-                Log.d(TAG, "initUserLocationOnTheMap: no GPS");
+                zoomInOnUserAndCreateNearbyPlaylist();
             }
         } else {
             Log.d(TAG, "initUserLocationOnTheMap: either google map is null or we have no perm");
+        }
+    }
+
+    /**
+     * If we have the permissions & user's location, we zoom in on the user and create + display
+     * the Nearby playlist
+     */
+    private void zoomInOnUserAndCreateNearbyPlaylist() {
+        if (isGPSEnabled && Holder.playlistsManager.getNearby() == null) {
+            LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
+            if (currentLatLng != null) {
+                //Zoom in to user's location
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+                //Create (and display on the map) the nearby playlist
+                Holder.playlistsManager.createLocationBasedPlaylist(
+                        currentLatLng.latitude, currentLatLng.longitude, true);
+                //Update the tabs after creating it
+                addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+            }
+        } else {
+            Log.d(TAG, "initUserLocationOnTheMap: no GPS");
+        }
+    }
+
+    /**
+     * If required, creates new chosen categories and removes old ones + updates the display
+     */
+    private void restoreCategories() {
+        List<String> newChosenCategories =
+                ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
+        if (!(chosenCategories.containsAll(newChosenCategories) &&
+                newChosenCategories.containsAll(chosenCategories))) {
+            // categories changed
+            Log.d(TAG, "onResume: categories changed");
+            chosenCategories = ((WikiAudioApp) getApplication())
+                    .getAppData().getChosenCategories();
+            //Update category based playlists & update their display (=tabLayout)
+            Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
+            new Thread(this::displayPlaylists).start();
         }
     }
 
@@ -431,81 +521,4 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "onInfoWindowClick: marker's tag is null :(");
     }
 
-    private boolean needToReloadTabs() {
-        // todo change to set? what happens if we take down and add again. order changes.
-        int tabCount = tabs.getTabCount();
-        return tabCount != chosenCategories.size();
-    }
-
-    private void cleanData() {
-        WorkManager.getInstance(this).cancelAllWork();
-        ((WikiAudioApp) getApplication()).getAppData().saveChosenCategories(new ArrayList<>());
-        ((WikiAudioApp) getApplication()).getAppData().setCategories(new ArrayList<>());
-        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH);
-        try {
-            Date date = sdf.parse("01/01/2000"); // just a very far date.
-            ((WikiAudioApp) getApplication()).getAppData().setLastLoadedCategories(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CHOOSE_CATEGORY_TAG) {
-            if(resultCode == Activity.RESULT_OK){
-                boolean dataSaved = data.getBooleanExtra("dataSaved", false);
-                if(dataSaved)
-                {
-                    chosenCategories = ((WikiAudioApp) getApplication())
-                            .getAppData().getChosenCategories();
-                    this.loadPlaylists();
-                }
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                // todo? why is this empty
-            }
-        }
-    }
-
-//    private void testUploadFile() {
-//        FileManager fileManager = new FileManager(this);
-//        String fp = fileManager.getFilePath("BenDeLaCreme",
-//                1,
-//                3)
-//                + "." + "3gp";
-//        String fileName = "BenDeLaCreme.3gp";
-//        wikipedia.uploadFile(fileName,fp);
-//    }
-
-//    private void testChooseCategoriesActivity() {
-//        Intent intent = new Intent(activity, ChooseCategoriesActivity.class);
-//        startActivity(intent);
-//    }
-
-//    private void testWikiRecordActivity() {
-//        final Wikipage testPage = new Wikipage();
-//        String pageName = "Hurricane_Irene_(2005)";
-//        List<PageAttributes> pageAttributes = new ArrayList<>();
-//        pageAttributes.add(PageAttributes.title);
-//        pageAttributes.add(PageAttributes.content);
-//        wikipedia.getWikipage(pageName,
-//                pageAttributes,
-//                testPage,
-//                new WorkerListener() {
-//                    @Override
-//                    public void onSuccess() {
-//                        Intent intent = new Intent(activity, WikiRecordActivity.class);
-//                        Gson gson = new Gson();
-//                        String wiki = gson.toJson(testPage);
-//                        intent.putExtra(WikiRecordActivity.WIKI_PAGE_TAG, wiki);
-//                        startActivity(intent);
-//                    }
-//                    @Override
-//                    public void onFailure() {
-//                    }
-//                }
-//        );
-//    }
 }

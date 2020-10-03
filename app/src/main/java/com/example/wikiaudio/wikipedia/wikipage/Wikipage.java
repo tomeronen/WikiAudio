@@ -7,12 +7,46 @@ import java.util.List;
 public class Wikipage {
 
 
-    public String getComputerUrl() {
-        return computerUrl;
+    public static class Section{
+        String title;
+        String htmlText;
+
+        public Section(String title, String htmlText) {
+            this.title = title;
+            this.htmlText = htmlText;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getContents() {
+            return htmlText;
+        }
+
+        public void setContents(String contents) {
+            this.htmlText = contents;
+        }
     }
 
+    private String audioFileName;
     private String computerUrl;
-
+    private String title;
+    private String url;
+    private String description;
+    private String summary;
+    private List<Section> sections;
+    private List<String> indicators;
+    private int watchers;
+    private Double lat;
+    private Double lon;
+    private String audioUrl;
+    private String thumbnailSrc;
+    private Playlist playlist;
     public Wikipage() {}
 
     public void setIndicators(List<String> indicators) {
@@ -40,11 +74,7 @@ public class Wikipage {
         String fullText = "";
         if(sections != null) {
             for (Section s : sections) {
-                fullText += s.title + ".";
-                for (String paragraph : s.contents
-                ) {
-                    fullText += paragraph;
-                }
+                fullText += s.title + "." + s.htmlText; //todo do
             }
         }
         return fullText;
@@ -54,47 +84,13 @@ public class Wikipage {
         this.computerUrl = computerUrl;
     }
 
-
-    // TODO - make to outer class?
-    public static class Section{
-        String title;
-        List<String> contents;
-
-
-        public Section(String section_one, List<String> content_one) {
-            this.title = section_one;
-            this.contents = content_one;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public List<String> getContents() {
-            return contents;
-        }
-
-        public void setContents(List<String> contents) {
-            this.contents = contents;
-        }
+    public void setAudioFileName(String audioFileName) {
+        this.audioFileName = audioFileName;
     }
 
-    private String title;
-    private String url;
-    private String description;
-    private String summary;
-    private List<Section> sections;
-    private List<String> indicators;
-    private int watchers;
-    private Double lat;
-    private Double lon;
-    private String audioUrl;
-    private String thumbnailSrc;
-    private Playlist playlist;
+    public String getAudioFileName() {
+        return audioFileName;
+    }
 
     // ************************* Getters and setters ***********************************************
 
@@ -189,4 +185,9 @@ public class Wikipage {
     public Playlist getPlaylist() {
         return playlist;
     }
+
+    public String getComputerUrl() {
+        return computerUrl;
+    }
+
 }

@@ -39,6 +39,16 @@ public class QuarryResponse {
         ThumbnailData thumbnail;
         ThumbnailData original;
         List<CoordinatesData> coordinates;
+
+
+
+        List<FileInfo> imageinfo;
+
+        public class FileInfo {
+            String url;
+            String descriptionurl;
+            String descriptionshorturl;
+        }
     }
 
     public static class ThumbnailData

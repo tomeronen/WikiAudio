@@ -16,34 +16,37 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.activates.playlist.Playlist;
-import com.example.wikiaudio.activates.playlist.PlaylistsManager;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
-import com.example.wikiaudio.wikipedia.Wikipedia;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+/**
+ * This is where we handle location related actions - from marking wikipages on the map to checking
+ * if the user moved "enough" so we'll present it a new Nearby playlist.
+ */
 public class LocationHandler {
     //For logs
     private static final String TAG = "LocationHandler";
-    private static final int RADIUS = 10000; // let user choose?
+
+    //Constants
     private static final int MAP_CAMERA_ZOOM_RADIUS = 15;
+    private static final int MINIMUM_DISTANCE_TO_CREATE_NEW_NEARBY_PLAYLIST = 5000;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
+    //Vars
     private static LocationHandler instance = null;
-
     private AppCompatActivity activity;
-    private PlaylistsManager playlistsManager;
-    private Wikipedia wikipedia;
 
-    //Location related
+    //Location
     private GoogleMap mMap;
     private LocationManager locationManager;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private boolean shouldUpdateZoomAndCreateNearby = false;
+
 
     private LocationHandler(AppCompatActivity activity) {
         this.activity = activity;
@@ -61,16 +64,6 @@ public class LocationHandler {
     public void setGoogleMap(GoogleMap map) {
         mMap = map;
     }
-//
-//    public LocationHandler(AppCompatActivity activityCompat, PlaylistsHandler playlistsHandler,
-//                           Wikipedia wikipedia, final GoogleMap mMap) {
-//        this.activity = activityCompat;
-//        this.playlistsHandler = playlistsHandler;
-//        this.wikipedia = wikipedia;
-//        this.mMap = mMap;
-//        locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-//        locationUpdates();
-//    }
 
     /**
      * What to do for when the location updates or the GPS provider goes on/off
@@ -83,14 +76,16 @@ public class LocationHandler {
                         @Override
                         public void onLocationChanged(Location location) {
                             Log.d(TAG, "locationUpdates: onLocationChanged");
-                            //Recenter the map at the user's location + create
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            LatLng currentLocation = new LatLng(location.getLatitude(),
+                                    location.getLongitude());
+                            double currentLat = currentLocation.latitude;
+                            double currentLng = currentLocation.longitude;
+
                             if (shouldUpdateZoomAndCreateNearby) {
                                 shouldUpdateZoomAndCreateNearby = false;
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
-                                Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
-                                Holder.playlistsManager.createLocationBasedPlaylist(
-                                        latLng.latitude, latLng.longitude, true);
+                                recenterMapAndCreateNearbyPlaylist(currentLocation, currentLat, currentLng);
+                            } else {
+                                checkForNearbyUpdate(currentLocation, currentLat, currentLng);
                             }
                         }
 
@@ -113,6 +108,31 @@ public class LocationHandler {
                                     Toast.LENGTH_LONG).show();
                         }
                     });
+        }
+    }
+
+    /**
+     * Recenter the map at user's location and creates a nearby playlist.
+     */
+    private void recenterMapAndCreateNearbyPlaylist(LatLng currentLocation, double currentLat,
+                                                    double currentLng) {
+        Log.d(TAG, "locationUpdates: onLocationChanged shouldUpdateZoomAndCreateNearby");
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, MAP_CAMERA_ZOOM_RADIUS));
+        Holder.playlistsManager.createLocationBasedPlaylist(currentLat, currentLng, true);
+    }
+
+    /**
+     * Checks if the new location is far enough for creating a new nearby playlist.
+     */
+    private void checkForNearbyUpdate(LatLng currentLocation, double currentLat,
+                                         double currentLng) {
+        if (Holder.playlistsManager.getNearby() != null) {
+            Playlist nearby = Holder.playlistsManager.getNearby();
+            float[] results = {0};
+            Location.distanceBetween(nearby.getLat(), nearby.getLon(), currentLat, currentLng, results);
+            if (results[0] > MINIMUM_DISTANCE_TO_CREATE_NEW_NEARBY_PLAYLIST) {
+                recenterMapAndCreateNearbyPlaylist(currentLocation, currentLat, currentLng);
+            }
         }
     }
 
@@ -152,7 +172,6 @@ public class LocationHandler {
 
     /**
      * Pretty self-explanatory, really.
-     * @return true if are granted, false ow.
      */
     private boolean isLocationPermissionGranted(){
         if (activity == null) {
@@ -180,7 +199,6 @@ public class LocationHandler {
 
     /**
      * Marks the given Wikipage object on the map using its title and coordinates
-     * @param wikipage the article we would like to mark
      */
     public void markLocation(Wikipage wikipage) {
         if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
@@ -191,12 +209,10 @@ public class LocationHandler {
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
         mMap.addMarker(new MarkerOptions()
                 .position(latLng).title(wikipage.getTitle())).setTag(wikipage);
-        //TODO: add thumbnail one day :)
     }
 
     /**
-     *
-     * @param playlist the playlist to mark
+     * Marks the given Playlist object on the map by marking all of its wikipages
      */
     public void markPlaylist(Playlist playlist) {
         clearMap();
@@ -209,12 +225,6 @@ public class LocationHandler {
         }
     }
 
-    // TODO
-    // do we want to create and display a path of the playlist's locations?
-    // we will also have to play the articles in that same order
-    public void createPath(Location[] locations) {
-    }
-
     /**
      * Removes all markers, overlays, and polylines from the map.
      */
@@ -222,6 +232,9 @@ public class LocationHandler {
         mMap.clear();
     }
 
+    /**
+     * Marks the given Wikipage object on the map & zooms the camera on it
+     */
     public void markAndZoom(Wikipage wikipage) {
         if (wikipage == null || wikipage.getLat() == null || wikipage.getLon() == null
                 || wikipage.getTitle() == null) {
@@ -229,14 +242,11 @@ public class LocationHandler {
             return;
         }
         clearMap();
-
-
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
         Marker marker = mMap.addMarker( new MarkerOptions().position(latLng).title(wikipage.getTitle()));
         marker.setTag(wikipage);
         marker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
-
-
     }
+
 }

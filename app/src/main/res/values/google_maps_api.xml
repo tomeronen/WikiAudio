@@ -1,6 +1,5 @@
 <resources>
     <!--
-    TODO: Before you run your application, you need a Google Maps API key.
     To get one, follow this link, follow the directions and press "Create" at the end:
     https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=11:7F:71:12:76:1A:86:CA:28:8F:2A:42:76:B3:E0:A9:34:FE:3C:42%3Bcom.example.wikiaudio.activates
     You can also add your credentials to an existing key, using these values:
