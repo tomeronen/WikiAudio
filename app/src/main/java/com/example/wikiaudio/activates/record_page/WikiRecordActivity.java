@@ -53,6 +53,7 @@ public class WikiRecordActivity extends AppCompatActivity {
 
     private static final int REQ_RECORD_PERMISSION = 12;
     public static final String WIKI_PAGE_TAG = "WikipageTag" ;
+    private static final String CUR_SECTION_TAG = "CUR_SECTION_TAG";
     WebView sectionView;
     AppCompatActivity activity;
     Wikipage wikipage = new Wikipage();
@@ -121,6 +122,10 @@ public class WikiRecordActivity extends AppCompatActivity {
         if(savedInstanceState == null)
         { // first instance
             showDialog();
+        }
+        else
+        {
+            curSection = savedInstanceState.getInt(CUR_SECTION_TAG);
         }
 
         // todo there is a problem with swipe
@@ -712,7 +717,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                     }
                 },
         "Welcome to the recording area!",
-                getDrawable(R.drawable.recorder_icon)); 
+                getDrawable(R.drawable.recorder_icon));
         introDialog.show(fragmentManager, "introTag");
     }
 
@@ -742,5 +747,9 @@ public class WikiRecordActivity extends AppCompatActivity {
     }
 
 
-
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CUR_SECTION_TAG, curSection);
+        }
 }
