@@ -343,4 +343,56 @@ public class WikipageDataManager {
         }
         return new ArrayList<>(this.spokenCategoriesMetaData.keySet());
     }
+
+    public List<Wikipage> searchPagesNearby(double latitude,
+                                          double longitude,
+                                          int radius,
+                                          List<PageAttributes> pageAttributes)
+            throws IOException {
+
+
+        if(radius == 0 || pageAttributes == null || pageAttributes.isEmpty())
+        { // nothing to search.
+            return new ArrayList<>();
+        }
+
+        // gets basic attributes:
+        List<Wikipage> wikipages = WikiServerHolder.getPagesNearby(latitude,
+                longitude,
+                radius,
+                pageAttributes);
+        if(wikipages.isEmpty()) // nothing found
+        {
+            return new ArrayList<>();
+        }
+
+        List<String> pagesNames = new ArrayList<>();
+        for(Wikipage wikipage: wikipages)
+        {
+            pagesNames.add(wikipage.getTitle());
+            wikipagesData.put(wikipage.getTitle(), wikipage);
+        }
+
+        // get content if asked:
+        if(pageAttributes.contains(PageAttributes.content))
+        {
+            for(String name:pagesNames) // page contents needs to be one by one.
+            {
+                Wikipage wikipage = wikipagesData.get(name);
+                if(wikipage != null) {
+                    wikipage.setSections(WikiServerHolder.getInstance().getPageContent(name));
+                }
+            }
+        }
+
+        // get audio source if asked:
+        if(pageAttributes.contains(PageAttributes.audioUrl))
+        {
+            WikiServerHolder.getInstance().loadAudioSource(wikipagesData,
+                    getSpokenWikipagesMetaData(),
+                    pagesNames);
+
+        }
+        return wikipages;
+    }
 }

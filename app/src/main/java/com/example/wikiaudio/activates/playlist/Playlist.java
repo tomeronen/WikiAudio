@@ -118,6 +118,7 @@ public class Playlist {
         this.title = NEARBY_PLAYLIST_TITLE;
         initVars(lat, lon);
 
+        pageAttributes.add(PageAttributes.content);
         List<Wikipage> results = new ArrayList<>();
         Holder.wikipedia.getPagesNearby(lat, lon, RADIUS, results, pageAttributes,
                 new WorkerListener() {

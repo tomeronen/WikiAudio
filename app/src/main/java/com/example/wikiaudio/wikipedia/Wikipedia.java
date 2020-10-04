@@ -138,11 +138,12 @@ public class Wikipedia {
             int numberOfTries = 0;
             while (numberOfTries < ATTEMPTS_BEFORE_FAILURE) {
                 try {
-                    List<Wikipage> pagesNearby = WikiServerHolder.getPagesNearby(latitude,
-                            longitude,
-                            radius,
-                            pageAttributes);
                     // task was successful.
+                    List<Wikipage> pagesNearby = wikipageDataManager
+                            .searchPagesNearby(latitude,
+                                    longitude,
+                                    radius,
+                                    pageAttributes);
                     listToFill.addAll(pagesNearby);
                     activ.runOnUiThread(workerListener::onSuccess);
                     return;
