@@ -168,10 +168,16 @@ public class LocationHandler {
                 return new LatLng(lat, lng);
             } else {
                 location = this.backUpLastKnownLocation(); // try getting with helper function
-                Log.d(TAG, "getCurrentLocation: got current location");
-                double lat = location.getLatitude();
-                double lng = location.getLongitude();
-                return new LatLng(lat, lng);
+                if (location != null) {
+                    Log.d(TAG, "getCurrentLocation: got current location");
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+                    return new LatLng(lat, lng);
+                }
+                else
+                {
+                    return null;
+                }
             }
         } else {
             requestLocationPermission();
