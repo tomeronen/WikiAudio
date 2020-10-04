@@ -77,7 +77,10 @@ public class WikipagePlaylistRecyclerViewAdapter extends
             if (Holder.playlistsManager.getMediaPlayer().getIsPlaying()) {
                 if (Holder.playlistsManager.getMediaPlayer().getCurrentWikipage().getTitle().equals(wikipage.getTitle())) {
 //                    holder.highlight.setVisibility(View.VISIBLE);
-
+                    holder.mView
+                            .setBackground
+                                    (holder.mView.getResources()
+                                            .getDrawable(R.drawable.border_highlight));
                 }
             }
         }
