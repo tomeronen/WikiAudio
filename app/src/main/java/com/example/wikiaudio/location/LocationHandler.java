@@ -25,6 +25,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.List;
+
 /**
  * This is where we handle location related actions - from marking wikipages on the map to checking
  * if the user moved "enough" so we'll present it a new Nearby playlist.
@@ -69,8 +71,8 @@ public class LocationHandler {
      * What to do for when the location updates or the GPS provider goes on/off
      */
     @SuppressLint("MissingPermission")
-    private void locationUpdates(){
-        if (isLocationPermissionGranted()){
+    private void locationUpdates() {
+        if (isLocationPermissionGranted()) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     5000, MAP_CAMERA_ZOOM_RADIUS, new LocationListener() {
                         @Override
@@ -90,7 +92,8 @@ public class LocationHandler {
                         }
 
                         @Override
-                        public void onStatusChanged(String provider, int status, Bundle extras) {}
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
 
                         @Override
                         public void onProviderEnabled(String provider) {
@@ -125,7 +128,7 @@ public class LocationHandler {
      * Checks if the new location is far enough for creating a new nearby playlist.
      */
     private void checkForNearbyUpdate(LatLng currentLocation, double currentLat,
-                                         double currentLng) {
+                                      double currentLng) {
         if (Holder.playlistsManager.getNearby() != null) {
             Playlist nearby = Holder.playlistsManager.getNearby();
             float[] results = {0};
@@ -155,14 +158,20 @@ public class LocationHandler {
                 return null;
             }
             // Getting Current Location
-            @SuppressLint("MissingPermission") Location location = locationManager.getLastKnownLocation(provider);
+            @SuppressLint("MissingPermission") Location location = locationManager
+                    .getLastKnownLocation(provider);
+
             if (location != null) {
                 Log.d(TAG, "getCurrentLocation: got current location");
                 double lat = location.getLatitude();
                 double lng = location.getLongitude();
                 return new LatLng(lat, lng);
             } else {
-                return null;
+                location = this.backUpLastKnownLocation(); // try getting with helper function
+                Log.d(TAG, "getCurrentLocation: got current location");
+                double lat = location.getLatitude();
+                double lng = location.getLongitude();
+                return new LatLng(lat, lng);
             }
         } else {
             requestLocationPermission();
@@ -173,7 +182,7 @@ public class LocationHandler {
     /**
      * Pretty self-explanatory, really.
      */
-    private boolean isLocationPermissionGranted(){
+    private boolean isLocationPermissionGranted() {
         if (activity == null) {
             Log.d(TAG, "isLocationPermissionGranted: null activity");
             return false;
@@ -217,10 +226,10 @@ public class LocationHandler {
     public void markPlaylist(Playlist playlist) {
         clearMap();
         if (playlist == null || playlist.getWikipages() == null) {
-            Log.d(TAG,"markPlaylist: got null playlist or playlist's wikipages array is null");
+            Log.d(TAG, "markPlaylist: got null playlist or playlist's wikipages array is null");
             return;
         }
-        for (Wikipage wikipage: playlist.getWikipages()) {
+        for (Wikipage wikipage : playlist.getWikipages()) {
             markLocation(wikipage);
         }
     }
@@ -243,10 +252,33 @@ public class LocationHandler {
         }
         clearMap();
         LatLng latLng = new LatLng(wikipage.getLat(), wikipage.getLon());
-        Marker marker = mMap.addMarker( new MarkerOptions().position(latLng).title(wikipage.getTitle()));
+        Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(wikipage.getTitle()));
         marker.setTag(wikipage);
         marker.showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, MAP_CAMERA_ZOOM_RADIUS));
     }
 
+
+    private Location backUpLastKnownLocation() {
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (!isLocationPermissionGranted()) {
+                return null;
+            }
+            else
+            {
+                @SuppressLint("MissingPermission") Location l
+                        = locationManager.getLastKnownLocation(provider);
+                if (l == null) {
+                    continue;
+                }
+                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                    // Found best last known location: %s", l);
+                    bestLocation = l;
+                }
+            }
+        }
+        return bestLocation;
+    }
 }

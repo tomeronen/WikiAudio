@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -418,17 +420,30 @@ public class MainActivity extends AppCompatActivity implements
         if (isGPSEnabled && Holder.playlistsManager.getNearby() == null) {
             LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
             if (currentLatLng != null) {
-                //Zoom in to user's location
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                //Create (and display on the map) the nearby playlist
-                Holder.playlistsManager.createLocationBasedPlaylist(
-                        currentLatLng.latitude, currentLatLng.longitude, true);
-                //Update the tabs after creating it
-                addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+                addLocationPlaylist(currentLatLng);
+            }
+            else{
+                final Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(() -> {
+                    LatLng currentLocation = Holder.locationHandler.getCurrentLocation();
+                    if (currentLocation != null) {
+                        addLocationPlaylist(currentLatLng);
+                    }
+                }, 5000); // try again after some time
             }
         } else {
             Log.d(TAG, "initUserLocationOnTheMap: no GPS");
         }
+    }
+
+    private void addLocationPlaylist(LatLng currentLatLng) {
+        //Zoom in to user's location
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+        //Create (and display on the map) the nearby playlist
+        Holder.playlistsManager.createLocationBasedPlaylist(
+                currentLatLng.latitude, currentLatLng.longitude, true);
+        //Update the tabs after creating it
+        addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
     }
 
     /**
