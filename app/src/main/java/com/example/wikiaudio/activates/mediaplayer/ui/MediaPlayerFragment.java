@@ -10,7 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.example.wikiaudio.R;
 import com.example.wikiaudio.activates.MainActivity;
@@ -56,6 +58,33 @@ public class MediaPlayerFragment extends Fragment {
         setOnClickButtonsForPlayer();
         setOnClickButtonsForNavigationBar();
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        FragmentActivity activity = getActivity();
+        if (activity != null)
+        {
+            String localClassName = activity.getLocalClassName();
+            highlightCurrentChoice(localClassName);
+        }
+    }
+
+    private void highlightCurrentChoice(String localClassName) {
+        // lightup the current window in bottom navigation bar:
+        switch (localClassName)
+        {
+            case "activates.MainActivity":
+                homeButton.setColorFilter(getResources().getColor(R.color.chosenItem));
+                break;
+            case "activates.search_page.SearchPageActivity":
+                searchButton.setColorFilter(getResources().getColor(R.color.chosenItem));
+                break;
+            case "activates.choose_categories.ChooseCategoriesActivity":
+                categoriesButton.setColorFilter(getResources().getColor(R.color.chosenItem));
+                break;
+        }
     }
 
     private void initVars() {

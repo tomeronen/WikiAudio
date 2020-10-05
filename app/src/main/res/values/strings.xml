@@ -114,4 +114,5 @@
     </string>
     <string name="upload_dialog_title">Uploading File</string>
     <string name="search_result_error">there was a problem with getting search results</string>
+    <string name="loading_categories_error">there was a problem with loading categories. pleas exit this screen and try again</string>
 </resources>

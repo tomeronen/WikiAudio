@@ -117,19 +117,22 @@
 
         <ImageButton
             android:id="@+id/searchButton"
-            app:srcCompat="@android:drawable/ic_menu_search"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:background="#302A2B"
-            android:layout_weight="1" />
+            android:foregroundTint="#FFFFFF"
+            android:tint="#FFFFFF"
+            app:srcCompat="@android:drawable/ic_menu_search" />
 
         <ImageButton
             android:id="@+id/categoriesButton"
-            app:srcCompat="@android:drawable/ic_menu_sort_by_size"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:background="#302A2B"
-            android:layout_weight="1" />
+            android:tint="#FFFFFF"
+            app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
     </LinearLayout>
 
 </RelativeLayout>

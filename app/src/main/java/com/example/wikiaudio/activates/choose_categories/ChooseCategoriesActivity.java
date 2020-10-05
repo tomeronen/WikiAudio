@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -119,6 +120,8 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
             public void onFailure() {
                 Log.d(TAG, "load status: loading categories failed");
                 loadingIcon.setVisibility(View.GONE);
+                Toast.makeText(activity,
+                        R.string.loading_categories_error, Toast.LENGTH_SHORT).show();
             }
         });
     }

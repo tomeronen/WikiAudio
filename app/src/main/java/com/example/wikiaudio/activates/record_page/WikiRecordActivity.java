@@ -554,7 +554,7 @@ public class WikiRecordActivity extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
+                                Toast.makeText(activity, "no hurry", Toast.LENGTH_SHORT).show();
                             }
                         }
                         ,

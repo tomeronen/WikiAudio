@@ -21,28 +21,17 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.R;
-import com.example.wikiaudio.data.AppData;
-import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.WikiAudioApp;
-import com.example.wikiaudio.activates.loading.LoadingActivity;
-import com.example.wikiaudio.activates.loading.LoadingHelper;
 import com.example.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment;
 import com.example.wikiaudio.activates.playlist.Playlist;
 import com.example.wikiaudio.activates.playlist.PlaylistsManager;
 import com.example.wikiaudio.activates.record_page.WikiRecordActivity;
-import com.example.wikiaudio.wikipedia.Wikipedia;
-import com.example.wikiaudio.wikipedia.server.WorkerListener;
-import com.example.wikiaudio.wikipedia.wikipage.PageAttributes;
+import com.example.wikiaudio.data.AppData;
+import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.wikipage.Wikipage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class WikipageActivity extends AppCompatActivity {
     //For logs
@@ -213,6 +202,7 @@ public class WikipageActivity extends AppCompatActivity {
                 articleImage.setVisibility(View.GONE);
             }
         }
+        shakeView(recordButton);
     }
 
     /**
@@ -260,6 +250,41 @@ public class WikipageActivity extends AppCompatActivity {
             }
         });
         view.startAnimation(animFadeIn);
+    }
+
+    private void shakeView(View view) {
+        if(view != null)
+        {
+            Animation animWobble = AnimationUtils.loadAnimation(getApplicationContext()
+                    ,R.anim.wobble);
+            animWobble.setStartOffset(10);
+        animWobble.setAnimationListener(new Animation.AnimationListener(){
+            boolean pausedAnim = false;
+            int repeatCount = 0;
+            @Override
+            public void onAnimationStart(Animation arg0) {
+            }
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+                ++repeatCount;
+                if(pausedAnim){ // we finished the pause.
+                    animWobble.setStartOffset(0);
+                    pausedAnim = false;
+                }
+                if(repeatCount % 20 == 0)
+                {
+                    pausedAnim = true;
+                    animWobble.setStartOffset(3000);
+                }
+            }
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+
+            }
+        });
+            view.startAnimation(animWobble);
+        }
+
     }
 
     /**
