@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements
         initVars();
         initMap();
         initMediaPlayer();
-        loadPlaylists();
+//        loadPlaylists();  todo  problem having this in onCreate and restoreCategories onResume
         setOnClickButtons();
     }
 
@@ -230,7 +230,21 @@ public class MainActivity extends AppCompatActivity implements
         //Display the tabLayout
         int finalSelectedIndex = selectedIndex;
         activity.runOnUiThread(() -> {
-            viewPager.setAdapter(playListsFragmentAdapter);
+            try {
+                // todo when we enable gps, when we have other playlist, makes the app to crash.
+                //  dont know why
+                viewPager.setAdapter(playListsFragmentAdapter);
+            }
+            catch (IndexOutOfBoundsException e)
+            {
+                e.printStackTrace();
+
+                // bad solution but better then crashing. restart app.
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+
             tabLayout.setupWithViewPager(viewPager);
             playListsFragmentAdapter.setTabLayout(tabLayout);
             int counter = 0;
@@ -267,8 +281,9 @@ public class MainActivity extends AppCompatActivity implements
         Log.d(TAG, "addTab: got here");
         if (tabLayout != null && playlistFragment != null &&
                 playlistFragment.getPlaylist() != null) {
-            playListsFragmentAdapter.addPlaylistFragment(playlistFragment);
             tabLayout.addTab(tabLayout.newTab().setText(playlistFragment.getPlaylist().getTitle()));
+            playListsFragmentAdapter.addPlaylistFragment(playlistFragment);
+            playListsFragmentAdapter.notifyDataSetChanged();
         } else {
             Log.d(TAG, "addTab: got null tabLayout/playlistFragment/playlist");
         }
@@ -461,7 +476,13 @@ public class MainActivity extends AppCompatActivity implements
         //Update the tabs after creating it
         if(!tabsContainsNearBy())
         {
-            addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+            try {
+                addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+            }
+            catch (Exception e)
+            {
+                Log.d("error:", "could not load tab");
+            }
         }
 
     }
@@ -483,8 +504,6 @@ public class MainActivity extends AppCompatActivity implements
      * If required, creates new chosen categories and removes old ones + updates the display
      */
     private void restoreCategories() {
-        List<String> newChosenCategories =
-                ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
         if (chosenCategoriesChanged()) {
             // categories changed
             Log.d(TAG, "onResume: categories changed");
@@ -499,6 +518,10 @@ public class MainActivity extends AppCompatActivity implements
     private boolean chosenCategoriesChanged() {
         Set<String> oldChosenCategories = new HashSet<>();
         int tabsAmount = tabLayout.getTabCount();
+        if(chosenCategories.size() != (tabLayout.getTabCount() - 1))
+        {
+            return true;
+        }
         for(int i = 0; i < tabsAmount; ++i)
         {
             oldChosenCategories.add(String.valueOf(tabLayout.getTabAt(i).getText()));
