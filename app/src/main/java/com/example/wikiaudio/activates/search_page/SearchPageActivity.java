@@ -33,6 +33,7 @@ public class SearchPageActivity extends AppCompatActivity {
     private SearchView searchBar;
     private ProgressBar loadingIcon;
     private TextView searchTitle;
+
     //Media bar
     private MediaPlayerFragment mediaPlayerFragment;
     private MediaPlayer mediaPlayer;
@@ -56,6 +57,11 @@ public class SearchPageActivity extends AppCompatActivity {
         loadingIcon = findViewById(R.id.loadingSearchResults);
         loadingIcon.setVisibility(View.GONE);
         app = getApplicationContext();
+        searchTitle.setOnClickListener(v -> {
+            searchBar.onActionViewCollapsed();
+            searchBar.onActionViewExpanded();
+        });
+
         searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -79,6 +85,7 @@ public class SearchPageActivity extends AppCompatActivity {
                 searchResultVisibility();
                 searchTitle.setText(query);
                 searchTitle.setVisibility(View.VISIBLE);
+
                 searchBar.onActionViewCollapsed();
                 return false;
             }
