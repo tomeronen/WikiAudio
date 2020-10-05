@@ -46,8 +46,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment.CHOOSE_CATEGORY_TAG;
 
@@ -154,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements
         //Views
         chooseCategoriesButton = findViewById(R.id.addCategoryButton);
         loadingIcon = findViewById(R.id.progressBar4);
+        loadingIcon.setVisibility(View.GONE);
         viewPager = findViewById(R.id.view_pager);
         tabLayout = findViewById(R.id.tabs);
         playListsFragmentAdapter = new PlaylistsFragmentAdapter(getSupportFragmentManager());
@@ -193,7 +196,8 @@ public class MainActivity extends AppCompatActivity implements
         if(PlaylistsManager.getPlaylists().size() != chosenCategories.size())
         {
             // we still have things to load;
-            loadingIcon.setVisibility(View.VISIBLE);
+            // loadingIcon.setVisibility(View.VISIBLE);
+            //todo need to fix. right now brings more problems then benefit
         }
         else
         {
@@ -481,8 +485,7 @@ public class MainActivity extends AppCompatActivity implements
     private void restoreCategories() {
         List<String> newChosenCategories =
                 ((WikiAudioApp) getApplication()).getAppData().getChosenCategories();
-        if (!(chosenCategories.containsAll(newChosenCategories) &&
-                newChosenCategories.containsAll(chosenCategories))) {
+        if (chosenCategoriesChanged()) {
             // categories changed
             Log.d(TAG, "onResume: categories changed");
             chosenCategories = ((WikiAudioApp) getApplication())
@@ -491,6 +494,17 @@ public class MainActivity extends AppCompatActivity implements
             Holder.playlistsManager.updateCategoryBasedPlaylists(chosenCategories);
             new Thread(this::displayPlaylists).start();
         }
+    }
+
+    private boolean chosenCategoriesChanged() {
+        Set<String> oldChosenCategories = new HashSet<>();
+        int tabsAmount = tabLayout.getTabCount();
+        for(int i = 0; i < tabsAmount; ++i)
+        {
+            oldChosenCategories.add(String.valueOf(tabLayout.getTabAt(i).getText()));
+        }
+        return !oldChosenCategories
+                .equals(new HashSet<>(chosenCategories)); // order does not matter
     }
 
     /**

@@ -1,12 +1,9 @@
 package com.example.wikiaudio.activates.choose_categories;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -41,7 +38,7 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
     //Views
 //    private SearchView searchCategoriesView;
     private RecyclerView categoriesView;
-    private Button saveButton;
+//    private Button saveButton;
     private ProgressBar loadingIcon;
 
     //Media bar
@@ -77,26 +74,26 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
                 .getAppData().getChosenCategories();
         categoriesView = findViewById(R.id.categoriesView);
 //        searchCategoriesView = findViewById(R.id.searchCategorysView);
-        saveButton = findViewById(R.id.saveChoice);
+//        saveButton = findViewById(R.id.saveChoice);
         loadingIcon = findViewById(R.id.progressBar5);
     }
 
     private void initOnClickButtons() {
-        saveButton.setOnClickListener(v -> {
-            if (!(originalCategories.containsAll(categories) &&
-                    categories.containsAll(originalCategories))) {
-                // categories changed
-                ((WikiAudioApp) getApplication()).getAppData()
-                        .saveChosenCategories(categoryAdapter._categoriesChosen);
-                Intent intent = getIntent();
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-            // categories unchanged
-            Intent intent = getIntent();
-            setResult(Activity.RESULT_CANCELED, intent);
-            finish();
-        });
+//        saveButton.setOnClickListener(v -> {
+//            if (!(originalCategories.containsAll(categories) &&
+//                    categories.containsAll(originalCategories))) {
+//                // categories changed
+//                ((WikiAudioApp) getApplication()).getAppData()
+//                        .saveChosenCategories(categoryAdapter._categoriesChosen);
+//                Intent intent = getIntent();
+//                setResult(Activity.RESULT_OK, intent);
+//                finish();
+//            }
+//            // categories unchanged
+//            Intent intent = getIntent();
+//            setResult(Activity.RESULT_CANCELED, intent);
+//            finish();
+//        });
     }
 
     private void loadCategories() {

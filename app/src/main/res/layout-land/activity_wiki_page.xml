@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:backgroundTint="#302A2B"
+        android:backgroundTint="@color/chosenItem"
         android:clickable="true"
         android:visibility="visible"
         app:borderWidth="0dp"

@@ -47,6 +47,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
                 _categoriesChosen.remove(this._categoryNameView.getText().toString());
                 itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
             }
+            // todo do we want to save chosen categories each time?
+            ((WikiAudioApp) this._adapter.activity.getApplication())
+                    .getAppData().saveChosenCategories(_categoriesChosen);
+
             this.categoryClickListener.onClick(this._categoryNameView.getText().toString());
         }
 
@@ -67,11 +71,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
     private List<String> _categories;
     public List<String> _categoriesChosen;
     private LayoutInflater _layoutInflater;
+    private final AppCompatActivity activity;
 
     public CategoryAdapter(AppCompatActivity activity,
                            List<String> categoriesList,
                            CategoryClickListeners categoryClickListener){
         this._categories = categoriesList;
+        this.activity  = activity;
         this._layoutInflater = LayoutInflater.from(activity);
         this.categoryClickListener = categoryClickListener;
         this._categoriesChosen = ((WikiAudioApp)activity.getApplication())
