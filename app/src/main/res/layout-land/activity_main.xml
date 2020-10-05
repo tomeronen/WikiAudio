@@ -75,7 +75,7 @@
         tools:context="com.example.wikiaudio.activates.MainActivity" />
 
     <fragment
-        android:id="@+id/audioPlayerFragment"
+        android:id="@+id/mediaPlayerFragment"
         android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="match_parent"
         android:layout_height="70dp"
