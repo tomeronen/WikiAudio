@@ -18,31 +18,33 @@
 
     <TextView
         android:id="@+id/mapBackground"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="314dp"
-        android:layout_marginBottom="98dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:background="#4d4d4d"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@id/fragmentMap"
+        app:layout_constraintEnd_toEndOf="@id/fragmentMap"
+        app:layout_constraintStart_toStartOf="@id/fragmentMap"
+        app:layout_constraintTop_toTopOf="@id/fragmentMap" />
 
-    <fragment xmlns:map="http://schemas.android.com/apk/res-auto"
+    <fragment
         android:id="@+id/fragmentMap"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="316dp"
-        android:layout_marginBottom="100dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_pager"
         tools:context="com.example.wikiaudio.activates.MainActivity" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="1.5dp"
         android:layout_marginLeft="1.5dp"
+        android:layout_marginTop="1.5dp"
         android:layout_marginRight="1.5dp"
-        android:layout_marginBottom="1.5dp"
+        android:layout_marginBottom="2dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintBottom_toTopOf="@+id/fragmentMap"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,7 +81,6 @@
         android:layout_height="110dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragmentMap" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout >
