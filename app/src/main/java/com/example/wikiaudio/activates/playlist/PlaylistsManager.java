@@ -1,5 +1,6 @@
 package com.example.wikiaudio.activates.playlist;
 
+import android.location.Location;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,8 +45,25 @@ public class PlaylistsManager {
      * Creates a playlist based on location
      * @param isNearby if true then overrides the current nearby playlist
      */
-    public void createLocationBasedPlaylist(double lat, double lon, boolean isNearby) {
-        Playlist playlist = new Playlist(true, lat, lon);
+    public synchronized void  createLocationBasedPlaylist(double lat, double lon, boolean isNearby) {
+        Playlist playlist = null;
+        if(nearby != null // check if we already have a good locationPlayList
+                && nearby.getLat() != 0
+                && nearby.getLon() != 0)
+        {
+            float[] results = new float[1]; // we only want distance (length one)
+            Location.distanceBetween(nearby.getLat(), nearby.getLon(),
+                    lat, lon, results);
+            if(results[0] < 50) // we have a up to date Location Based Playlist
+            {
+                playlist = nearby;
+            }
+        }
+
+        if(playlist == null) // we don't have a nearby playlist already. make one.
+        {
+            playlist = new Playlist(true, lat, lon);
+        }
         if (isNearby) {
             //replace the nearby playlist if it exists
             if (playlists.size() > 0 && playlists.get(0).getTitle().equals("Nearby")) {
@@ -58,6 +76,7 @@ public class PlaylistsManager {
         } else {
             addPlaylist(playlist);
         }
+
     }
 
     /**

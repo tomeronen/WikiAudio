@@ -10,6 +10,7 @@ import com.example.wikiaudio.WikiAudioApp;
 import com.example.wikiaudio.activates.MainActivity;
 import com.example.wikiaudio.data.AppData;
 import com.example.wikiaudio.data.Holder;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
@@ -22,16 +23,22 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //todo-sm: tried and didn't work
-//        //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
-//        //it needs an activity
         AppData appData = ((WikiAudioApp) getApplication()).getAppData();
-        //Init && holds all of the app's facades/singletons. Can't be init at WikiAudioApp because
-        //it needs an activity
+
         Holder.getInstance(this, appData);
         List<String> chosenCategories = ((WikiAudioApp) getApplication())
                 .getAppData().getChosenCategories();
-//        // start loading categories playlists in splash screen
+
+        // try to initialize location based playlist.
+        ((WikiAudioApp) getApplication()).getExecutorService().execute(() -> {
+            LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
+            if (currentLatLng != null) {
+                Holder.playlistsManager.createLocationBasedPlaylist(
+                        currentLatLng.latitude, currentLatLng.longitude, true);
+            }
+        });
+
+        // start loading categories playlists in splash screen
         new Thread(()
                 -> Holder.playlistsManager.createCategoryBasedPlaylists(chosenCategories)).start();
 

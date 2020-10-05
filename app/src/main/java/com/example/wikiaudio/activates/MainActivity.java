@@ -418,6 +418,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void zoomInOnUserAndCreateNearbyPlaylist() {
         if (isGPSEnabled && Holder.playlistsManager.getNearby() == null) {
+            // we don't have nearby playlist. we create one here.
             LatLng currentLatLng = Holder.locationHandler.getCurrentLocation();
             if (currentLatLng != null) {
                 addLocationPlaylist(currentLatLng);
@@ -431,7 +432,16 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 }, 5000); // try again after some time
             }
-        } else {
+        }
+        else if(isGPSEnabled && Holder.playlistsManager.getNearby() != null )
+        {
+            // we have a nearby playlist just need to zoom map on it.
+            LatLng currentLatLng = new LatLng(Holder.playlistsManager.getNearby().getLat(),
+                    Holder.playlistsManager.getNearby().getLon());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+        }
+        else {
+            // no GPS.
             Log.d(TAG, "initUserLocationOnTheMap: no GPS");
         }
     }
@@ -439,11 +449,30 @@ public class MainActivity extends AppCompatActivity implements
     private void addLocationPlaylist(LatLng currentLatLng) {
         //Zoom in to user's location
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+
         //Create (and display on the map) the nearby playlist
         Holder.playlistsManager.createLocationBasedPlaylist(
                 currentLatLng.latitude, currentLatLng.longitude, true);
+
         //Update the tabs after creating it
-        addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+        if(!tabsContainsNearBy())
+        {
+            addTab(Holder.playlistsManager.getNearby().getPlaylistFragment());
+        }
+
+    }
+
+    private boolean tabsContainsNearBy() {
+        boolean containsNearBy = false;
+        for(int i = 0; i < tabLayout.getTabCount(); ++i)
+        {
+            if(tabLayout.getTabAt(i).getText().equals(Holder.playlistsManager.getNearby().getTitle()))
+            {
+                containsNearBy = true;
+                break;
+            }
+        }
+        return containsNearBy;
     }
 
     /**
