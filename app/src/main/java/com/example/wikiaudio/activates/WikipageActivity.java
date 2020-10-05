@@ -179,9 +179,6 @@ public class WikipageActivity extends AppCompatActivity {
             finish();
         }
 
-        //PlayButton
-        setFloatingButtonsVisibility(View.GONE);
-
         //WebView
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
@@ -190,16 +187,17 @@ public class WikipageActivity extends AppCompatActivity {
         //Image
         if(wikipage.getThumbnailSrc() == null) {
             articleImage.setVisibility(View.GONE);
-            setFloatingButtonsVisibility(View.VISIBLE);
         } else {
             if(firstTimeOpening) // don't show image again on rotation.
             {
+                setFloatingButtonsVisibility(View.GONE);
                 articleImage.bringToFront();
                 displayImage();
             }
             else
             {
                 articleImage.setVisibility(View.GONE);
+                setFloatingButtonsVisibility(View.VISIBLE);
             }
         }
         shakeView(recordButton);
@@ -217,6 +215,7 @@ public class WikipageActivity extends AppCompatActivity {
                     public boolean onLoadFailed(@Nullable GlideException e, Object model,
                                                 Target<Drawable> target, boolean isFirstResource) {
                         articleImage.setVisibility(View.GONE);
+                        setFloatingButtonsVisibility(View.VISIBLE);
                         return false;
                     }
 
