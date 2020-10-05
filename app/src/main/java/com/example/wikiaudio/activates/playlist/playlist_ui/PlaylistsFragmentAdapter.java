@@ -56,8 +56,13 @@ public class PlaylistsFragmentAdapter extends FragmentStatePagerAdapter {
         playlistFragments = new ArrayList<>();
         for (Playlist playlist: PlaylistsManager.getPlaylists()) {
             Log.d(TAG, "updatePlaylistFragmentList: add the fragment of playlist titled - " + playlist.getTitle());
-            addPlaylistFragment(playlist.getPlaylistFragment());
-            playlist.getPlaylistFragment().setPlaylistsFragmentAdapter(this);
+            PlaylistFragment playlistFragment = playlist.getPlaylistFragment();
+            if(playlistFragment != null)
+            {
+                addPlaylistFragment(playlistFragment);
+                playlistFragment.setPlaylistsFragmentAdapter(this);
+            }
+
         }
     }
 
