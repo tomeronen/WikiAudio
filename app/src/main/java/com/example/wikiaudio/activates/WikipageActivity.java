@@ -253,12 +253,15 @@ public class WikipageActivity extends AppCompatActivity {
     }
 
     private void shakeView(View view) {
+
         if(view != null)
         {
             Animation animWobble = AnimationUtils.loadAnimation(getApplicationContext()
                     ,R.anim.wobble);
             animWobble.setStartOffset(10);
         animWobble.setAnimationListener(new Animation.AnimationListener(){
+            int totalAmountOfShakes = 2;
+            int curAmountOfShakes = 0;
             boolean pausedAnim = false;
             int repeatCount = 0;
             @Override
@@ -273,8 +276,13 @@ public class WikipageActivity extends AppCompatActivity {
                 }
                 if(repeatCount % 20 == 0)
                 {
+                    ++curAmountOfShakes;
                     pausedAnim = true;
                     animWobble.setStartOffset(3000);
+                }
+                if(curAmountOfShakes > totalAmountOfShakes)
+                {
+                    view.clearAnimation();
                 }
             }
             @Override
