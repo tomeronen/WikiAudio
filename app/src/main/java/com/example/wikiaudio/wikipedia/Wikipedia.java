@@ -35,33 +35,30 @@ public class Wikipedia {
 
     private static final int DAYS_BETWEEN_LOADING_CATEGORIES = 7;
     private static final int ATTEMPTS_BEFORE_FAILURE = 3;  // todo check what is best number
-    private final ExecutorService threadPool;
+    private ExecutorService threadPool;
     private WikipageDataManager wikipageDataManager;
     private AppCompatActivity activ;
     AppData appData;
-    List<WikiUserData> aviableUsersData;
+    List<WikiUserData> availableUsersData;
 
     public Wikipedia(AppCompatActivity activity) {
+        initVars(activity);
+    }
+
+    private void initVars(AppCompatActivity activity) {
         activ = activity;
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
         appData = ((WikiAudioApp) this.activ.getApplication()).getAppData();
         wikipageDataManager = new WikipageDataManager();
+        initUsersData();
+        initSpokenPagesMetaData();
+    }
 
-        aviableUsersData = new ArrayList<>();
-
-        // this is my main account. have permission to load files. todo make more
-        aviableUsersData.add(new WikiUserData( "tomer ronen",
-                "xTGHTibZAL3cBws",
-                false));
-
-        // future user names that still don't have permission to load files:
-            //        String BotName = "Tomer207";
-            //        String Password = "TomerRonen@9k7g4f8bhfmd5g1ukdan8rkr4idlgvc3";
-            //        String Password = "WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv";
-            //        String BotName  = "Tomer_ronen";
-            //        String userName = "Tomer207";
-            //        String password = "X94A2wgzHA36MQ2";
-
+    /**
+     * to make the app run faster, we start with looking on the pages with spoken audio and save
+     * there audio file name.
+     */
+    private void initSpokenPagesMetaData() {
         threadPool.execute(()-> {
                 int numberOfTries = 0;
                 while (numberOfTries < ATTEMPTS_BEFORE_FAILURE)
@@ -78,6 +75,27 @@ public class Wikipedia {
                 }
                 // todo what to do if wikipageDataManager fails to init?
         });
+    }
+
+    /**
+     * inits the array of current available wiki user data. when we try to do operations that
+     * needs authentication we will try using one of the following users data.
+     */
+    private void initUsersData() {
+        availableUsersData = new ArrayList<>();
+
+        // this is my main account. have permission to load files. todo make more
+        availableUsersData.add(new WikiUserData( "tomer ronen",
+                "xTGHTibZAL3cBws",
+                false));
+
+        // future user names that still don't have permission to load files:
+        //        String BotName = "Tomer207";
+        //        String Password = "TomerRonen@9k7g4f8bhfmd5g1ukdan8rkr4idlgvc3";
+        //        String Password = "WikiAudio@tkpemajv20jm4t1ofm2amr5mb7p1v9cv";
+        //        String BotName  = "Tomer_ronen";
+        //        String userName = "Tomer207";
+        //        String password = "X94A2wgzHA36MQ2";
     }
 
 
@@ -216,29 +234,8 @@ public class Wikipedia {
         }
     }
 
-
     /**
-     * load
-     * @param category
-     * @param result
-     * @param workerListener
-     */
-    public void loadSpokenPagesNamesByCategories(final String category,
-                                                 final List<String> result,
-                                                 final WorkerListener workerListener)
-    {
-        try {
-            result.addAll(this.wikipageDataManager.getSpokenPagesNamesByCategories(category));
-            threadPool.execute(workerListener::onSuccess);
-        } catch (IOException e) {
-            e.printStackTrace();
-            threadPool.execute(workerListener::onFailure);
-        }
-    }
-
-
-    /**
-     *
+     * get a Wikipage by its name/title.
      * @param name the name of wiki page to get.
      * @param pageAttributes the Attributes to get on the page.
      * @param pageToFill the wiki page to fill with the data.
@@ -328,11 +325,11 @@ public class Wikipedia {
 
 
     /**
-     *
-     * @param category
-     * @param result
-     * @param pageAttributes
-     * @param workerListener
+     * load Spoken Pages By Categories.
+     * @param category the category to bring the pages from.
+     * @param result the list to add the pages to.
+     * @param pageAttributes what Attributes to bring on result pages.
+     * @param workerListener what to do if work fails or is successful.
      */
     public void loadSpokenPagesByCategories(final String category,
                                                  final List<PageAttributes> pageAttributes,
@@ -360,7 +357,10 @@ public class Wikipedia {
     }
 
 
+    /**
+     * @return a list of users data.
+     */
     public List<WikiUserData> getUsersData() {
-        return aviableUsersData;
+        return availableUsersData;
     }
 }

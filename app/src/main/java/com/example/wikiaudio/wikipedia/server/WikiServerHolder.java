@@ -147,6 +147,12 @@ public class WikiServerHolder {
         throw new IOException();
     }
 
+    /**
+     * parse Content Response into a list of sections.
+     * @param contentResponse the response to parse.
+     * @return the list of sections that was made from the data inside the ContentResponse
+     * @throws IOException if Content Response was illegal format.
+     */
     private List<Wikipage.Section> parseContentResponse(ContentResponse contentResponse)
             throws IOException {
         if(contentResponse != null) {
@@ -222,32 +228,15 @@ public class WikiServerHolder {
     }
 
 
-
+    /**
+     * checks if a quarryResponse is of a legal format.
+     * @param quarryResponse the response to check.
+     * @return true if the quarryResponse is formatted ok, false otherwise.
+     */
     private static boolean quarryResponseIsLegal(QuarryResponse quarryResponse) {
         return quarryResponse != null
                 && quarryResponse.query != null
                 && quarryResponse.query.pages != null;
-    }
-
-    private String parseAudioFileResponse(QuarryResponse quarryResponse)
-            throws IOException {
-        if (quarryResponseIsLegal(quarryResponse)) {
-            StringBuilder fileNames = new StringBuilder();
-            if(    quarryResponse.query.pages.values().size() == 1)
-            {
-                return quarryResponse.query.pages.get(0).title;
-            }
-            for(QuarryResponse.PageData pageData:
-                    quarryResponse.query.pages.values())
-            {
-                fileNames.insert(0, pageData.title + "|");
-            }
-            return fileNames.toString();
-        }
-        else
-        {
-            throw new IOException();
-        }
     }
 
     private String getNamesToSearch(List<String> names) {
@@ -282,6 +271,16 @@ public class WikiServerHolder {
         }
     }
 
+    /**
+     * gets Wikipages nearby the given coordinates. if successful,
+     * returns the 'listToFill' with found pages. And then runs workerListener.
+     * @param latitude the latitude to preform the search on.
+     * @param longitude the longitude to preform the search on.
+     * @param radius the radius from coordinates to search in.
+     * @param pageAttr the attributes to get on each wiki page found.
+     * @return a list with the wiki pages found.
+     * @throws IOException if there was a problem with the connection to wikipedia.
+     */
     public static List<Wikipage> getPagesNearby(Double latitude,
                                                 Double longitude,
                                                 int radius,
@@ -315,6 +314,12 @@ public class WikiServerHolder {
         }
     }
 
+    /**
+     *  parse QuarryResponse into a list of wikipages.
+     * @param quarryResponse the QuarryResponse to be parsed.
+     * @return a list of wikipages, made from the data inside the QuarryResponse.
+     * @throws IOException if CQuarryResponse illegal format.
+     */
     private static List<Wikipage> parseQuarryResponse(QuarryResponse quarryResponse)
             throws IOException {
         if (quarryResponseIsLegal(quarryResponse)) {
@@ -333,6 +338,11 @@ public class WikiServerHolder {
     }
 
 
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     public List<String> callGetSpokenPagesCategories() throws IOException {
         ArrayList<String> allCategories = new ArrayList<>();
         Response<Object> response = this.server.callGetSpokenPagesCategories().execute();
@@ -376,7 +386,16 @@ public class WikiServerHolder {
         }
         return pageNames;
     }
-    //todo implement.
+
+    /**
+     * uploads the file in the given path, to wikipedia with the given file name.
+     * using the given userData.
+     * @param fileName how to save the file in wikipedia.
+     * @param filePath the path to the file to be loaded.
+     * @param userData the user data to use inorder to load the file. user must have permission to
+     *                 load files.
+     * @throws IOException if task failed. can be IO problem, bad user data or bad file path.
+     */
     public void uploadFile(String fileName,
                            String filePath,
                            WikiUserData userData)
@@ -477,6 +496,11 @@ public class WikiServerHolder {
     };
 
 
+    /**
+     * parses PageData into a wikipage object.
+     * @param pageData the data used to create wikipage.
+     * @return built wikipage.
+     */
     private static Wikipage parseWikiData(QuarryResponse.PageData pageData) {
         if(pageData != null)
         {
@@ -562,21 +586,6 @@ public class WikiServerHolder {
         }
         return inprop.toString();
     }
-
-
-    private String getNames(List<Wikipage> wikipages) {
-        StringBuilder result = new StringBuilder();
-        for(Wikipage wikipage:wikipages)
-        {
-            result.append(wikipage.getTitle()).append("|");
-        }
-        if (result.length() > 0 && result.charAt(result.length() - 1) == '|')
-        {
-            result = new StringBuilder(result.substring(0, result.length() - 1));
-        }
-        return result.toString();
-    }
-
 
     public void loadPagesByName(HashMap<String, Wikipage> wikipagesData,
                                 List<String> pagesNames,
@@ -681,84 +690,3 @@ public class WikiServerHolder {
 
 }
 
-
-
-// unused options for functions:
-
-
-//    private void parseAudioSourceResponse(QuarryResponse quarryResponse,
-//                                                  List<Wikipage> wikipages) throws IOException {
-//        if (quarryResponseIsLegal(quarryResponse)) {
-//            List<String> result = new ArrayList<>();
-//            int counter = 0;
-//            for(QuarryResponse.PageData pageData:
-//                    quarryResponse.query.pages.values())
-//            {
-//                if(pageData.imageinfo != null && pageData.imageinfo.get(0) != null)
-//                {
-//                    wikipages.get(counter).setAudioUrl(pageData.imageinfo.get(0).url);
-////                    result.add(pageData.imageinfo.get(0).url);
-//                }
-//                counter++;
-//            }
-////            return result;
-//        }
-//        else
-//        {
-//            throw new IOException();
-//        }
-//
-//    }
-
-
-
-//    private void loadAudioSources(String names, List<Wikipage> wikipages) throws IOException {
-//        Response<QuarryResponse> response = server.callGetAudioFilesNames(names).execute();
-//        // todo for a weird reason brings back values in reverse order.
-//        if (response.code() == 200 && response.isSuccessful()) {
-//            // call to get audio files name was Successful
-//            String audioFileNames =  parseAudioFileResponse(response.body());
-//            Response<QuarryResponse> fileResponse = server.callGetAudioFile(audioFileNames).execute();
-//            if (fileResponse.code() == 200 && fileResponse.isSuccessful()) {
-//                // we got the files source.
-//                parseAudioSourceResponse(fileResponse.body(), wikipages);
-//            }
-//        }
-//    }
-
-
-//    public void fillWikipages(List<Wikipage> wikipages, List<PageAttributes> pageAttr)
-//            throws IOException {
-//        String prop = getQueryProp(pageAttr) + "|" + "images" ;
-//        String inprop = getQueryInProp(pageAttr);
-//        String namesToSearch = getNames(wikipages);
-//        Response<QuarryResponse> response = server.callGetPageByName(namesToSearch,
-//                prop, inprop, "original|thumbnail").execute();
-//        if (response.code() == 200 && response.isSuccessful()) {
-//            // task was successful.
-//            HashMap<String, Wikipage> wikipageMap = new HashMap<>();
-//            List<Wikipage> wikipagesResult = parseQuarryResponse(response.body());
-//
-//            if(pageAttr.contains(audioUrl))
-//            {
-//                loadAudioSources(namesToSearch, wikipagesResult);
-//            }
-//            if(pageAttr.contains(content) ) {
-//                List<Wikipage> badPages = new ArrayList<>();
-//                for (Wikipage wikipage : wikipagesResult) {
-//                    try {
-//                        WikiHtmlParser.parseAdvanceAttr(wikipage);
-//                    } catch (HttpStatusException e) {
-//                        Log.e("http error",
-//                                "something went wrong with bringing " +
-//                                        "advance Attributes of page:" + wikipage.getTitle());
-//                        badPages.add(wikipage);
-//                    }
-//                }
-//                wikipagesResult.removeAll(badPages); // todo do we want to remove if failed?
-//            }
-//        } else {
-//            // task failed.
-//            throw new IOException();
-//        }
-//    }
