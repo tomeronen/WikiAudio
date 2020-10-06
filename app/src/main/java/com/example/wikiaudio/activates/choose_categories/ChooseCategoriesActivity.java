@@ -21,7 +21,9 @@ import com.example.wikiaudio.data.Holder;
 import com.example.wikiaudio.wikipedia.server.WorkerListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ChooseCategoriesActivity extends AppCompatActivity {
 
@@ -102,9 +104,13 @@ public class ChooseCategoriesActivity extends AppCompatActivity {
         Holder.wikipedia.loadSpokenPagesCategories(categories, new WorkerListener() {
             @Override
             public void onSuccess() {
+                // todo bad way to make sure there are no deduplicate values
+                //  all chosen categorise containers need to be sets.
+                Set categoriesSet = new HashSet(categories);
+                categories = new ArrayList<>(categoriesSet);
                 Log.d(TAG, "load status: loaded categories");
                 categoryAdapter =
-                        new CategoryAdapter(activity, categories, categoryClickListeners);
+                        new CategoryAdapter(activity,categories , categoryClickListeners);
                 categoriesView.setLayoutManager(new GridLayoutManager(activity, columnAmount));
                 RecyclerView.ItemDecoration itemDecoration = new
                         DividerItemDecoration(activity, DividerItemDecoration.HORIZONTAL);

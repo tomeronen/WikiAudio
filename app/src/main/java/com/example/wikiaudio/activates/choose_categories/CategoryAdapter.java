@@ -1,6 +1,5 @@
 package com.example.wikiaudio.activates.choose_categories;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,12 +39,21 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
             if(!_categoriesChosen.contains(name))
             {
                 _categoriesChosen.add(this._categoryNameView.getText().toString());
-                itemView.setBackgroundColor(Color.parseColor("#7DCDF1"));
+//                itemView.setBackgroundColor(Color.parseColor("#7DCDF1"));
+                // highlight pick:
+                this._categoryNameView.setBackgroundResource(R.drawable.rounded_corner_highlight);
+                this._categoryNameView
+                        .setTextColor(itemView.getResources().getColor(R.color.chosenItem));
+
             }
             else
             {
                 _categoriesChosen.remove(this._categoryNameView.getText().toString());
-                itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+//                itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                // unhighlight pick:
+                this._categoryNameView.setBackgroundResource(R.drawable.rounded_corner);
+                this._categoryNameView
+                        .setTextColor(itemView.getResources().getColor(R.color.black));
             }
             // todo do we want to save chosen categories each time?
             ((WikiAudioApp) this._adapter.activity.getApplication())
@@ -55,15 +63,19 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
         }
 
         public void set(String categoryName){
+            this._categoryNameView.setText(categoryName);
             if(_categoriesChosen != null && _categoriesChosen.contains(categoryName))
             {
-                itemView.setBackgroundColor(Color.parseColor("#7DCDF1"));
+                this._categoryNameView.setBackgroundResource(R.drawable.rounded_corner_highlight);
+                this._categoryNameView
+                        .setTextColor(itemView.getResources().getColor(R.color.chosenItem));
             }
             else
             {
-                itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                this._categoryNameView.setBackgroundResource(R.drawable.rounded_corner);
+                this._categoryNameView
+                        .setTextColor(itemView.getResources().getColor(R.color.black));
             }
-            this._categoryNameView.setText(categoryName);
         }
     }
 

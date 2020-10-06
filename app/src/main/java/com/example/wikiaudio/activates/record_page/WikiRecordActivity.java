@@ -387,7 +387,8 @@ public class WikiRecordActivity extends AppCompatActivity {
     private void loadWikiDataToView(int curSection) {
         if (sectionNumberIsLegal(curSection)) {
             sectionTitle.setText(wikipage.getSection(curSection).getTitle());
-            String htmlText = wikipage.getSection(curSection).getContents();
+            String htmlText = "<b>" +  wikipage.getSection(curSection).getTitle()
+                    + "</b>" + ".\n" + wikipage.getSection(curSection).getContents();
             sectionView.loadDataWithBaseURL("https://en.wikipedia.org",
                     htmlText,
                     "text/html",
