@@ -29,6 +29,8 @@
         android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp"
         android:background="@drawable/upper_and_lower_border"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         app:layout_constraintBottom_toTopOf="@+id/mediaPlayerFragment"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
