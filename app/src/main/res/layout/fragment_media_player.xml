@@ -108,16 +108,25 @@
         android:weightSum="3" >
 
         <ImageButton
-            android:id="@+id/homeButton"
-            android:src="@drawable/ic_menu_home"
-            android:layout_width="wrap_content"
+            android:id="@+id/settingsButton"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:background="#302A2B"
-            android:layout_weight="1"/>
+            android:src="@drawable/settings_icon"
+            android:tint="#7C7A7A" />
+
+        <ImageButton
+            android:id="@+id/homeButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#302A2B"
+            android:src="@drawable/ic_menu_home" />
 
         <ImageButton
             android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#302A2B"
@@ -127,12 +136,13 @@
 
         <ImageButton
             android:id="@+id/categoriesButton"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#302A2B"
             android:tint="#FFFFFF"
             app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+
     </LinearLayout>
 
 </RelativeLayout>

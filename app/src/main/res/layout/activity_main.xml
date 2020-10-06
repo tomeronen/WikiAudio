@@ -35,7 +35,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/view_pager"
-        tools:context="com.example.wikiaudio.activates.MainActivity" />
+        tools:context="com.wikiaudioapp.wikiaudio.activates.MainActivity" />
+
+    <TextView
+        android:id="@+id/noPlaylistsText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="@string/noPlaylistsText"
+        app:layout_constraintBottom_toBottomOf="@id/view_pager"
+        app:layout_constraintEnd_toEndOf="@id/view_pager"
+        app:layout_constraintStart_toStartOf="@id/view_pager"
+        app:layout_constraintTop_toTopOf="@id/view_pager" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
@@ -76,7 +87,7 @@
 
     <fragment
         android:id="@+id/mediaPlayerFragment"
-        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
+        android:name="com.wikiaudioapp.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="match_parent"
         android:layout_height="110dp"
         app:layout_constraintBottom_toBottomOf="parent"

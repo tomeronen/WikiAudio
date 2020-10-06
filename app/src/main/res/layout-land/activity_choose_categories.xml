@@ -48,7 +48,7 @@
 
     <fragment
         android:id="@+id/mediaPlayerFragment"
-        android:name="com.example.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
+        android:name="com.wikiaudioapp.wikiaudio.activates.mediaplayer.ui.MediaPlayerFragment"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         app:layout_constraintStart_toStartOf="parent"

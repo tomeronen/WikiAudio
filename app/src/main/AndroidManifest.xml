@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.wikiaudio">
+    package="com.wikiaudioapp.wikiaudio">
 
     <application
-        android:name=".WikiAudioApp"
+        android:name="com.wikiaudioapp.wikiaudio.WikiAudioApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activates.record_page.RecordingTipsActivity" />
-        <activity android:name=".activates.loading.LoadingActivity" />
-        <activity android:name=".activates.search_page.SearchPageActivity" />
-        <activity android:name=".activates.record_page.WikiRecordActivity" />
-        <activity android:name=".activates.choose_categories.ChooseCategoriesActivity" />
-        <activity android:name=".activates.WikipageActivity" />
-        <activity android:name=".activates.MainActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.record_page.RecordingTipsActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.loading.LoadingActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.search_page.SearchPageActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.record_page.WikiRecordActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.choose_categories.ChooseCategoriesActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.WikipageActivity" />
+        <activity android:name="com.wikiaudioapp.wikiaudio.activates.MainActivity" />
         <activity
-            android:name=".activates.loading.SplashActivity"
+            android:name="com.wikiaudioapp.wikiaudio.activates.loading.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +33,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
     </application>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
