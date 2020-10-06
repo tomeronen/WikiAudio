@@ -14,7 +14,7 @@
         android:freezesText="true"
         android:gravity="center"
         android:padding="6dp"
-        android:text="Choose Playlists"
+        android:text="My Playlists"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
