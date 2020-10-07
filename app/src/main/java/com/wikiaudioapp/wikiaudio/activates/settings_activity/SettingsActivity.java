@@ -49,7 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
             myPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 public boolean onPreferenceClick(Preference preference) {
                     //open browser or intent here
-                    Intent privacyPolicyIntent = new Intent(getActivity(), PrivacyPolicy.class);
+                    Intent privacyPolicyIntent = new Intent(getActivity(), PrivacyPolicyActivity.class);
                     startActivity(privacyPolicyIntent);
                     return true;
                 }

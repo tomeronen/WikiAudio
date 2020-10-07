@@ -10,7 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activates.settings_activity.PrivacyPolicy"></activity>
+        <activity android:name=".activates.settings_activity.PrivacyPolicyActivity"></activity>
         <activity
             android:name=".activates.settings_activity.SettingsActivity"
             android:label="@string/title_activity_settings" />

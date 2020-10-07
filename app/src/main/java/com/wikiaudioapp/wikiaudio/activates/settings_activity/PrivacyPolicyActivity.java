@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.wikiaudioapp.wikiaudio.R;
 
-public class PrivacyPolicy extends AppCompatActivity {
+public class PrivacyPolicyActivity extends AppCompatActivity {
 
     private static final String PRIVACY_POLICY_URL = "https://sites.google.com/view/wikiaudio/home";
     private WebView privacyPolicyView;
