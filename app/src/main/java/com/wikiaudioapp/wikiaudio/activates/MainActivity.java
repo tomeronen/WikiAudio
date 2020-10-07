@@ -103,12 +103,12 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        showPrivacyPolicy();
         initVars();
         initMap();
         initMediaPlayer();
 //        loadPlaylists();  todo  problem having this in onCreate and restoreCategories onResume
         setOnClickButtons();
+//        showPrivacyPolicy(); todo do we need to show the user PrivacyPolicy on first instance?
     }
 
     private void showPrivacyPolicy() {
