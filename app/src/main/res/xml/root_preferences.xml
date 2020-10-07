@@ -1,13 +1,11 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
+<!--    Wikipage Article Preferences -->
 
     <PreferenceCategory app:title="@string/wikipedia_article_header">
 
         <SwitchPreferenceCompat
-            android:background="#FF0909"
-            android:backgroundTint="#FA1515"
             android:defaultValue="true"
             android:foregroundTint="#FFFFFF"
             android:soundEffectsEnabled="true"
@@ -18,6 +16,8 @@
 
     </PreferenceCategory>
 
+<!--    Audio Preferences -->
+
     <PreferenceCategory app:title="@string/audio_header">
         <ListPreference
             android:defaultValue="false"
@@ -26,6 +26,30 @@
             android:key="audio_speed"
             android:title="Audio Speed"
             app:icon="@drawable/audio_wave_icon" />
+    </PreferenceCategory>
+
+
+<!--    Location Preferences -->
+    <PreferenceCategory app:title="@string/map_header">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="show_map"
+            android:title="Show Map"
+            app:defaultValue="true"
+            app:icon="@android:drawable/ic_menu_mapmode" />
+    </PreferenceCategory>
+
+
+<!--    Storage Preferences -->
+
+    <PreferenceCategory app:title="@string/storage_header">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/upload"
+            android:key="delete_audio_files"
+            android:title="Delete audio files after upload to wikipeda"
+            app:defaultValue="false" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/privacy_policy_header">

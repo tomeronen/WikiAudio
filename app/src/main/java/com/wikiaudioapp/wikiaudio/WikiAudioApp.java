@@ -11,9 +11,7 @@ import com.wikiaudioapp.wikiaudio.data.AppData;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//AIzaSyCdfbuPtiv1WB8SBqpY7tTvRcqPqMQBQRw
-//wikiaudio-291717
-//AIzaSyADwVkdtjOl39hozfHyO052Nmjn1qdSEv8
+
 /**
  * This class is primarily used for initialization of global state before the first Activity
  * is displayed. Usually used for:

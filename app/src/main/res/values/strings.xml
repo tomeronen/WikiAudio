@@ -135,4 +135,6 @@
     <string name="privacy_policy_header">Privacy Policy</string>
     <string name="wikipedia_article_header">Wikipedia Article Settings</string>
     <string name="audio_header">Audio Settings</string>
+    <string name="map_header">Location Settings</string>
+    <string name="storage_header">Storage Settings</string>
 </resources>
