@@ -15,12 +15,14 @@ import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.wikiaudioapp.wikiaudio.R;
 import com.wikiaudioapp.wikiaudio.WikiAudioApp;
 import com.wikiaudioapp.wikiaudio.activates.mediaplayer.MediaPlayer;
@@ -31,7 +33,6 @@ import com.wikiaudioapp.wikiaudio.activates.record_page.WikiRecordActivity;
 import com.wikiaudioapp.wikiaudio.data.AppData;
 import com.wikiaudioapp.wikiaudio.data.Holder;
 import com.wikiaudioapp.wikiaudio.wikipedia.wikipage.Wikipage;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class WikipageActivity extends AppCompatActivity {
     //For logs
@@ -55,6 +56,7 @@ public class WikipageActivity extends AppCompatActivity {
     private FloatingActionButton playButton;
     private ImageButton addButton;
     private static boolean firstTimeOpening = false;
+    private boolean showArticleImage;
 
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -68,6 +70,7 @@ public class WikipageActivity extends AppCompatActivity {
         initMediaPlayer();
         setLayout();
         initOnClickButtons();
+
     }
 
     @Override
@@ -105,6 +108,11 @@ public class WikipageActivity extends AppCompatActivity {
         addButton = findViewById(R.id.addButton);
         webView = findViewById(R.id.WikipageView);
         articleImage = findViewById(R.id.thumbnailImageView);
+
+        // Preferences:
+        showArticleImage = PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getBoolean("articleImage", true);
     }
 
     /**
@@ -185,7 +193,7 @@ public class WikipageActivity extends AppCompatActivity {
         webView.loadUrl(wikipage.getUrl());
 
         //Image
-        if(wikipage.getThumbnailSrc() == null) {
+        if(!showArticleImage || wikipage.getThumbnailSrc() == null) {
             articleImage.setVisibility(View.GONE);
         } else {
             if(firstTimeOpening) // don't show image again on rotation.

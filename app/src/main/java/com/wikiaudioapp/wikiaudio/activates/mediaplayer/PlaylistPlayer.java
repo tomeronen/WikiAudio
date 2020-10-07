@@ -2,11 +2,13 @@ package com.wikiaudioapp.wikiaudio.activates.mediaplayer;
 
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.media.MediaTimestamp;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import com.wikiaudioapp.wikiaudio.WikiAudioApp;
 import com.wikiaudioapp.wikiaudio.activates.playlist.Playlist;
@@ -48,12 +50,16 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     private boolean isEngineReady = false;
     private String textToSpeak;
     private int textBlocksLeft = 0;
+    private float audioSpeed;
 
 
     public PlaylistPlayer(AppCompatActivity activity) {
         this.activity = activity;
         ttsEngine = new TextToSpeech(activity.getApplicationContext(), this);
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
+        audioSpeed = Float.parseFloat(PreferenceManager
+                .getDefaultSharedPreferences(activity)
+                .getString("audio_speed", "1"));
     }
 
     /**
@@ -61,6 +67,9 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
      * index to start playing the playlist.
      */
     public boolean playPlaylistFromIndex(Playlist playlist, int index) {
+        audioSpeed = Float.parseFloat(PreferenceManager
+                .getDefaultSharedPreferences(activity)
+                .getString("audio_speed", "1")); // update speed.
         if (!isValidPlaylistAndIndex(playlist, index)) {
             Log.d(TAG, "playPlaylist: null playlist or bad index");
             return false;
@@ -99,11 +108,12 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
                 Log.d(TAG, "playWikipageByIndexWithAudioURL: playing wikipage from URL audio source");
 
                 mp = new MediaPlayer();
+
                 mp.setAudioAttributes(new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                         .setUsage(AudioAttributes.USAGE_MEDIA)
-                        .build()
-                );
+                        .build());
+
 
                 // Called when the end of a media source is reached during playback.
                 // we want to release resources and play the next wikipage on the playlist
@@ -117,6 +127,8 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
 
                 try {
                     mp.setDataSource(audioUrl);
+                    mp.setPlaybackParams(mp.getPlaybackParams().setSpeed(audioSpeed));
+                    MediaTimestamp timestamp = mp.getTimestamp();
                     mp.prepare(); // this one takes time
                     mp.start();
                     playingUrl = true;

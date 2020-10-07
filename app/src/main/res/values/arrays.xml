@@ -1,0 +1,19 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="audio_speed_entries">
+        <item>Faster (x 1.5)</item>
+        <item>Fast (x 1.25)</item>
+        <item>Default (x 1)</item>
+        <item>Slow (x 0.75)</item>
+        <item>Slower (x 0.5)</item>
+
+    </string-array>
+
+    <string-array name="audio_speed_values">
+        <item>1.5</item>
+        <item>1.25</item>
+        <item>1</item>
+        <item>0.75</item>
+        <item>0.5</item>
+    </string-array>
+</resources>

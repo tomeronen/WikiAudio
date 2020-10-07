@@ -27,50 +27,50 @@
         <li /><li>Say the section title before starting to read the section content </li>\n\n
         </font>
 
-        <li /><li>Go over the section before you record it.</li>\n\n
-
         <font color="#85b4ff">
         <li /><li>Treat links like text when reading.
             Any vocal indication of every link would disrupt the flow.</li> \n\n
-        </font>
-
-        <li /><li>Speak more slowly than normal, by about 25%. You should have about
-        150–160 words per minute so people can comfortably hear an article.
-            The most conversational speech is at 200 words per minute or more.</li>\n\n
-
-        <font color="#85b4ff">
+        </font><font color="#85b4ff">
         <li /><li>Warm up. The vagaries of the day can leave your vocal cords clogged, especially if you
         have recently been eating or drinking milk-based foods such as cheese and chocolate.
         Some gentle humming before starting to record can cleanse and moisten the vocal cords
             leading to a better sound to the voice. </li>\n\n
-        </font>
-
-        <li /><li>Stay relaxed. Whenever you realize that your voice is becoming tenser than normal,
-        or you are having more and more trouble speaking fluently, take a break, and resume when you
-            feel muscular tension going away.</li> \n\n
+        </font>\n\n
 
         <font color="#85b4ff">
         <li /><li>Keep some fresh (not cold) water in reach, and drink some whenever you feel your
             mouth drying out. </li> \n\n
         </font>
 
-        <li /><li>Speak outward, with your chin up. Posture and facial expressions can affect voice
-            recordings.</li> \n\n
-
         <font color="#85b4ff">
         <li /><li> Record at a quiet place to reduce noise. </li> \n\n
-        </font>
-
-        <li /><li>Try standing up. If you think your voice sounds a little thin or lacking in
-            expression, standing while recording might help. Radio announcers and actors
-            regularly stand while speaking to lend additional depth and confidence to their
-            performance.</li> \n\n
-
-        <font color="#85b4ff">
+        </font><font color="#85b4ff">
         <li /><li> Speak across the microphone or to the side of it, rather than directly into it,
         to avoid pops and breath noise. A distance of several centimeters or inches away from
             the microphone is recommended.</li> \n\n
-        </font>
+        </font>\n\n
+
+        <li />
+
+        <li>Go over the section before you record it.</li><li /> \n\n
+
+        <li>Speak more slowly than normal, by about 25%. You should have about
+        150–160 words per minute so people can comfortably hear an article.
+            The most conversational speech is at 200 words per minute or more.</li>
+
+        <li /><li>Stay relaxed. Whenever you realize that your voice is becoming tenser than normal,
+        or you are having more and more trouble speaking fluently, take a break, and resume when you
+            feel muscular tension going away.</li> \n\n
+
+        <li />
+
+        <li>Speak outward, with your chin up. Posture and facial expressions can affect voice
+            recordings.</li><li /> \n\n
+
+        <li>Try standing up. If you think your voice sounds a little thin or lacking in
+            expression, standing while recording might help. Radio announcers and actors
+            regularly stand while speaking to lend additional depth and confidence to their
+            performance.</li>
     </string>
     <string name="dont_show_tips">im ready to record</string>
 
@@ -116,4 +116,23 @@
     <string name="search_result_error">there was a problem with getting search results</string>
     <string name="loading_categories_error">there was a problem with loading categories. pleas exit this screen and try again</string>
     <string name="noPlaylistsText">You can choose your playlists by pressing on the bottom navigation bar below</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="privacy_policy_header">Privacy Policy</string>
+    <string name="wikipedia_article_header">Wikipedia Article Settings</string>
+    <string name="audio_header">Audio Settings</string>
 </resources>

@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
+import com.ohoussein.playpause.PlayPauseView;
 import com.wikiaudioapp.wikiaudio.R;
 import com.wikiaudioapp.wikiaudio.activates.MainActivity;
 import com.wikiaudioapp.wikiaudio.activates.WikipageActivity;
@@ -21,9 +22,9 @@ import com.wikiaudioapp.wikiaudio.activates.choose_categories.ChooseCategoriesAc
 import com.wikiaudioapp.wikiaudio.activates.mediaplayer.MediaPlayer;
 import com.wikiaudioapp.wikiaudio.activates.playlist.Playlist;
 import com.wikiaudioapp.wikiaudio.activates.search_page.SearchPageActivity;
+import com.wikiaudioapp.wikiaudio.activates.settings_activity.SettingsActivity;
 import com.wikiaudioapp.wikiaudio.data.CurrentlyPlayed;
 import com.wikiaudioapp.wikiaudio.data.Holder;
-import com.ohoussein.playpause.PlayPauseView;
 
 import java.util.Objects;
 
@@ -47,6 +48,7 @@ public class MediaPlayerFragment extends Fragment {
     private ImageButton homeButton;
     private ImageButton searchButton;
     private ImageButton categoriesButton;
+    private ImageButton settingsButton;
 
     public MediaPlayerFragment() {}
 
@@ -84,6 +86,9 @@ public class MediaPlayerFragment extends Fragment {
             case "com.wikiaudioapp.wikiaudio.activates.choose_categories.ChooseCategoriesActivity":
                 categoriesButton.setColorFilter(getResources().getColor(R.color.chosenItem));
                 break;
+            case "com.wikiaudioapp.wikiaudio.activates.settings_activity.SettingsActivity":
+                settingsButton.setColorFilter(getResources().getColor(R.color.chosenItem));
+                break;
         }
     }
 
@@ -102,6 +107,7 @@ public class MediaPlayerFragment extends Fragment {
         homeButton = view.findViewById(R.id.homeButton);
         searchButton = view.findViewById(R.id.searchButton);
         categoriesButton = view.findViewById(R.id.categoriesButton);
+        settingsButton = view.findViewById(R.id.settingsButton);
     }
 
     /**
@@ -261,6 +267,29 @@ public class MediaPlayerFragment extends Fragment {
                 // ow, redirects to the ChooseCategoriesActivity
                 Intent chooseCategories = new Intent(player.getActivity(), ChooseCategoriesActivity.class);
                 startActivity(chooseCategories);
+            }
+        });
+
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // redirect to SettingsActivity
+                Activity activeActivity = getActiveActivity();
+                if (activeActivity == null  ) {
+                    Log.d(TAG, "settingsButton.setOnClickListener: got null activeActivity");
+                    return;
+                }
+                //if we're in SettingssActivity, we change nothing
+                if (activeActivity
+                        .getLocalClassName()
+                        .equals("com.wikiaudioapp.wikiaudio" +
+                                ".activates.settings_activity.SettingsActivity")) {
+                    Log.d(TAG, "homeButton.setOnClickListener: we're on SettingsActivity");
+                } else {
+                    // ow, redirects to the SettingsActivity
+                    Intent settingsActivity = new Intent(player.getActivity(), SettingsActivity.class);
+                    startActivity(settingsActivity);
+                }
             }
         });
     }
