@@ -57,9 +57,15 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
         this.activity = activity;
         ttsEngine = new TextToSpeech(activity.getApplicationContext(), this);
         threadPool =((WikiAudioApp)activity.getApplication()).getExecutorService();
-        audioSpeed = Float.parseFloat(PreferenceManager
-                .getDefaultSharedPreferences(activity)
-                .getString("audio_speed", "1"));
+        try{
+            audioSpeed = Float.parseFloat(PreferenceManager
+                    .getDefaultSharedPreferences(activity)
+                    .getString("audio_speed", "1")); // update speed.
+        }
+        catch (Exception e)
+        {
+            audioSpeed = 1.0f;
+        }
     }
 
     /**

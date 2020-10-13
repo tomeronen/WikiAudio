@@ -29,29 +29,6 @@
     </PreferenceCategory>
 
 
-<!--    Location Preferences -->
-    <PreferenceCategory app:title="@string/map_header">
-
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="show_map"
-            android:title="Show Map"
-            app:defaultValue="true"
-            app:icon="@android:drawable/ic_menu_mapmode" />
-    </PreferenceCategory>
-
-
-<!--    Storage Preferences -->
-
-    <PreferenceCategory app:title="@string/storage_header">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:icon="@drawable/upload"
-            android:key="delete_audio_files"
-            android:title="Delete audio files after upload to wikipeda"
-            app:defaultValue="false" />
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/privacy_policy_header">
         <Preference
             android:key="privacy_policy"
