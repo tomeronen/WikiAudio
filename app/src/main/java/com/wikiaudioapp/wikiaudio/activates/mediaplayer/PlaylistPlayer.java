@@ -50,7 +50,7 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
     private boolean isEngineReady = false;
     private String textToSpeak;
     private int textBlocksLeft = 0;
-    private float audioSpeed;
+    private float audioSpeed = 1.0f;
 
 
     public PlaylistPlayer(AppCompatActivity activity) {
@@ -67,9 +67,15 @@ public class PlaylistPlayer implements TextToSpeech.OnInitListener{
      * index to start playing the playlist.
      */
     public boolean playPlaylistFromIndex(Playlist playlist, int index) {
-        audioSpeed = Float.parseFloat(PreferenceManager
-                .getDefaultSharedPreferences(activity)
-                .getString("audio_speed", "1")); // update speed.
+        try{
+            audioSpeed = Float.parseFloat(PreferenceManager
+                    .getDefaultSharedPreferences(activity)
+                    .getString("audio_speed", "1")); // update speed.
+        }
+        catch (Exception e)
+        {
+            audioSpeed = 1.0f;
+        }
         if (!isValidPlaylistAndIndex(playlist, index)) {
             Log.d(TAG, "playPlaylist: null playlist or bad index");
             return false;
